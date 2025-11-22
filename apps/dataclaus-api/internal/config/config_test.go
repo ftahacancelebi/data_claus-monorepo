@@ -23,53 +23,93 @@ func TestLoadConfig(t *testing.T) {
 
 	t.Run("LoadConfig with environment variables", func(t *testing.T) {
 		// Save current state
-		dsnVal, dsnOk := saveEnv("DATABASE_DSN")
-		portVal, portOk := saveEnv("SERVER_PORT")
+		hostVal, hostOk := saveEnv("POSTGRES_HOST")
+		portVal, portOk := saveEnv("POSTGRES_PORT")
+		userVal, userOk := saveEnv("POSTGRES_USER")
+		passVal, passOk := saveEnv("POSTGRES_PASSWORD")
+		dbVal, dbOk := saveEnv("POSTGRES_DB")
+		sslVal, sslOk := saveEnv("POSTGRES_SSLMODE")
+		srvPortVal, srvPortOk := saveEnv("SERVER_PORT")
 		envVal, envOk := saveEnv("APP_ENV")
+
 		defer func() {
-			restoreEnv("DATABASE_DSN", dsnVal, dsnOk)
-			restoreEnv("SERVER_PORT", portVal, portOk)
+			restoreEnv("POSTGRES_HOST", hostVal, hostOk)
+			restoreEnv("POSTGRES_PORT", portVal, portOk)
+			restoreEnv("POSTGRES_USER", userVal, userOk)
+			restoreEnv("POSTGRES_PASSWORD", passVal, passOk)
+			restoreEnv("POSTGRES_DB", dbVal, dbOk)
+			restoreEnv("POSTGRES_SSLMODE", sslVal, sslOk)
+			restoreEnv("SERVER_PORT", srvPortVal, srvPortOk)
 			restoreEnv("APP_ENV", envVal, envOk)
 		}()
 
 		// Set test values
-		expectedDSN := "host=testdb user=test pass=test dbname=testdb port=5432 sslmode=disable"
-		expectedPort := "9090"
-		expectedEnv := "test"
-
-		os.Setenv("DATABASE_DSN", expectedDSN)
-		os.Setenv("SERVER_PORT", expectedPort)
-		os.Setenv("APP_ENV", expectedEnv)
+		os.Setenv("POSTGRES_HOST", "testhost")
+		os.Setenv("POSTGRES_PORT", "5433")
+		os.Setenv("POSTGRES_USER", "testuser")
+		os.Setenv("POSTGRES_PASSWORD", "testpass")
+		os.Setenv("POSTGRES_DB", "testdb")
+		os.Setenv("POSTGRES_SSLMODE", "require")
+		os.Setenv("SERVER_PORT", "9090")
+		os.Setenv("APP_ENV", "test")
 
 		cfg := LoadConfig()
 
-		assert.Equal(t, expectedDSN, cfg.DatabaseDSN)
-		assert.Equal(t, expectedPort, cfg.ServerPort)
-		assert.Equal(t, expectedEnv, cfg.AppEnv)
+		assert.Equal(t, "testhost", cfg.DBHost)
+		assert.Equal(t, "5433", cfg.DBPort)
+		assert.Equal(t, "testuser", cfg.DBUser)
+		assert.Equal(t, "testpass", cfg.DBPassword)
+		assert.Equal(t, "testdb", cfg.DBName)
+		assert.Equal(t, "require", cfg.DBSSLMode)
+		assert.Equal(t, "9090", cfg.ServerPort)
+		assert.Equal(t, "test", cfg.AppEnv)
+
+		expectedDSN := "host=testhost user=testuser password=testpass dbname=testdb port=5433 sslmode=require"
+		assert.Equal(t, expectedDSN, cfg.GetDSN())
 	})
 
 	t.Run("LoadConfig with defaults", func(t *testing.T) {
-		// Save current state
-		dsnVal, dsnOk := saveEnv("DATABASE_DSN")
-		portVal, portOk := saveEnv("SERVER_PORT")
-		envVal, envOk := saveEnv("APP_ENV")
-		defer func() {
-			restoreEnv("DATABASE_DSN", dsnVal, dsnOk)
-			restoreEnv("SERVER_PORT", portVal, portOk)
-			restoreEnv("APP_ENV", envVal, envOk)
-		}()
+		// Save current state - same as above, could refactor but keeping simple
 
-		// Unset to force defaults
-		os.Unsetenv("DATABASE_DSN")
-		os.Unsetenv("SERVER_PORT")
-		os.Unsetenv("APP_ENV")
+		// ... (omitting full save/restore for brevity in thought, but will include in code)
+		// Actually, I should just unset everything relevant.
+		// Ideally I'd use a helper that clears all relevant envs.
+		
+		vars := []string{"POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB", "POSTGRES_SSLMODE", "SERVER_PORT", "APP_ENV"}
+		saved := make(map[string]string)
+		exists := make(map[string]bool)
+		
+		for _, v := range vars {
+			val, ok := os.LookupEnv(v)
+			saved[v] = val
+			exists[v] = ok
+			os.Unsetenv(v)
+		}
+		
+		defer func() {
+			for _, v := range vars {
+				if exists[v] {
+					os.Setenv(v, saved[v])
+				} else {
+					os.Unsetenv(v)
+				}
+			}
+		}()
 
 		cfg := LoadConfig()
 
 		// Check against defaults defined in config.go
-		assert.Equal(t, "host=localhost user=postgres password=postgres dbname=dataclaus port=5432 sslmode=disable", cfg.DatabaseDSN)
+		assert.Equal(t, "localhost", cfg.DBHost)
+		assert.Equal(t, "5432", cfg.DBPort)
+		assert.Equal(t, "postgres", cfg.DBUser)
+		assert.Equal(t, "postgres", cfg.DBPassword)
+		assert.Equal(t, "dataclaus", cfg.DBName)
+		assert.Equal(t, "disable", cfg.DBSSLMode)
 		assert.Equal(t, "8080", cfg.ServerPort)
 		assert.Equal(t, "development", cfg.AppEnv)
+		
+		expectedDefaultDSN := "host=localhost user=postgres password=postgres dbname=dataclaus port=5432 sslmode=disable"
+		assert.Equal(t, expectedDefaultDSN, cfg.GetDSN())
 	})
 }
 

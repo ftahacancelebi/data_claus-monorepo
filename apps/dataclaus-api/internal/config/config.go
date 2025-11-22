@@ -8,9 +8,14 @@ import (
 )
 
 type Config struct {
-	DatabaseDSN string
-	ServerPort  string
-	AppEnv      string
+	DBHost     string
+	DBPort     string
+	DBUser     string
+	DBPassword string
+	DBName     string
+	DBSSLMode  string
+	ServerPort string
+	AppEnv     string
 }
 
 func LoadConfig() *Config {
@@ -19,10 +24,24 @@ func LoadConfig() *Config {
 	}
 
 	return &Config{
-		DatabaseDSN: getEnv("DATABASE_DSN", "host=localhost user=postgres password=postgres dbname=dataclaus port=5432 sslmode=disable"),
-		ServerPort:  getEnv("SERVER_PORT", "8080"),
-		AppEnv:      getEnv("APP_ENV", "development"),
+		DBHost:     getEnv("POSTGRES_HOST", "localhost"),
+		DBPort:     getEnv("POSTGRES_PORT", "5432"),
+		DBUser:     getEnv("POSTGRES_USER", "postgres"),
+		DBPassword: getEnv("POSTGRES_PASSWORD", "postgres"),
+		DBName:     getEnv("POSTGRES_DB", "dataclaus"),
+		DBSSLMode:  getEnv("POSTGRES_SSLMODE", "disable"),
+		ServerPort: getEnv("SERVER_PORT", "8080"),
+		AppEnv:     getEnv("APP_ENV", "development"),
 	}
+}
+
+func (c *Config) GetDSN() string {
+	return "host=" + c.DBHost +
+		" user=" + c.DBUser +
+		" password=" + c.DBPassword +
+		" dbname=" + c.DBName +
+		" port=" + c.DBPort +
+		" sslmode=" + c.DBSSLMode
 }
 
 func getEnv(key, fallback string) string {
