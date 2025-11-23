@@ -9,13 +9,26 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 
 	adapterHttp "apps/dataclaus-api/internal/adapters/http"
 	"apps/dataclaus-api/internal/config"
 	"apps/dataclaus-api/pkg/database"
 )
 
+// Dependencies that can be mocked for testing
+var (
+	newDB     func(dsn string) (*gorm.DB, error) = database.NewPostgresDB
+	newServer                                    = adapterHttp.NewServer
+)
+
 func main() {
+	if err := run(context.Background()); err != nil {
+		log.Fatal().Err(err).Msg("Application failed")
+	}
+}
+
+func run(ctx context.Context) error {
 	// Configure zerolog
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
@@ -24,15 +37,15 @@ func main() {
 
 	// Connect to database
 	// we will implement in repository layer
-	db, err := database.NewPostgresDB(cfg.GetDSN())
+	db, err := newDB(cfg.GetDSN())
 	if err != nil {
-		log.Fatal().Err(err).Msg("Database connection failed")
+		return err
 	}
 	// escaping from go compiler
-	_ = db 
+	_ = db
 
 	// initializing server
-	server := adapterHttp.NewServer()
+	server := newServer()
 
 	// starting server with graceful shutdown
 	go func() {
@@ -46,14 +59,22 @@ func main() {
 	// handling os signals
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
-	<-quit // wait for signal
+
+	select {
+	case <-quit:
+		log.Info().Msg("Signal received, shutting down...")
+	case <-ctx.Done():
+		log.Info().Msg("Context done, shutting down...")
+	}
 
 	log.Info().Msg("System shutting down...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := server.Shutdown(ctx); err != nil {
-		log.Fatal().Err(err).Msg("Server forced to shutdown")
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		return err
 	}
+
+	return nil
 }
