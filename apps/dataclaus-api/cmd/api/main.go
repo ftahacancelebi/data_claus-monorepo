@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 
 	adapterHttp "apps/dataclaus-api/internal/adapters/http"
 	"apps/dataclaus-api/internal/config"
@@ -14,14 +16,17 @@ import (
 )
 
 func main() {
+	// Configure zerolog
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
 	// Load config
 	cfg := config.LoadConfig()
 
 	// Connect to database
 	// we will implement in repository layer
-	db, err := database.NewPostgresDB(cfg.DatabaseDSN)
+	db, err := database.NewPostgresDB(cfg.GetDSN())
 	if err != nil {
-		log.Fatalf("Database connection failed: %v", err)
+		log.Fatal().Err(err).Msg("Database connection failed")
 	}
 	// escaping from go compiler
 	_ = db 
@@ -31,9 +36,9 @@ func main() {
 
 	// starting server with graceful shutdown
 	go func() {
-		log.Printf("Server started on port %s", cfg.ServerPort)
+		log.Info().Str("port", cfg.ServerPort).Msg("Server started")
 		if err := server.Start(":" + cfg.ServerPort); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Server failed to start: %v", err)
+			log.Fatal().Err(err).Msg("Server failed to start")
 		}
 	}()
 
@@ -43,12 +48,12 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit // wait for signal
 
-	log.Println("System shutting down...")
+	log.Info().Msg("System shutting down...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
-		server.Logger.Fatal(err)
+		log.Fatal().Err(err).Msg("Server forced to shutdown")
 	}
 }

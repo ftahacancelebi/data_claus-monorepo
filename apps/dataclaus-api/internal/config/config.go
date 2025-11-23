@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -19,9 +18,10 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
-	if err := godotenv.Load(); err != nil {
-		log.Println("Could not load .env file")
-	}
+	// Load .env files. Local .env takes precedence over root .env.
+	// We ignore errors because it's fine if one or both are missing (e.g. in prod).
+	_ = godotenv.Load(".env")
+	_ = godotenv.Load("../../.env")
 
 	return &Config{
 		DBHost:     getEnv("POSTGRES_HOST", "localhost"),
@@ -30,7 +30,7 @@ func LoadConfig() *Config {
 		DBPassword: getEnv("POSTGRES_PASSWORD", "postgres"),
 		DBName:     getEnv("POSTGRES_DB", "dataclaus"),
 		DBSSLMode:  getEnv("POSTGRES_SSLMODE", "disable"),
-		ServerPort: getEnv("SERVER_PORT", "8080"),
+		ServerPort: getEnv("SERVER_PORT", "3000"),
 		AppEnv:     getEnv("APP_ENV", "development"),
 	}
 }

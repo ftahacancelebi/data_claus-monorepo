@@ -105,7 +105,7 @@ func TestLoadConfig(t *testing.T) {
 		assert.Equal(t, "postgres", cfg.DBPassword)
 		assert.Equal(t, "dataclaus", cfg.DBName)
 		assert.Equal(t, "disable", cfg.DBSSLMode)
-		assert.Equal(t, "8080", cfg.ServerPort)
+		assert.Equal(t, "3000", cfg.ServerPort)
 		assert.Equal(t, "development", cfg.AppEnv)
 		
 		expectedDefaultDSN := "host=localhost user=postgres password=postgres dbname=dataclaus port=5432 sslmode=disable"
