@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestDTO is a test DTO for validation testing.
 type TestDTO struct {
 	Email        string `json:"email" validate:"required,email"`
 	Name         string `json:"name" validate:"required,min=2,max=50"`
@@ -99,8 +98,8 @@ func TestValidator_Validate_EmailFormat(t *testing.T) {
 	validator := NewValidator()
 
 	tests := []struct {
-		name     string
-		email    string
+		name       string
+		email      string
 		shouldFail bool
 	}{
 		{"valid email", "test@example.com", false},
@@ -139,9 +138,9 @@ func TestValidator_Validate_StringLength(t *testing.T) {
 	validator := NewValidator()
 
 	tests := []struct {
-		name       string
-		nameValue  string
-		shouldFail bool
+		name        string
+		nameValue   string
+		shouldFail  bool
 		expectedTag string
 	}{
 		{"valid name - min length", "Jo", false, ""},
@@ -183,9 +182,9 @@ func TestValidator_Validate_NumericRange(t *testing.T) {
 	validator := NewValidator()
 
 	tests := []struct {
-		name       string
-		age        int
-		shouldFail bool
+		name        string
+		age         int
+		shouldFail  bool
 		expectedTag string
 	}{
 		{"valid age - minimum", 0, false, ""},
