@@ -1,12 +1,18 @@
 package http
 
 import (
+	"apps/dataclaus-api/internal/adapters/http/validation"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog/log"
 )
 
 func ApplyMiddlewares(e *echo.Echo) {
+	// Create a global validator instance
+	validator := validation.NewValidator()
+
+	// Request logger middleware
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogURI:     true,
 		LogStatus:  true,
@@ -23,6 +29,13 @@ func ApplyMiddlewares(e *echo.Echo) {
 			return nil
 		},
 	}))
+
+	// Recovery middleware
 	e.Use(middleware.Recover())
+
+	// CORS middleware
 	e.Use(middleware.CORS())
+
+	// Inject validator into context
+	e.Use(validation.InjectValidator(validator))
 }

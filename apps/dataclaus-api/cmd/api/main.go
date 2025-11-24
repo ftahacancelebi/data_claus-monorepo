@@ -12,8 +12,10 @@ import (
 	"gorm.io/gorm"
 
 	adapterHttp "apps/dataclaus-api/internal/adapters/http"
+	repository "apps/dataclaus-api/internal/adapters/repository/postgres"
 	"apps/dataclaus-api/internal/config"
-	"apps/dataclaus-api/pkg/database"
+	"apps/dataclaus-api/internal/core/services"
+	"apps/dataclaus-api/internal/database"
 )
 
 // Dependencies that can be mocked for testing
@@ -36,16 +38,18 @@ func run(ctx context.Context) error {
 	cfg := config.LoadConfig()
 
 	// Connect to database
-	// we will implement in repository layer
 	db, err := newDB(cfg.GetDSN())
 	if err != nil {
 		return err
 	}
-	// escaping from go compiler
-	_ = db
+
+	// Initialize User System
+	userRepo := repository.NewUserRepository(db)
+	userService := services.NewUserService(userRepo)
+	userHandler := adapterHttp.NewUserHandler(userService)
 
 	// initializing server
-	server := newServer()
+	server := newServer(userHandler)
 
 	// starting server with graceful shutdown
 	go func() {
