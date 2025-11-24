@@ -27,7 +27,7 @@ func TestRun(t *testing.T) {
 
 	t.Run("Successful startup and shutdown", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
-		
+
 		// Cancel context after a short delay to simulate shutdown
 		go func() {
 			time.Sleep(100 * time.Millisecond)

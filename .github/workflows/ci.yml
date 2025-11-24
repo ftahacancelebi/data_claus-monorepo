@@ -7,6 +7,10 @@ on:
       - develop
   pull_request:
 
+permissions:
+  actions: read
+  contents: read
+
 jobs:
   quality-gate:
     runs-on: ubuntu-latest

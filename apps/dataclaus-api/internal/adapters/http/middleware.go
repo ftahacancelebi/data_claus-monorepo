@@ -8,9 +8,9 @@ import (
 
 func ApplyMiddlewares(e *echo.Echo) {
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
-		LogURI:    true,
-		LogStatus: true,
-		LogMethod: true,
+		LogURI:     true,
+		LogStatus:  true,
+		LogMethod:  true,
 		LogLatency: true,
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
 			log.Info().

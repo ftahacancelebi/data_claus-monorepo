@@ -20,5 +20,6 @@ func TestHealthCheck(t *testing.T) {
 	e.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, "OK", rec.Body.String())
+	expectedBody := `{"status":"ok","version":"1.0.0"}` + "\n"
+	assert.Equal(t, expectedBody, rec.Body.String())
 }

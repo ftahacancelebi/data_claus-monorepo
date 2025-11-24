@@ -74,18 +74,18 @@ func TestLoadConfig(t *testing.T) {
 		// ... (omitting full save/restore for brevity in thought, but will include in code)
 		// Actually, I should just unset everything relevant.
 		// Ideally I'd use a helper that clears all relevant envs.
-		
+
 		vars := []string{"POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB", "POSTGRES_SSLMODE", "SERVER_PORT", "APP_ENV"}
 		saved := make(map[string]string)
 		exists := make(map[string]bool)
-		
+
 		for _, v := range vars {
 			val, ok := os.LookupEnv(v)
 			saved[v] = val
 			exists[v] = ok
 			os.Unsetenv(v)
 		}
-		
+
 		defer func() {
 			for _, v := range vars {
 				if exists[v] {
@@ -107,7 +107,7 @@ func TestLoadConfig(t *testing.T) {
 		assert.Equal(t, "disable", cfg.DBSSLMode)
 		assert.Equal(t, "3000", cfg.ServerPort)
 		assert.Equal(t, "development", cfg.AppEnv)
-		
+
 		expectedDefaultDSN := "host=localhost user=postgres password=postgres dbname=dataclaus port=5432 sslmode=disable"
 		assert.Equal(t, expectedDefaultDSN, cfg.GetDSN())
 	})
