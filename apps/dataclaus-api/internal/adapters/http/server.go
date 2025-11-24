@@ -10,11 +10,11 @@ func NewServer() *echo.Echo {
 	e := echo.New()
 
 	ApplyMiddlewares(e)
-	
+
 	e.GET("health", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, 
+		return c.JSON(http.StatusOK,
 			map[string]interface{}{
-				"status": "ok",
+				"status":  "ok",
 				"version": "1.0.0",
 			},
 		)
