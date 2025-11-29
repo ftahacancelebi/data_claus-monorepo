@@ -43,6 +43,11 @@ func run(ctx context.Context) error {
 		return err
 	}
 
+	// Run database migrations
+	if err := database.RunMigrations(db); err != nil {
+		return err
+	}
+
 	// Initialize User System
 	userRepo := repository.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
