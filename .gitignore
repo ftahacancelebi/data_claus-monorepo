@@ -44,6 +44,6 @@ Thumbs.db
 .env
 
 #editor
-.vscode
+/.vscode
 .idea
 
