@@ -1,0 +1,32 @@
+{
+  "name": "dataclaus-sdk-js",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/dataclaus-sdk-js/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "generatorOptions": {
+        "packageRoot": "dist/{projectRoot}",
+        "currentVersionResolver": "git-tag"
+      }
+    }
+  },
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/dataclaus-sdk-js",
+        "main": "libs/dataclaus-sdk-js/src/index.ts",
+        "tsConfig": "libs/dataclaus-sdk-js/tsconfig.lib.json",
+        "assets": ["libs/dataclaus-sdk-js/*.md"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  }
+}

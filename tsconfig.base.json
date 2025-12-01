@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "composite": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
@@ -16,6 +17,9 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@data-claus-monorepo/source"]
+    "customConditions": ["@data-claus-monorepo/source"],
+    "paths": {
+      "@dataclaus/sdk-js": ["libs/dataclaus-sdk-js/src/index.ts"]
+    }
   }
 }
