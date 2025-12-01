@@ -40,7 +40,7 @@ services:
       retries: 5
 
   postgres:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: dataclaus-db
     ports:
       - '${POSTGRES_PORT}:5432'
