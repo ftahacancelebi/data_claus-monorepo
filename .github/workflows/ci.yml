@@ -1,9 +1,10 @@
-name: CI
+name: DataClaus - CI Pipeline
 
 on:
   push:
     branches:
       - main
+      - develop
   pull_request:
 
 permissions:
@@ -11,37 +12,53 @@ permissions:
   contents: read
 
 jobs:
-  main:
+  quality-gate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
-          filter: tree:0
+          #for nx affected
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
+      # 1. NX Setup & Cache
+      - name: Setup Node.js & pnpm
+        uses: actions/setup-node@v3
         with:
-          version: 9.8.0
-          run_install: false
-
-      # This enables task distribution via Nx Cloud
-      # Run this command as early as possible, before dependencies are installed
-      # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
-      # Uncomment this line to enable task distribution
-      # - run: pnpm dlx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
-
-      # Cache node_modules
-      - uses: actions/setup-node@v4
+          node-version: 18
+      - run: npm install -g pnpm
+      - uses: actions/cache@v3 # pnpm cache'i
         with:
-          node-version: 20
-          cache: 'pnpm'
-
+          path: node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm install --frozen-lockfile
+      - name: Determine Affected Projects
+        uses: nrwl/nx-set-shas@v4 # finds the affected parts
 
-      # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
-      # - run: pnpm exec nx-cloud record -- echo Hello World
-      - run: pnpm exec nx run-many -t lint test build typecheck
-      # Nx Cloud recommends fixes for failures to help you get CI green faster. Learn more: https://nx.dev/ci/features/self-healing-ci
-      - run: pnpm exec nx fix-ci
-        if: always()
+      # 2. Go Setup
+      - name: Setup Go Environment
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache: true # Go mod cache
+
+      # downloads the necessary packages
+      - name: Go Mod Download (apps/dataclaus-api)
+        run: go mod download
+        working-directory: apps/dataclaus-api
+
+      # a. Format Kontrolü (Kalite Kuralı: go fmt bozuksa fail et)
+      - name: Check Code Formatting (go fmt)
+        run: |
+          diff -u <(echo -n) <(gofmt -d .)
+
+      # b. Statik Analiz (go vet)
+      - name: Run Static Analysis (go vet)
+        run: npx nx affected --target=lint --parallel=1
+
+      # 4. BİRİM TESTLERİ (Hata Payı Yok)
+      - name: Run Unit Tests (nx test)
+        run: npx nx affected --target=test --parallel=1
+
+      - name: Build All Affected Apps
+        run: npx nx affected --target=build --parallel=2

@@ -1,0 +1,25 @@
+package http
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestNewServer(t *testing.T) {
+	e := NewServer(NewUserHandler(nil))
+	assert.NotNil(t, e)
+}
+
+func TestHealthCheck(t *testing.T) {
+	e := NewServer(NewUserHandler(nil))
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	expectedBody := `{"status":"ok","version":"1.0.0"}` + "\n"
+	assert.Equal(t, expectedBody, rec.Body.String())
+}
