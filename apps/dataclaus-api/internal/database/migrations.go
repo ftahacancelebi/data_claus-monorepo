@@ -25,7 +25,9 @@ func RunMigrations(db *gorm.DB) error {
 	// It will NOT delete unused columns or change existing column types
 	err := db.AutoMigrate(
 		&postgres.UserGorm{},
-		// Add other models here as you create them
+		&postgres.WalletGorm{},
+		&postgres.CampaignGorm{},
+		&postgres.LedgerTransactionGorm{},
 	)
 
 	if err != nil {
