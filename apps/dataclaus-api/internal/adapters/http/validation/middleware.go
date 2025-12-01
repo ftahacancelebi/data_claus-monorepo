@@ -29,11 +29,7 @@ func NewValidatorMiddleware(validator *Validator) *ValidatorMiddleware {
 func ValidateDTO(c echo.Context, dto interface{}) error {
 	// Bind the request body to the DTO
 	if err := c.Bind(dto); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error":   "invalid_request",
-			"message": "Failed to parse request body",
-			"details": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body").SetInternal(err)
 	}
 
 	// Get the validator from context or create a new one
@@ -44,18 +40,7 @@ func ValidateDTO(c echo.Context, dto interface{}) error {
 
 	// Validate the DTO
 	if err := validator.Validate(dto); err != nil {
-		if ve, ok := IsValidationError(err); ok {
-			return c.JSON(http.StatusUnprocessableEntity, map[string]interface{}{
-				"error":   "validation_failed",
-				"message": "Request validation failed",
-				"errors":  ve.Errors,
-			})
-		}
-
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error":   "validation_error",
-			"message": err.Error(),
-		})
+		return err
 	}
 
 	return nil

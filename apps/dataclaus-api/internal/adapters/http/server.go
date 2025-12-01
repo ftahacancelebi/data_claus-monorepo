@@ -6,8 +6,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func NewServer(userHandler *UserHandler) *echo.Echo {
+func NewServer(userHandler *UserHandler, ingestHandler *IngestHandler) *echo.Echo {
 	e := echo.New()
+	e.HTTPErrorHandler = CustomHTTPErrorHandler
 
 	ApplyMiddlewares(e)
 
@@ -27,6 +28,9 @@ func NewServer(userHandler *UserHandler) *echo.Echo {
 	// User routes
 	e.POST("/users", userHandler.Create)
 	e.GET("/users/:id", userHandler.Get)
+
+	// Ingest routes
+	e.POST("/v1/ingest", ingestHandler.Ingest)
 
 	return e
 }

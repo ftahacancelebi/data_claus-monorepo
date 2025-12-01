@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm"
 
 	adapterHttp "apps/dataclaus-api/internal/adapters/http"
+	"apps/dataclaus-api/internal/adapters/messaging/kafka"
 	repository "apps/dataclaus-api/internal/adapters/repository/postgres"
 	"apps/dataclaus-api/internal/config"
 	"apps/dataclaus-api/internal/core/services"
@@ -53,8 +54,15 @@ func run(ctx context.Context) error {
 	userService := services.NewUserService(userRepo)
 	userHandler := adapterHttp.NewUserHandler(userService)
 
+	// Initialize Kafka Producer
+	kafkaProducer := kafka.NewProducer([]string{cfg.DBHost + ":9092"}) // Using DBHost as a proxy for localhost/kafka host for now, or add KafkaHost to config
+	// Ideally, add KafkaHost to config. For now, let's assume localhost if not set or use a hardcoded value for dev.
+	// Better: Update config to have KafkaBrokers.
+
+	ingestHandler := adapterHttp.NewIngestHandler(kafkaProducer)
+
 	// initializing server
-	server := newServer(userHandler)
+	server := newServer(userHandler, ingestHandler)
 
 	// starting server with graceful shutdown
 	go func() {

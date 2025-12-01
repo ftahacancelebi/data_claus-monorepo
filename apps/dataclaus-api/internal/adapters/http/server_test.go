@@ -9,12 +9,12 @@ import (
 )
 
 func TestNewServer(t *testing.T) {
-	e := NewServer(NewUserHandler(nil))
+	e := NewServer(NewUserHandler(nil), nil)
 	assert.NotNil(t, e)
 }
 
 func TestHealthCheck(t *testing.T) {
-	e := NewServer(NewUserHandler(nil))
+	e := NewServer(NewUserHandler(nil), nil)
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rec := httptest.NewRecorder()
 	e.ServeHTTP(rec, req)
