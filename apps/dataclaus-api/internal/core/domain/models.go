@@ -31,7 +31,7 @@ type Campaign struct {
 
 // LedgerTransaction represents an immutable financial record.
 type LedgerTransaction struct {
-	ID          uuid.UUID
+	ID             uuid.UUID
 	SourceWalletID uuid.UUID
 	DestWalletID   uuid.UUID
 	Amount         float64

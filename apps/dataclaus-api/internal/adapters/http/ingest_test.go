@@ -59,10 +59,10 @@ func TestIngestHandler_Ingest(t *testing.T) {
 
 		err := handler.Ingest(c)
 		assert.Error(t, err)
-		
+
 		// Manually invoke error handler to verify response
 		e.HTTPErrorHandler(err, c)
-		
+
 		assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
 	})
 }

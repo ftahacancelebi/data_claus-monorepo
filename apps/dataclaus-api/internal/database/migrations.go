@@ -38,4 +38,3 @@ func RunMigrations(db *gorm.DB) error {
 	log.Info().Msg("Database migrations completed successfully")
 	return nil
 }
-

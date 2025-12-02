@@ -27,12 +27,12 @@ func TestProducer_Publish(t *testing.T) {
 	// In a real integration test, we'd ensure Kafka is up.
 	// For now, we'll just run it and see. If it fails due to connection, we know the code is executed.
 	err := producer.Publish(ctx, topic, key, value)
-	
+
 	// If we are running in an environment without Kafka, this will error.
 	// We can check if the error is a connection error or something else.
 	// For this specific test run, let's just assert that we can call the method.
 	// Ideally, we'd have a mock or a real instance.
-	
+
 	// NOTE: Since we just started docker-compose up -d kafka, it might take a moment.
 	// We will assert nil error assuming the environment is set up correctly.
 	if err != nil {
