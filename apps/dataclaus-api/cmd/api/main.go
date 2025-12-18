@@ -19,7 +19,6 @@ import (
 	"apps/dataclaus-api/internal/database"
 )
 
-// Dependencies that can be mocked for testing
 var (
 	newDB     func(dsn string) (*gorm.DB, error) = database.NewPostgresDB
 	newServer                                    = adapterHttp.NewServer
@@ -32,39 +31,63 @@ func main() {
 }
 
 func run(ctx context.Context) error {
-	// Configure zerolog
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	// Load config
 	cfg := config.LoadConfig()
 
-	// Connect to database
 	db, err := newDB(cfg.GetDSN())
 	if err != nil {
 		return err
 	}
 
-	// Run database migrations
 	if err := database.RunMigrations(db); err != nil {
 		return err
 	}
 
-	// Initialize User System
 	userRepo := repository.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
 	userHandler := adapterHttp.NewUserHandler(userService)
 
-	// Initialize Kafka Producer
-	kafkaProducer := kafka.NewProducer([]string{cfg.DBHost + ":9092"}) // Using DBHost as a proxy for localhost/kafka host for now, or add KafkaHost to config
-	// Ideally, add KafkaHost to config. For now, let's assume localhost if not set or use a hardcoded value for dev.
-	// Better: Update config to have KafkaBrokers.
+	devRepo := repository.NewDeveloperRepository(db)
+	apiKeyRepo := repository.NewAPIKeyRepository(db)
+	devService := services.NewDeveloperService(devRepo)
+	apiKeyService := services.NewAPIKeyService(apiKeyRepo, devRepo)
+	devHandler := adapterHttp.NewDeveloperHandler(devService, apiKeyService)
 
+	walletRepo := repository.NewWalletRepository(db)
+	walletService := services.NewWalletService(walletRepo)
+	walletHandler := adapterHttp.NewWalletHandler(walletService)
+
+	campaignRepo := repository.NewCampaignRepository(db)
+	campaignService := services.NewCampaignService(campaignRepo)
+	campaignHandler := adapterHttp.NewCampaignHandler(campaignService)
+
+	ledgerRepo := repository.NewLedgerRepository(db)
+	ledgerService := services.NewLedgerService(ledgerRepo)
+	ledgerHandler := adapterHttp.NewLedgerHandler(ledgerService)
+
+	eventRepo := repository.NewScoredEventRepository(db)
+	analyticsService := services.NewAnalyticsService(eventRepo, userRepo, devRepo, campaignRepo, ledgerRepo)
+	analyticsHandler := adapterHttp.NewAnalyticsHandler(analyticsService)
+
+	kafkaProducer := kafka.NewProducer(cfg.KafkaBrokers)
 	ingestHandler := adapterHttp.NewIngestHandler(kafkaProducer)
 
-	// initializing server
-	server := newServer(userHandler, ingestHandler)
+	hmacMiddleware := adapterHttp.NewHMACMiddleware(apiKeyService)
 
-	// starting server with graceful shutdown
+	handlers := &adapterHttp.Handlers{
+		User:      userHandler,
+		Ingest:    ingestHandler,
+		Developer: devHandler,
+		Wallet:    walletHandler,
+		Campaign:  campaignHandler,
+		Ledger:    ledgerHandler,
+		Analytics: analyticsHandler,
+		HMAC:      hmacMiddleware,
+	}
+
+	server := newServer(handlers)
+
 	go func() {
 		log.Info().Str("port", cfg.ServerPort).Msg("Server started")
 		if err := server.Start(":" + cfg.ServerPort); err != nil && err != http.ErrServerClosed {
@@ -72,8 +95,6 @@ func run(ctx context.Context) error {
 		}
 	}()
 
-	// --- Graceful Shutdown ---
-	// handling os signals
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 
@@ -84,14 +105,8 @@ func run(ctx context.Context) error {
 		log.Info().Msg("Context done, shutting down...")
 	}
 
-	log.Info().Msg("System shutting down...")
-
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := server.Shutdown(shutdownCtx); err != nil {
-		return err
-	}
-
-	return nil
+	return server.Shutdown(shutdownCtx)
 }
