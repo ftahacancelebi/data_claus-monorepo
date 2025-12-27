@@ -8,6 +8,7 @@ import (
 
 type Handlers struct {
 	User      *UserHandler
+	Auth      *AuthHandler
 	Ingest    *IngestHandler
 	Developer *DeveloperHandler
 	Wallet    *WalletHandler
@@ -36,6 +37,9 @@ func NewServer(h *Handlers) *echo.Echo {
 
 	e.POST("/users", h.User.Create)
 	e.GET("/users/:id", h.User.Get)
+
+	e.POST("/auth/login", h.Auth.Login)
+
 
 	e.POST("/developers", h.Developer.Register)
 	e.GET("/developers/:id", h.Developer.Get)

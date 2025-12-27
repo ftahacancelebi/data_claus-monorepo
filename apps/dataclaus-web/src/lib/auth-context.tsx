@@ -8,49 +8,20 @@ import {
   ReactNode,
 } from 'react';
 import type { AuthUser, UserRole } from './types';
-import { createUser, registerDeveloper, createWallet } from './api';
+import { createUser, registerDeveloper, createWallet, loginUser } from './api';
 
 interface AuthContextType {
   user: AuthUser | null;
-  login: (email: string, password: string, role: UserRole) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   register: (
     name: string,
     email: string,
     password: string,
     role: UserRole
   ) => Promise<void>;
-  loginAsDemo: (role: UserRole) => void;
   logout: () => void;
   isLoading: boolean;
 }
-
-// Demo accounts with proper UUIDs
-export const DEMO_ACCOUNTS: Record<UserRole, AuthUser> = {
-  user: {
-    id: '11111111-1111-1111-1111-111111111111',
-    email: 'demo.user@dataclaus.io',
-    name: 'Demo User',
-    role: 'user',
-  },
-  developer: {
-    id: '22222222-2222-2222-2222-222222222222',
-    email: 'demo.developer@dataclaus.io',
-    name: 'Demo Developer',
-    role: 'developer',
-  },
-  buyer: {
-    id: '33333333-3333-3333-3333-333333333333',
-    email: 'demo.buyer@dataclaus.io',
-    name: 'Demo Buyer',
-    role: 'buyer',
-  },
-  admin: {
-    id: '44444444-4444-4444-4444-444444444444',
-    email: 'demo.admin@dataclaus.io',
-    name: 'Demo Admin',
-    role: 'admin',
-  },
-};
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -60,11 +31,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem('dataclaus_user');
-    if (stored) {
+    const token = localStorage.getItem('dataclaus_token');
+
+    if (stored && token) {
       try {
         setUser(JSON.parse(stored));
       } catch {
         localStorage.removeItem('dataclaus_user');
+        localStorage.removeItem('dataclaus_token');
       }
     }
     setIsLoading(false);
@@ -77,74 +51,79 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     role: UserRole
   ) => {
     let userId: string;
+    let userName: string;
+    let userEmail: string;
 
-    try {
-      if (role === 'developer') {
-        // Register as developer
-        const dev = await registerDeveloper({ name, email, password });
-        userId = dev.id;
-        // Create developer wallet
-        await createWallet({
-          owner_id: userId,
-          type: 'developer',
-          currency: 'USD',
-        }).catch(() => {});
-      } else {
-        // Register as user (also used for buyers)
-        const newUser = await createUser({ name, email, password });
-        userId = newUser.id;
-        // Create appropriate wallet type
-        const walletType = role === 'buyer' ? 'buyer' : 'user';
-        await createWallet({
-          owner_id: userId,
-          type: walletType,
-          currency: 'USD',
-        }).catch(() => {});
-      }
+    if (role === 'developer') {
+      // Register as developer
+      const dev = await registerDeveloper({ name, email, password });
+      userId = dev.id;
+      userName = dev.name;
+      userEmail = dev.email;
 
-      const authUser: AuthUser = { id: userId, email, name, role };
-      setUser(authUser);
-      localStorage.setItem('dataclaus_user', JSON.stringify(authUser));
-    } catch (error) {
-      throw error;
+      // Create developer wallet
+      await createWallet({
+        owner_id: userId,
+        type: 'developer',
+        currency: 'USD',
+      }).catch(() => {
+        // Wallet creation is optional
+      });
+    } else {
+      // Register as user (also used for buyers and admins)
+      const newUser = await createUser({ name, email, password });
+      userId = newUser.id;
+      userName = newUser.name;
+      userEmail = newUser.email;
+
+      // Create appropriate wallet type
+      const walletType = role === 'buyer' ? 'buyer' : 'user';
+      await createWallet({
+        owner_id: userId,
+        type: walletType,
+        currency: 'USD',
+      }).catch(() => {
+        // Wallet creation is optional
+      });
     }
+
+    const authUser: AuthUser = {
+      id: userId,
+      email: userEmail,
+      name: userName,
+      role,
+    };
+
+    setUser(authUser);
+    localStorage.setItem('dataclaus_user', JSON.stringify(authUser));
+    // In a real app, you'd get a JWT token from the backend
+    localStorage.setItem('dataclaus_token', `token-${userId}`);
   };
 
-  const login = async (email: string, password: string, role: UserRole) => {
-    // For demo purposes, we'll create a user if they don't exist
-    // In production, this would be a proper login endpoint
-    try {
-      await register(email.split('@')[0] || 'User', email, password, role);
-    } catch {
-      // If registration fails (user exists), just set the user locally
-      // In production, you'd have a proper login endpoint
-      const authUser: AuthUser = {
-        id: `${role}-${Date.now()}`,
-        email,
-        name: email.split('@')[0] || 'User',
-        role,
-      };
-      setUser(authUser);
-      localStorage.setItem('dataclaus_user', JSON.stringify(authUser));
-    }
-  };
+  const login = async (email: string, password: string) => {
+    // Call the backend login endpoint
+    const response = await loginUser(email, password);
 
-  // Quick login with demo accounts
-  const loginAsDemo = (role: UserRole) => {
-    const demoUser = DEMO_ACCOUNTS[role];
-    setUser(demoUser);
-    localStorage.setItem('dataclaus_user', JSON.stringify(demoUser));
+    const authUser: AuthUser = {
+      id: response.id,
+      email: response.email,
+      name: response.name,
+      role: response.role as UserRole,
+    };
+
+    setUser(authUser);
+    localStorage.setItem('dataclaus_user', JSON.stringify(authUser));
+    localStorage.setItem('dataclaus_token', response.token);
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('dataclaus_user');
+    localStorage.removeItem('dataclaus_token');
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, login, register, loginAsDemo, logout, isLoading }}
-    >
+    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -13,10 +13,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { useAuth, DEMO_ACCOUNTS } from '@/lib/auth-context';
+import { useAuth } from '@/lib/auth-context';
 import type { UserRole } from '@/lib/types';
 import { REVENUE_SHARES } from '@/lib/types';
-import { User, Code, ShoppingCart, Shield } from 'lucide-react';
 
 const roles: { value: UserRole; label: string; description: string }[] = [
   {
@@ -44,7 +43,7 @@ const roles: { value: UserRole; label: string; description: string }[] = [
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { login, register, loginAsDemo, user, isLoading } = useAuth();
+  const { login, register, user, isLoading } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -67,7 +66,7 @@ export default function LoginPage() {
         await register(name, email, password, selectedRole);
         toast({ title: 'Account created successfully' });
       } else {
-        await login(email, password, selectedRole);
+        await login(email, password);
       }
       router.push('/dashboard');
     } catch (error: unknown) {
@@ -89,7 +88,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
+      <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2">🎅 DataClaus</h1>
           <p className="text-muted-foreground">
@@ -102,52 +101,50 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{isRegister ? 'Create Account' : 'Sign In'}</CardTitle>
-              <CardDescription>
-                {isRegister
-                  ? 'Register a new account'
-                  : 'Enter your credentials'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {isRegister && (
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Your name or company"
-                      required={isRegister}
-                    />
-                  </div>
-                )}
+        <Card>
+          <CardHeader>
+            <CardTitle>{isRegister ? 'Create Account' : 'Sign In'}</CardTitle>
+            <CardDescription>
+              {isRegister ? 'Register a new account' : 'Enter your credentials'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {isRegister && (
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="name">Name</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    required
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your name or company"
+                    required={isRegister}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              {isRegister && (
                 <div className="space-y-2">
                   <Label>Account Type</Label>
                   <div className="grid grid-cols-2 gap-2">
@@ -166,102 +163,27 @@ export default function LoginPage() {
                     ))}
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={submitting}>
-                  {submitting
-                    ? 'Please wait...'
-                    : isRegister
-                    ? 'Create Account'
-                    : 'Sign In'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="link"
-                  className="w-full"
-                  onClick={() => setIsRegister(!isRegister)}
-                >
-                  {isRegister
-                    ? 'Already have an account? Sign in'
-                    : "Don't have an account? Register"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>🚀 Quick Demo Access</CardTitle>
-              <CardDescription>
-                Click to instantly login as a demo account
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                variant="outline"
-                className="w-full justify-start h-auto py-3"
-                onClick={() => {
-                  loginAsDemo('user');
-                  router.push('/dashboard');
-                }}
-              >
-                <User className="h-5 w-5 mr-3 text-green-600" />
-                <div className="text-left">
-                  <div className="font-medium">Demo User</div>
-                  <div className="text-xs text-muted-foreground">
-                    Earn from your data usage
-                  </div>
-                </div>
+              )}
+              <Button type="submit" className="w-full" disabled={submitting}>
+                {submitting
+                  ? 'Please wait...'
+                  : isRegister
+                  ? 'Create Account'
+                  : 'Sign In'}
               </Button>
               <Button
-                variant="outline"
-                className="w-full justify-start h-auto py-3"
-                onClick={() => {
-                  loginAsDemo('developer');
-                  router.push('/dashboard');
-                }}
+                type="button"
+                variant="link"
+                className="w-full"
+                onClick={() => setIsRegister(!isRegister)}
               >
-                <Code className="h-5 w-5 mr-3 text-blue-600" />
-                <div className="text-left">
-                  <div className="font-medium">Demo Developer</div>
-                  <div className="text-xs text-muted-foreground">
-                    Build apps, configure revenue share
-                  </div>
-                </div>
+                {isRegister
+                  ? 'Already have an account? Sign in'
+                  : "Don't have an account? Register"}
               </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start h-auto py-3"
-                onClick={() => {
-                  loginAsDemo('buyer');
-                  router.push('/dashboard');
-                }}
-              >
-                <ShoppingCart className="h-5 w-5 mr-3 text-purple-600" />
-                <div className="text-left">
-                  <div className="font-medium">Demo Buyer</div>
-                  <div className="text-xs text-muted-foreground">
-                    Run campaigns, access data
-                  </div>
-                </div>
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start h-auto py-3"
-                onClick={() => {
-                  loginAsDemo('admin');
-                  router.push('/dashboard');
-                }}
-              >
-                <Shield className="h-5 w-5 mr-3 text-red-600" />
-                <div className="text-left">
-                  <div className="font-medium">Demo Admin</div>
-                  <div className="text-xs text-muted-foreground">
-                    Full platform management
-                  </div>
-                </div>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+            </form>
+          </CardContent>
+        </Card>
 
         <Card className="mt-6">
           <CardHeader>

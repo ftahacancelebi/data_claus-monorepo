@@ -54,6 +54,9 @@ func run(ctx context.Context) error {
 	apiKeyService := services.NewAPIKeyService(apiKeyRepo, devRepo)
 	devHandler := adapterHttp.NewDeveloperHandler(devService, apiKeyService)
 
+	authHandler := adapterHttp.NewAuthHandler(userService, devService, cfg.JWTSecret)
+
+
 	walletRepo := repository.NewWalletRepository(db)
 	walletService := services.NewWalletService(walletRepo)
 	walletHandler := adapterHttp.NewWalletHandler(walletService)
@@ -77,6 +80,7 @@ func run(ctx context.Context) error {
 
 	handlers := &adapterHttp.Handlers{
 		User:      userHandler,
+		Auth:      authHandler,
 		Ingest:    ingestHandler,
 		Developer: devHandler,
 		Wallet:    walletHandler,

@@ -34,6 +34,18 @@ export const createUser = (data: {
 export const getUser = (id: string) =>
   request<{ id: string; email: string; name: string }>(`/users/${id}`);
 
+export const loginUser = (email: string, password: string) =>
+  request<{
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    token: string;
+  }>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+
 // Developers
 export const registerDeveloper = (data: {
   name: string;
