@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Card,
   CardContent,
@@ -20,11 +21,22 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import { generateApiKey, listApiKeys, revokeApiKey } from '@/lib/api';
 import type { ApiKey } from '@/lib/types';
-import { Key, Plus, Copy, Trash2, AlertTriangle } from 'lucide-react';
+import { 
+    Key, 
+    Plus, 
+    Copy, 
+    Trash, 
+    Warning, 
+    ShieldCheck, 
+    Code, 
+    CheckCircle,
+    LockKey
+} from 'phosphor-react';
 
 export default function ApiKeysPage() {
   const { user } = useAuth();
@@ -56,8 +68,8 @@ export default function ApiKeysPage() {
   const handleGenerate = async () => {
     if (!newKeyName.trim()) {
       toast({
-        title: 'Error',
-        description: 'Please enter a key name',
+        title: 'Validation Error',
+        description: 'Please enter a key name to proceed.',
         variant: 'destructive',
       });
       return;
@@ -69,8 +81,8 @@ export default function ApiKeysPage() {
       setNewKeyName('');
       fetchKeys();
       toast({
-        title: 'API Key generated',
-        description: "Save the key - it won't be shown again!",
+        title: 'Success',
+        description: "API Key generated successfully.",
       });
     } catch (error: unknown) {
       const message =
@@ -101,57 +113,115 @@ export default function ApiKeysPage() {
   const activeKeys = apiKeys.filter((k) => k.is_active).length;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">API Keys</h1>
-        <p className="text-muted-foreground">
-          Manage your API keys for data ingestion
-        </p>
+    <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+         <div>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">API Credentials</h1>
+            <p className="text-slate-500 mt-1">
+              Secure access tokens for communicating with the DataClaus Ingestion API.
+            </p>
+         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Generator Card */}
+        <Card className="lg:col-span-2 glass-panel border-0 shadow-lg shadow-blue-100/30">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Key className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Key size={20} className="text-primary" weight="duotone" />
               Generate New Key
             </CardTitle>
             <CardDescription>
-              Create a new API key for your applications
+              Create a new API key for your applications. Treat these keys like passwords.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Key Name</Label>
-              <Input
-                placeholder="e.g., Production Key"
-                value={newKeyName}
-                onChange={(e) => setNewKeyName(e.target.value)}
-              />
+          <CardContent className="space-y-6">
+            <div className="flex gap-4 items-end">
+                <div className="space-y-2 flex-1">
+                <Label htmlFor="keyName">Key Name</Label>
+                <div className="relative">
+                    <ShieldCheck className="absolute left-3 top-2.5 text-slate-400" size={18} />
+                    <Input
+                        id="keyName"
+                        placeholder="e.g. Production Mobile App"
+                        value={newKeyName}
+                        onChange={(e) => setNewKeyName(e.target.value)}
+                        className="pl-10"
+                    />
+                </div>
+                </div>
+                <Button 
+                    onClick={handleGenerate} 
+                    disabled={generating}
+                    className="bg-primary hover:bg-blue-700 text-white min-w-[140px]"
+                >
+                {generating ? <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white mr-2" /> : <Plus weight="bold" className="mr-2" />}
+                {generating ? 'Creating...' : 'Create Key'}
+                </Button>
             </div>
-            <Button onClick={handleGenerate} disabled={generating}>
-              <Plus className="h-4 w-4 mr-2" />
-              {generating ? 'Generating...' : 'Generate Key'}
-            </Button>
+
+            <AnimatePresence>
+            {newRawKey && (
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                >
+                    <Alert className="bg-amber-50 border-amber-200 text-amber-900">
+                    <Warning size={20} className="text-amber-600" weight="duotone" />
+                    <AlertTitle className="font-bold ml-2">Save this key immediately</AlertTitle>
+                    <AlertDescription className="mt-2 text-amber-800">
+                        <p className="text-xs mb-3">This implies read/write access. It will not be shown again.</p>
+                        <div className="flex items-center gap-2 bg-white/80 border border-amber-200 p-2 rounded-md">
+                        <code className="flex-1 font-mono text-xs break-all text-slate-800 select-all">{newRawKey}</code>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 hover:bg-amber-100 text-amber-700"
+                            onClick={() => copyToClipboard(newRawKey)}
+                        >
+                            <Copy size={16} />
+                        </Button>
+                        </div>
+                        <div className="mt-3 flex justify-end">
+                             <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setNewRawKey('')}
+                                className="text-amber-700 hover:text-amber-900 hover:bg-amber-100"
+                            >
+                                I have saved it
+                            </Button>
+                        </div>
+                    </AlertDescription>
+                    </Alert>
+                </motion.div>
+            )}
+            </AnimatePresence>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Stats Card */}
+        <Card className="glass-panel border-0 shadow-lg shadow-blue-100/30">
           <CardHeader>
-            <CardTitle>Key Statistics</CardTitle>
+            <CardTitle className="text-lg">Security Overview</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-              <span>Total Keys</span>
-              <span className="font-bold">{apiKeys.length}</span>
+            <div className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-sm font-medium text-slate-500">Total Keys</span>
+              <span className="font-bold text-slate-900">{apiKeys.length}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-              <span>Active Keys</span>
-              <span className="font-bold text-green-600">{activeKeys}</span>
+            <div className="flex justify-between items-center p-4 bg-blue-50 rounded-xl border border-blue-100">
+              <span className="text-sm font-medium text-blue-700">Active</span>
+              <div className="flex items-center gap-2">
+                 <CheckCircle size={16} className="text-blue-500" weight="fill" />
+                 <span className="font-bold text-blue-700">{activeKeys}</span>
+              </div>
             </div>
-            <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-              <span>Revoked Keys</span>
-              <span className="font-bold text-red-600">
+            <div className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-sm font-medium text-slate-500">Revoked</span>
+              <span className="font-bold text-slate-400">
                 {apiKeys.length - activeKeys}
               </span>
             </div>
@@ -159,83 +229,63 @@ export default function ApiKeysPage() {
         </Card>
       </div>
 
-      {newRawKey && (
-        <Card className="border-yellow-500">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-yellow-600">
-              <AlertTriangle className="h-5 w-5" />
-              New API Key Created
-            </CardTitle>
-            <CardDescription>
-              Copy this key now. You won&apos;t be able to see it again!
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2">
-              <Input value={newRawKey} readOnly className="font-mono text-sm" />
-              <Button
-                variant="outline"
-                onClick={() => copyToClipboard(newRawKey)}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mt-2"
-              onClick={() => setNewRawKey('')}
-            >
-              Dismiss
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Your API Keys</CardTitle>
-          <CardDescription>Manage existing API keys</CardDescription>
+      {/* Keys List */}
+      <Card className="glass-panel border-0 shadow-xl shadow-blue-100/30 overflow-hidden">
+        <CardHeader className="bg-white/50 border-b border-blue-50/50">
+          <CardTitle className="text-lg font-medium text-slate-900">Active Credentials</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {loading ? (
-            <p className="text-center text-muted-foreground py-4">Loading...</p>
+             <div className="p-8 text-center text-slate-400">Loading credentials...</div>
           ) : apiKeys.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              No API keys yet. Generate one to get started.
-            </p>
+             <div className="p-12 text-center flex flex-col items-center gap-3">
+                 <div className="h-12 w-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+                     <LockKey size={24} weight="duotone" />
+                 </div>
+                 <p className="text-slate-500 font-medium">No API keys found.</p>
+                 <p className="text-sm text-slate-400 max-w-xs mx-auto">Generate your first key to start sending data to the platform.</p>
+             </div>
           ) : (
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-slate-50/50">
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Key Prefix</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="font-semibold text-slate-500">Key Name</TableHead>
+                  <TableHead className="font-semibold text-slate-500">Token Prefix</TableHead>
+                  <TableHead className="font-semibold text-slate-500">Status</TableHead>
+                  <TableHead className="text-right font-semibold text-slate-500">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {apiKeys.map((key) => (
-                  <TableRow key={key.id}>
-                    <TableCell className="font-medium">{key.name}</TableCell>
-                    <TableCell className="font-mono">
-                      {key.key_prefix}...
+                  <TableRow key={key.id} className="hover:bg-slate-50/50">
+                    <TableCell className="font-medium text-slate-900 flex items-center gap-2">
+                        <Key size={16} className="text-blue-400" />
+                        {key.name}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-slate-500 bg-slate-100/50 py-1 rounded w-fit">
+                      {key.key_prefix}•••••••••••••••••
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={key.is_active ? 'success' : 'destructive'}
+                        className={`
+                             ${key.is_active 
+                                ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200' 
+                                : 'bg-slate-100 text-slate-500 hover:bg-slate-200 border-slate-200'}
+                             border
+                        `}
                       >
                         {key.is_active ? 'Active' : 'Revoked'}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-right">
                       {key.is_active && (
                         <Button
                           size="sm"
-                          variant="destructive"
+                          variant="ghost"
+                          className="text-slate-400 hover:text-red-600 hover:bg-red-50"
                           onClick={() => handleRevoke(key.id)}
                         >
-                          <Trash2 className="h-4 w-4 mr-1" />
+                          <Trash size={16} weight="duotone" className="mr-2" />
                           Revoke
                         </Button>
                       )}
@@ -248,35 +298,39 @@ export default function ApiKeysPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>API Usage</CardTitle>
-          <CardDescription>
-            How to use your API key for data ingestion
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="bg-muted p-4 rounded-lg">
-            <p className="text-sm font-medium mb-2">Required Headers:</p>
-            <code className="text-xs block">X-API-Key: your-api-key</code>
-            <code className="text-xs block">
-              X-Signature: hmac-sha256-signature
-            </code>
-          </div>
-          <div className="bg-muted p-4 rounded-lg">
-            <p className="text-sm font-medium mb-2">Endpoint:</p>
-            <code className="text-xs">POST /v1/ingest</code>
-          </div>
-          <div className="bg-muted p-4 rounded-lg">
-            <p className="text-sm font-medium mb-2">Signature Calculation:</p>
-            <ol className="text-xs space-y-1 list-decimal list-inside">
-              <li>Take the raw JSON request body</li>
-              <li>Compute HMAC-SHA256 using your API key as the secret</li>
-              <li>Hex-encode the result</li>
-              <li>Set as X-Signature header</li>
-            </ol>
-          </div>
-        </CardContent>
+      {/* Integration Guide */}
+      <Card className="bg-slate-900 text-slate-300 border-slate-800">
+         <CardHeader>
+            <div className="flex items-center gap-2 mb-2">
+                <Code size={24} className="text-blue-400" />
+                <CardTitle className="text-white">Integration Guide</CardTitle>
+            </div>
+            <CardDescription className="text-slate-400">Use the following headers to authenticate your requests.</CardDescription>
+         </CardHeader>
+         <CardContent className="space-y-4 font-mono text-sm">
+            <div className="grid gap-4 md:grid-cols-2">
+               <div className="space-y-2">
+                   <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Headers</div>
+                   <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
+                       <div className="flex items-center gap-3 mb-2">
+                           <span className="text-blue-400">X-API-Key:</span>
+                           <span className="text-slate-500">&lt;your_api_key&gt;</span>
+                       </div>
+                       <div className="flex items-center gap-3">
+                           <span className="text-purple-400">X-Signature:</span>
+                           <span className="text-slate-500">&lt;hmac_sha256_signature&gt;</span>
+                       </div>
+                   </div>
+               </div>
+               <div className="space-y-2">
+                   <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Endpoint</div>
+                   <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 flex items-center h-[86px]">
+                       <span className="text-blue-400 mr-2">POST</span>
+                       <span className="text-white">/v1/ingest</span>
+                   </div>
+               </div>
+            </div>
+         </CardContent>
       </Card>
     </div>
   );

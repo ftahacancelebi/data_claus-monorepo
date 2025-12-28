@@ -234,8 +234,8 @@ export default function DataProductsPage() {
             </p>
           </div>
           <p className="text-sm text-muted-foreground mt-4">
-            💡 Higher user share attracts more users but reduces your cut. Find
-            the right balance! Amounts below{' '}
+            Higher user share attracts more users but reduces your cut. Find the
+            right balance! Amounts below{' '}
             {formatMoney(REVENUE_SHARES.MIN_PAYOUT_THRESHOLD, 2)} are held as
             pending.
           </p>

@@ -29,6 +29,7 @@ type DeveloperService interface {
 	Get(ctx context.Context, id uuid.UUID) (*domain.Developer, error)
 	GetByEmail(ctx context.Context, email string) (*domain.Developer, error)
 	UpdateUserShare(ctx context.Context, developerID uuid.UUID, userSharePercent int) (*domain.Developer, error)
+	Authenticate(ctx context.Context, email, password string) (*domain.Developer, error)
 }
 
 type APIKeyService interface {

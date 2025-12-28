@@ -55,10 +55,13 @@ export interface ScoredEvent {
 
 export interface ApiKey {
   id: string;
+  developer_id?: string;
   key_prefix: string;
   name: string;
   is_active: boolean;
-  raw_key?: string;
+  last_used_at?: string;
+  created_at: string;
+  raw_key?: string; // Only returned on creation
 }
 
 export interface AppLink {

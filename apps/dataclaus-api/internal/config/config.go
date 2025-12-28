@@ -18,13 +18,14 @@ type Config struct {
 	AppEnv       string
 	KafkaBrokers []string
 	HMACSecret   string
+	JWTSecret    string
 }
 
 func LoadConfig() *Config {
 	_ = godotenv.Load(".env")
 	_ = godotenv.Load("../../.env")
 
-	kafkaBrokersStr := getEnv("KAFKA_BROKERS", "localhost:9092")
+	kafkaBrokersStr := getEnv("KAFKA_BROKERS", "localhost:9094")
 	kafkaBrokers := strings.Split(kafkaBrokersStr, ",")
 
 	return &Config{
@@ -38,6 +39,7 @@ func LoadConfig() *Config {
 		AppEnv:       getEnv("APP_ENV", "development"),
 		KafkaBrokers: kafkaBrokers,
 		HMACSecret:   getEnv("HMAC_SECRET", "default-secret-change-in-production"),
+		JWTSecret:    getEnv("JWT_SECRET", "jwt-secret-change-in-production-please"),
 	}
 }
 

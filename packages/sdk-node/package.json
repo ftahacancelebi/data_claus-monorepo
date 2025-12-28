@@ -1,0 +1,33 @@
+{
+  "name": "@dataclaus/sdk-node",
+  "version": "1.0.0",
+  "description": "DataClaus Node.js SDK for server-side data ingestion with HMAC authentication",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [
+    "dataclaus",
+    "sdk",
+    "analytics",
+    "data",
+    "hmac"
+  ],
+  "author": "DataClaus",
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/recaptcha-enterprise": "^6.3.1",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/node-fetch": "^2.6.13",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist"
+  ]
+}

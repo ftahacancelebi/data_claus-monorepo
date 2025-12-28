@@ -1,49 +1,87 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import Image from 'next/image';
+import Logo from '../assets/logos/logo.svg';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import type { UserRole } from '@/lib/types';
-import { REVENUE_SHARES } from '@/lib/types';
+import { 
+  EnvelopeSimple, 
+  LockKey, 
+  CircleNotch, 
+  ArrowRight, 
+  User, 
+  GlobeHemisphereWest, 
+  ShieldCheck,
+  TrendUp,
+  Cpu,
+  CheckCircle,
+  Fingerprint
+} from 'phosphor-react';
 
-const roles: { value: UserRole; label: string; description: string }[] = [
-  {
-    value: 'user',
-    label: 'End User',
-    description: `Earn ${REVENUE_SHARES.MIN_USER_SHARE_PERCENT}-${REVENUE_SHARES.MAX_USER_SHARE_PERCENT}% of ad revenue from your data`,
-  },
-  {
-    value: 'developer',
-    label: 'Developer',
-    description: `Configure user share, earn the remainder (5-45%)`,
-  },
-  {
-    value: 'buyer',
-    label: 'Buyer',
-    description: 'Run campaigns and access quality data',
-  },
-  {
-    value: 'admin',
-    label: 'Admin',
-    description: 'Full system access and management',
-  },
-];
+// Live Data Feed with fixed height to prevent flickering
+const LiveDataFeed = () => {
+    const [events, setEvents] = useState([
+      { id: 'init1', type: 'AUTH', latency: 24, status: 'OK' },
+      { id: 'init2', type: 'INGEST', latency: 18, status: 'OK' },
+      { id: 'init3', type: 'RISK_CHECK', latency: 32, status: 'OK' },
+      { id: 'init4', type: 'AUTH', latency: 15, status: 'OK' },
+    ]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const newEvent = {
+                id: Math.random().toString(36).substr(2, 9),
+                type: ['AUTH', 'INGEST', 'RISK_CHECK'][Math.floor(Math.random() * 3)],
+                latency: Math.floor(Math.random() * 40) + 10,
+                status: 'OK'
+            };
+            setEvents(prev => [newEvent, ...prev.slice(0, 3)]);
+        }, 2500);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="glass-panel p-6 rounded-2xl w-full max-w-sm hidden xl:block mt-12">
+            <div className="flex items-center gap-3 mb-4 border-b border-slate-100 pb-3">
+                <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></div>
+                <span className="text-xs font-semibold tracking-wider text-slate-500 uppercase">Live System Metrics</span>
+            </div>
+            {/* Fixed height container to prevent layout shift */}
+            <div className="h-[120px] overflow-hidden">
+              <div className="space-y-3">
+                  {events.slice(0, 4).map((evt, i) => (
+                      <div 
+                        key={evt.id} 
+                        className="flex items-center justify-between text-xs h-[24px]" 
+                        style={{ opacity: 1 - i * 0.2 }}
+                      >
+                           <div className="flex items-center gap-2">
+                              <code className="text-primary font-mono w-20">{evt.type}</code>
+                              <span className="text-slate-400 font-mono text-[10px]">evt_{evt.id.slice(0,6)}</span>
+                           </div>
+                           <div className="flex items-center gap-2">
+                               <span className="text-slate-500 font-mono w-10 text-right">{evt.latency}ms</span>
+                               <CheckCircle size={12} className="text-blue-500" weight="fill" />
+                           </div>
+                      </div>
+                  ))}
+              </div>
+            </div>
+        </div>
+    );
+};
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { login, register, user, isLoading } = useAuth();
+  
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -70,8 +108,7 @@ export default function LoginPage() {
       }
       router.push('/dashboard');
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Authentication failed';
+      const message = error instanceof Error ? error.message : 'Authentication failed';
       toast({ title: 'Error', description: message, variant: 'destructive' });
     } finally {
       setSubmitting(false);
@@ -80,145 +117,169 @@ export default function LoginPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <CircleNotch size={32} className="animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">🎅 DataClaus</h1>
-          <p className="text-muted-foreground">
-            Data marketplace & advertising platform
-          </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Fair revenue sharing: {REVENUE_SHARES.MIN_USER_SHARE_PERCENT}-
-            {REVENUE_SHARES.MAX_USER_SHARE_PERCENT}% to users,{' '}
-            {REVENUE_SHARES.PLATFORM_FEE_PERCENT}% platform fee
-          </p>
-        </div>
+    <div className="min-h-screen w-full relative overflow-hidden bg-slate-900">
+      
+      {/* Animated Background Mesh */}
+       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+          <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-900/30 rounded-full blur-[150px] animate-float"></div>
+          <div className="absolute bottom-[-15%] right-[-15%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px] animate-float-delayed"></div>
+          
+          {/* Subtle Grid Overlay */}
+          <div className="absolute inset-0 bg-grid-pattern opacity-[0.08]"></div>
+       </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{isRegister ? 'Create Account' : 'Sign In'}</CardTitle>
-            <CardDescription>
-              {isRegister ? 'Register a new account' : 'Enter your credentials'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {isRegister && (
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your name or company"
-                    required={isRegister}
-                  />
-                </div>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                />
+       {/* Main Content Container */}
+       <div className="relative z-10 w-full max-w-[1400px] mx-auto min-h-screen flex flex-col lg:flex-row items-center justify-center p-6 gap-12 lg:gap-24">
+          
+          {/* Left Side: Brand Narrative */}
+          <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left pt-10 lg:pt-0">
+              
+              {/* Logo/Badge */}
+              <div className="animate-float mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium text-slate-300">
+                 <ShieldCheck size={18} className="text-blue-400" weight="duotone" />
+                 <span>Enterprise Grade Security</span>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-              {isRegister && (
-                <div className="space-y-2">
-                  <Label>Account Type</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {roles.map((role) => (
-                      <Button
-                        key={role.value}
-                        type="button"
-                        variant={
-                          selectedRole === role.value ? 'default' : 'outline'
-                        }
-                        size="sm"
-                        onClick={() => setSelectedRole(role.value)}
-                      >
-                        {role.label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting
-                  ? 'Please wait...'
-                  : isRegister
-                  ? 'Create Account'
-                  : 'Sign In'}
-              </Button>
-              <Button
-                type="button"
-                variant="link"
-                className="w-full"
-                onClick={() => setIsRegister(!isRegister)}
-              >
-                {isRegister
-                  ? 'Already have an account? Sign in'
-                  : "Don't have an account? Register"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
 
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Revenue Sharing Model</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="p-4 bg-green-50 rounded-lg text-center">
-                <p className="text-3xl font-bold text-green-700">
-                  {REVENUE_SHARES.MIN_USER_SHARE_PERCENT}-
-                  {REVENUE_SHARES.MAX_USER_SHARE_PERCENT}%
-                </p>
-                <p className="text-sm text-green-600">To Users</p>
-                <p className="text-xs text-muted-foreground">
-                  Set by developer
-                </p>
+              <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1] mb-6">
+                 Data Infrastructure for the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">Intelligence Age</span>.
+              </h1>
+              
+              <p className="text-xl text-slate-400 max-w-lg font-light leading-relaxed mb-10">
+                 DataClaus provides the compliant, high-performance rails for monetizing and acquiring structured training data.
+              </p>
+
+              {/* Stats / Trust Badges */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 opacity-80">
+                 <div className="flex items-center gap-2 text-slate-400">
+                     <GlobeHemisphereWest size={24} weight="duotone" />
+                     <span className="font-medium">Global CDN</span>
+                 </div>
+                  <div className="flex items-center gap-2 text-slate-400">
+                     <Fingerprint size={24} weight="duotone" />
+                     <span className="font-medium">Biometric Auth</span>
+                 </div>
+                  <div className="flex items-center gap-2 text-slate-400">
+                     <Cpu size={24} weight="duotone" />
+                     <span className="font-medium">99.9% Uptime</span>
+                 </div>
               </div>
-              <div className="p-4 bg-blue-50 rounded-lg text-center">
-                <p className="text-3xl font-bold text-blue-700">5-45%</p>
-                <p className="text-sm text-blue-600">To Developers</p>
-                <p className="text-xs text-muted-foreground">
-                  Remainder after fees
-                </p>
-              </div>
-              <div className="p-4 bg-gray-100 rounded-lg text-center">
-                <p className="text-3xl font-bold text-gray-700">
-                  {REVENUE_SHARES.PLATFORM_FEE_PERCENT}%
-                </p>
-                <p className="text-sm text-gray-600">Platform (fixed)</p>
-                <p className="text-xs text-muted-foreground">Infrastructure</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
+              {/* Visual Element (The Live Feed) */}
+              <LiveDataFeed />
+
+          </div>
+
+          {/* Right Side: The Access Terminal (Login Form) */}
+          <div className="w-full lg:w-[420px] animate-float-delayed" style={{ animationDuration: '8s' }}>
+             <div className="gradient-border-card rounded-3xl p-8 lg:p-10 shadow-2xl shadow-blue-900/30 relative bg-white">
+                
+                {/* Logo in form header */}
+                <div className="flex items-center justify-center mb-6">
+                  <Image src={Logo} alt="DataClaus" width={120} height={40} className="h-8 w-auto" />
+                </div>
+
+                <div className="mb-6 text-center">
+                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                        {isRegister ? 'Create Account' : 'Welcome Back'}
+                    </h2>
+                    <p className="text-slate-500 text-sm mt-2">
+                        {isRegister ? 'Set up your developer credentials.' : 'Sign in to your account.'}
+                    </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Name Field (Register only) */}
+                    {isRegister && (
+                    <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Full Name</Label>
+                        <div className="relative group">
+                            <Input 
+                                value={name} onChange={e => setName(e.target.value)} required 
+                                className="pl-10 h-11 bg-slate-50/50 border-slate-200 focus:bg-white focus:ring-blue-500/20 transition-all text-slate-800 placeholder:text-slate-300"
+                                placeholder="John Smith"
+                            />
+                            <User size={18} className="absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-blue-500 transition-colors" weight="duotone" />
+                        </div>
+                    </div>
+                    )}
+
+                    {/* Email Field */}
+                    <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</Label>
+                        <div className="relative group">
+                            <Input 
+                                type="email" value={email} onChange={e => setEmail(e.target.value)} required 
+                                className="pl-10 h-11 bg-slate-50/50 border-slate-200 focus:bg-white focus:ring-blue-500/20 transition-all text-slate-800 placeholder:text-slate-300"
+                                placeholder="you@company.com"
+                            />
+                            <EnvelopeSimple size={18} className="absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-blue-500 transition-colors" weight="duotone" />
+                        </div>
+                    </div>
+
+                    {/* Password Field */}
+                    <div className="space-y-1.5">
+                         <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Password</Label>
+                         <div className="relative group">
+                            <Input 
+                                type="password" value={password} onChange={e => setPassword(e.target.value)} required 
+                                className="pl-10 h-11 bg-slate-50/50 border-slate-200 focus:bg-white focus:ring-blue-500/20 transition-all text-slate-800 placeholder:text-slate-300"
+                                placeholder="••••••••"
+                            />
+                            <LockKey size={18} className="absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-blue-500 transition-colors" weight="duotone" />
+                        </div>
+                    </div>
+                    
+                    {/* Role Selection (Register only) */}
+                    {isRegister && (
+                         <div className="grid grid-cols-2 gap-3 pt-2">
+                             <button type="button" onClick={() => setSelectedRole('developer')}
+                                className={`p-3 rounded-xl border text-left transition-all ${selectedRole === 'developer' ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'}`}
+                             >
+                                <div className="text-xs font-bold text-slate-900 mb-1 flex items-center gap-1.5">
+                                    <Cpu size={14} weight="duotone" className="text-primary"/> Developer
+                                </div>
+                                <div className="text-[10px] text-slate-500 leading-tight">Integrate SDK & Earn</div>
+                             </button>
+                             <button type="button" onClick={() => setSelectedRole('buyer')}
+                                className={`p-3 rounded-xl border text-left transition-all ${selectedRole === 'buyer' ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'}`}
+                             >
+                                <div className="text-xs font-bold text-slate-900 mb-1 flex items-center gap-1.5">
+                                    <TrendUp size={14} weight="duotone" className="text-primary"/> Buyer
+                                </div>
+                                <div className="text-[10px] text-slate-500 leading-tight">Access Data Streams</div>
+                             </button>
+                         </div>
+                    )}
+
+                    <Button className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl shadow-lg shadow-slate-900/10 transition-all active:scale-[0.98] mt-2">
+                        {submitting ? <CircleNotch className="animate-spin" /> : (
+                            <span className="flex items-center gap-2">
+                                {isRegister ? 'Create Account' : 'Sign In'} <ArrowRight weight="bold"/>
+                            </span>
+                        )}
+                    </Button>
+                </form>
+
+                <div className="mt-6 text-center border-t border-slate-100 pt-6">
+                    <p className="text-sm text-slate-500">
+                        {isRegister ? 'Already have an account?' : 'New to DataClaus?'} 
+                        <button onClick={() => setIsRegister(!isRegister)} className="ml-1.5 font-semibold text-primary hover:text-blue-700 transition-colors">
+                            {isRegister ? 'Sign in' : 'Create account'}
+                        </button>
+                    </p>
+                </div>
+
+             </div>
+         </div>
       </div>
+
     </div>
   );
 }

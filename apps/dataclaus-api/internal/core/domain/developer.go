@@ -20,15 +20,16 @@ type Developer struct {
 }
 
 type APIKey struct {
-	ID          uuid.UUID
-	DeveloperID uuid.UUID
-	KeyHash     string
-	KeyPrefix   string
-	Name        string
-	IsActive    bool
-	LastUsedAt  *time.Time
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID            uuid.UUID
+	DeveloperID   uuid.UUID
+	ApplicationID *uuid.UUID // Optional: links key to specific application
+	KeyHash       string
+	KeyPrefix     string
+	Name          string
+	IsActive      bool
+	LastUsedAt    *time.Time
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 func NewDeveloper(name, email, password string) *Developer {

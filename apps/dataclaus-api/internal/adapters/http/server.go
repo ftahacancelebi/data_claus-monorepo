@@ -73,6 +73,7 @@ func NewServer(h *Handlers) *echo.Echo {
 	ingest := e.Group("/v1")
 	ingest.Use(h.HMAC.Validate())
 	ingest.POST("/ingest", h.Ingest.Ingest)
+	ingest.POST("/ingest/batch", h.Ingest.IngestBatch)
 
 	return e
 }

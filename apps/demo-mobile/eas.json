@@ -1,0 +1,37 @@
+{
+  "cli": {
+    "version": ">= 13.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "base": {
+      "node": "20.18.0",
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+      }
+    },
+    "development": {
+      "extends": "base",
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_BACKEND_URL": "http://localhost:4000",
+        "EXPO_PUBLIC_RECAPTCHA_SITE_KEY_IOS": "6LdOVzgsAAAAAKk_Yd49y2RPTFb9RAr3btNZy3SA",
+        "CI": "1"
+      }
+    },
+    "preview": {
+      "extends": "base",
+      "distribution": "internal"
+    },
+    "production": {
+      "extends": "base"
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

@@ -21,4 +21,5 @@ type UserRepository interface {
 type UserService interface {
 	Create(ctx context.Context, email, name, password string) (*domain.User, error)
 	Get(ctx context.Context, id uuid.UUID) (*domain.User, error)
+	Authenticate(ctx context.Context, email, password string) (*domain.User, error)
 }

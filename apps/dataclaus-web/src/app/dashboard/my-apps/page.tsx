@@ -1,389 +1,543 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/auth-context';
-import { Plus, Code, Users, DollarSign, Edit, Trash2 } from 'lucide-react';
-
-import { REVENUE_SHARES } from '@/lib/types';
+import { REVENUE_SHARES, ApiKey } from '@/lib/types';
 import { Slider } from '@/components/ui/slider';
+import { 
+    Plus, 
+    Code, 
+    Users, 
+    CurrencyDollar, 
+    AppWindow,
+    X,
+    MagnifyingGlass,
+    CheckCircle,
+    Heart,
+    GameController,
+    ShoppingCart,
+    Airplane,
+    Briefcase,
+    ChartBar,
+    Flask,
+    MusicNote,
+    Camera,
+    Book,
+    Wallet,
+    ArrowRight,
+    Activity,
+    TrendUp,
+    Lightning,
+    Key,
+    Copy,
+    Warning,
+    CircleNotch
+} from 'phosphor-react';
+import { listApiKeys, generateApiKey, getDashboard, DashboardStats } from '@/lib/api';
 
-interface App {
-  id: string;
-  name: string;
-  description: string;
-  url: string;
-  category: string;
-  userSharePercent: number; // Revenue share for users (50-90%)
-  users: number;
-  revenue: number;
-  status: 'active' | 'paused' | 'pending';
-}
-
-const MOCK_APPS: App[] = [
-  {
-    id: '1',
-    name: 'FitTracker SDK',
-    description: 'Fitness tracking integration',
-    url: 'https://fittracker.io',
-    category: 'Health',
-    userSharePercent: 75, // Generous to attract users
-    users: 1250,
-    revenue: 450,
-    status: 'active',
-  },
-  {
-    id: '2',
-    name: 'Survey Widget',
-    description: 'Embeddable survey component',
-    url: 'https://surveys.io',
-    category: 'Research',
-    userSharePercent: 70, // Default
-    users: 890,
-    revenue: 320,
-    status: 'active',
-  },
-  {
-    id: '3',
-    name: 'Location API',
-    description: 'Anonymous location data API',
-    url: 'https://locapi.io',
-    category: 'Travel',
-    userSharePercent: 85, // Very generous
-    users: 450,
-    revenue: 180,
-    status: 'paused',
-  },
+// Categories with icons
+const categories = [
+  { id: 'health', name: 'Health & Fitness', icon: Heart },
+  { id: 'gaming', name: 'Gaming', icon: GameController },
+  { id: 'ecommerce', name: 'E-Commerce', icon: ShoppingCart },
+  { id: 'travel', name: 'Travel', icon: Airplane },
+  { id: 'business', name: 'Business', icon: Briefcase },
+  { id: 'analytics', name: 'Analytics', icon: ChartBar },
+  { id: 'research', name: 'Research', icon: Flask },
+  { id: 'entertainment', name: 'Entertainment', icon: MusicNote },
+  { id: 'social', name: 'Social Media', icon: Camera },
+  { id: 'education', name: 'Education', icon: Book },
+  { id: 'finance', name: 'Finance', icon: Wallet },
 ];
+
+const container = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.08 } }
+};
+
+const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 }
+};
 
 export default function MyAppsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [apps, setApps] = useState<App[]>(MOCK_APPS);
-  const [showForm, setShowForm] = useState(false);
+  
+  // Real data from API
+  const [apps, setApps] = useState<ApiKey[]>([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [categorySearch, setCategorySearch] = useState('');
+  const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({
     name: '',
     description: '',
-    url: '',
-    category: 'Health',
-    userSharePercent: REVENUE_SHARES.DEFAULT_USER_SHARE_PERCENT,
+    category: '',
   });
-  const [editingApp, setEditingApp] = useState<string | null>(null);
+
+  // Fetch apps (API Keys) from backend
+  useEffect(() => {
+    async function fetchData() {
+      if (!user?.id) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch API keys for this developer
+        const apiKeys = await listApiKeys(user.id);
+        setApps(apiKeys || []);
+        
+        // Fetch dashboard stats
+        const dashboardStats = await getDashboard();
+        setStats(dashboardStats);
+      } catch (err) {
+        console.error('Failed to fetch apps:', err);
+        setError('Failed to load applications. Make sure the backend is running.');
+        // Keep page usable with empty data
+        setApps([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchData();
+  }, [user?.id]);
 
   if (!user) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const filteredCategories = categories.filter(cat => 
+    cat.name.toLowerCase().includes(categorySearch.toLowerCase())
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newApp: App = {
-      id: Date.now().toString(),
-      name: form.name,
-      description: form.description,
-      url: form.url,
-      category: form.category,
-      userSharePercent: form.userSharePercent,
-      users: 0,
-      revenue: 0,
-      status: 'pending',
-    };
-    setApps([...apps, newApp]);
-    setForm({
-      name: '',
-      description: '',
-      url: '',
-      category: 'Health',
-      userSharePercent: REVENUE_SHARES.DEFAULT_USER_SHARE_PERCENT,
-    });
-    setShowForm(false);
-    toast({
-      title: 'App submitted',
-      description: 'Your app is pending review',
-    });
+    if (!form.name.trim()) {
+      toast({ title: 'Please enter an app name', variant: 'destructive' });
+      return;
+    }
+    
+    setCreating(true);
+    
+    try {
+      // Create API key with app name
+      const result = await generateApiKey(user.id, form.name);
+      
+      // Add to local state
+      setApps([...apps, result]);
+      
+      // Reset form and close modal
+      setForm({ name: '', description: '', category: '' });
+      setShowModal(false);
+      
+      toast({
+        title: 'Application Created! 🎉',
+        description: `Your API key: ${result.raw_key}. Copy it now - you won't see it again!`,
+      });
+    } catch (err) {
+      console.error('Failed to create app:', err);
+      toast({
+        title: 'Failed to create application',
+        description: 'Make sure the backend server is running.',
+        variant: 'destructive',
+      });
+    } finally {
+      setCreating(false);
+    }
   };
 
-  const updateAppUserShare = (appId: string, newShare: number) => {
-    setApps(
-      apps.map((app) =>
-        app.id === appId ? { ...app, userSharePercent: newShare } : app
-      )
-    );
+  const copyApiKey = (keyPrefix: string) => {
+    navigator.clipboard.writeText(keyPrefix);
+    toast({ title: 'API Key prefix copied!' });
   };
 
-  const toggleStatus = (id: string) => {
-    setApps(
-      apps.map((app) => {
-        if (app.id === id) {
-          return {
-            ...app,
-            status: app.status === 'active' ? 'paused' : 'active',
-          };
-        }
-        return app;
-      })
-    );
-  };
-
-  const totalUsers = apps.reduce((sum, app) => sum + app.users, 0);
-  const totalRevenue = apps.reduce((sum, app) => sum + app.revenue, 0);
+  const activeApps = apps.filter(app => app.is_active).length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">My Apps</h1>
-          <p className="text-muted-foreground">
-            Manage your published applications
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Applications</h1>
+          <p className="text-slate-500 mt-1">
+            Manage your integrated applications and API keys.
           </p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)}>
-          <Plus className="h-4 w-4 mr-2" />
-          New App
+        <Button 
+            onClick={() => setShowModal(true)} 
+            className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 transition-all font-medium"
+        >
+          <Plus weight="bold" className="mr-2" />
+          Create New App
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Apps</CardTitle>
-            <Code className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{apps.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {totalUsers.toLocaleString()}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {showForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Publish New App</CardTitle>
-            <CardDescription>Submit your app for review</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label>App Name</Label>
-                <Input
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>URL</Label>
-                <Input
-                  value={form.url}
-                  onChange={(e) => setForm({ ...form, url: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label>Description</Label>
-                <Input
-                  value={form.description}
-                  onChange={(e) =>
-                    setForm({ ...form, description: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Category</Label>
-                <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  value={form.category}
-                  onChange={(e) =>
-                    setForm({ ...form, category: e.target.value })
-                  }
-                >
-                  <option>Health</option>
-                  <option>Research</option>
-                  <option>Finance</option>
-                  <option>Travel</option>
-                  <option>Shopping</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label>User Share: {form.userSharePercent}%</Label>
-                <Slider
-                  value={[form.userSharePercent]}
-                  onValueChange={(v) =>
-                    setForm({ ...form, userSharePercent: v[0] })
-                  }
-                  min={REVENUE_SHARES.MIN_USER_SHARE_PERCENT}
-                  max={REVENUE_SHARES.MAX_USER_SHARE_PERCENT}
-                  step={1}
-                />
-                <p className="text-xs text-muted-foreground">
-                  You get{' '}
-                  {100 -
-                    REVENUE_SHARES.PLATFORM_FEE_PERCENT -
-                    form.userSharePercent}
-                  % (Platform: {REVENUE_SHARES.PLATFORM_FEE_PERCENT}%)
-                </p>
-              </div>
-              <div className="md:col-span-2 flex gap-2">
-                <Button type="submit">Submit App</Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowForm(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+      {/* Error Banner */}
+      {error && (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+          <Warning size={20} className="text-amber-600 mt-0.5" />
+          <div>
+            <p className="font-medium text-amber-800">{error}</p>
+            <p className="text-sm text-amber-600 mt-1">
+              Run `docker-compose up -d` and `go run apps/dataclaus-api/cmd/api` to start the backend.
+            </p>
+          </div>
+        </div>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Apps</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>User Share</TableHead>
-                <TableHead>Users</TableHead>
-                <TableHead>Revenue</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {apps.map((app) => (
-                <TableRow key={app.id}>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">{app.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {app.description}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell>{app.category}</TableCell>
-                  <TableCell>
-                    {editingApp === app.id ? (
-                      <div className="w-32">
-                        <Slider
-                          value={[app.userSharePercent]}
-                          onValueChange={(v) =>
-                            updateAppUserShare(app.id, v[0])
-                          }
-                          min={REVENUE_SHARES.MIN_USER_SHARE_PERCENT}
-                          max={REVENUE_SHARES.MAX_USER_SHARE_PERCENT}
-                          step={1}
-                        />
-                        <div className="flex justify-between text-xs mt-1">
-                          <span className="text-green-600">
-                            {app.userSharePercent}% users
-                          </span>
-                          <span className="text-blue-600">
-                            {100 -
-                              REVENUE_SHARES.PLATFORM_FEE_PERCENT -
-                              app.userSharePercent}
-                            % you
-                          </span>
-                        </div>
+      {/* ========== STATISTICS SECTION ========== */}
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <ChartBar size={20} className="text-slate-400" weight="duotone" />
+          <h2 className="text-lg font-semibold text-slate-700">Statistics Overview</h2>
+        </div>
+        
+        <motion.div 
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="grid gap-4 md:grid-cols-4"
+        >
+          {/* Total Apps */}
+          <motion.div variants={item}>
+            <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                    <AppWindow size={20} className="text-blue-600" weight="duotone" />
+                  </div>
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Total Apps</p>
+                <p className="text-3xl font-bold text-slate-900">{loading ? '-' : apps.length}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Active Apps */}
+          <motion.div variants={item}>
+            <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                    <Activity size={20} className="text-emerald-600" weight="duotone" />
+                  </div>
+                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
+                    <Lightning size={10} className="mr-1" weight="fill" />
+                    Live
+                  </Badge>
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Active Apps</p>
+                <p className="text-3xl font-bold text-slate-900">{loading ? '-' : activeApps}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+          
+          {/* Total Events */}
+          <motion.div variants={item}>
+            <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="h-10 w-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                    <Users size={20} className="text-purple-600" weight="duotone" />
+                  </div>
+                  {stats && (
+                    <span className="flex items-center text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                      <TrendUp size={10} className="mr-1" weight="bold" />Live
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Total Events</p>
+                <p className="text-3xl font-bold text-slate-900">{stats?.total_events?.toLocaleString() ?? '-'}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+          
+          {/* Total Payouts */}
+          <motion.div variants={item}>
+            <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                    <CurrencyDollar size={20} className="text-slate-700" weight="duotone" />
+                  </div>
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Total Payouts</p>
+                <p className="text-3xl font-bold text-slate-900">${stats?.total_payouts?.toLocaleString() ?? '0'}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ========== APPLICATIONS SECTION ========== */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Key size={20} className="text-slate-400" weight="duotone" />
+            <h2 className="text-lg font-semibold text-slate-700">Your Applications (API Keys)</h2>
+            <Badge variant="outline" className="ml-2 text-xs">{apps.length} apps</Badge>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <CircleNotch size={32} className="text-primary animate-spin" />
+          </div>
+        ) : (
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {apps.map((app, index) => (
+              <motion.div 
+                key={app.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.08 }}
+              >
+                <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all h-full group">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-900/20">
+                        <Code size={22} weight="duotone" />
                       </div>
-                    ) : (
+                      <Badge className={
+                        app.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                        'bg-slate-50 text-slate-600 border-slate-200'
+                      }>
+                        {app.is_active && <Activity size={10} className="mr-1" weight="fill" />}
+                        {app.is_active ? 'active' : 'inactive'}
+                      </Badge>
+                    </div>
+
+                    <h3 className="font-bold text-lg text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">{app.name}</h3>
+                    <p className="text-sm text-slate-500 mb-4">API Key for SDK integration</p>
+                    
+                    {/* API Key Preview */}
+                    <div className="p-3 bg-slate-100 rounded-lg mb-4">
+                      <div className="flex items-center justify-between">
+                        <code className="text-xs text-slate-600 font-mono">{app.key_prefix}••••••••</code>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => copyApiKey(app.key_prefix)}
+                          className="h-7 w-7 p-0"
+                        >
+                          <Copy size={14} />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-slate-100">
                       <div>
-                        <Badge variant="default" className="bg-green-600">
-                          {app.userSharePercent}%
-                        </Badge>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          You:{' '}
-                          {100 -
-                            REVENUE_SHARES.PLATFORM_FEE_PERCENT -
-                            app.userSharePercent}
-                          %
+                        <p className="text-xs text-slate-400 uppercase font-medium mb-1">Created</p>
+                        <p className="text-sm font-medium text-slate-900">
+                          {new Date(app.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                    )}
-                  </TableCell>
-                  <TableCell>{app.users.toLocaleString()}</TableCell>
-                  <TableCell>${app.revenue.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        app.status === 'active'
-                          ? 'success'
-                          : app.status === 'pending'
-                          ? 'secondary'
-                          : 'outline'
-                      }
+                      <div>
+                        <p className="text-xs text-slate-400 uppercase font-medium mb-1">Last Used</p>
+                        <p className="text-sm font-medium text-slate-900">
+                          {app.last_used_at ? new Date(app.last_used_at).toLocaleDateString() : 'Never'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Link href={`/dashboard/my-apps/${app.id}`} className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full hover:bg-slate-50">
+                          View Details
+                          <ArrowRight size={14} className="ml-2" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+
+            {/* Empty State / Create New Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: apps.length * 0.08 }}
+            >
+              <Card 
+                className="border-2 border-dashed border-slate-200 hover:border-blue-300 bg-slate-50/50 hover:bg-blue-50/30 transition-all h-full cursor-pointer group"
+                onClick={() => setShowModal(true)}
+              >
+                <CardContent className="p-6 flex flex-col items-center justify-center h-full min-h-[280px]">
+                  <div className="h-14 w-14 rounded-2xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center mb-4 transition-colors">
+                    <Plus size={28} className="text-slate-400 group-hover:text-blue-600 transition-colors" weight="bold" />
+                  </div>
+                  <h3 className="font-semibold text-slate-600 group-hover:text-blue-700 transition-colors mb-1">Create New App</h3>
+                  <p className="text-sm text-slate-400 text-center">Register a new application to get an API key</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        )}
+      </section>
+
+      {/* Create App Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <>
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+              style={{ zIndex: 99999 }}
+              onClick={() => setShowModal(false)}
+            />
+            
+            {/* Modal Container */}
+            <div 
+              className="fixed inset-0 flex items-center justify-center p-4"
+              style={{ zIndex: 100000 }}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="w-full max-w-xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+                  {/* Header */}
+                  <div className="relative h-24 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 flex items-center px-8">
+                    <div className="absolute inset-0 overflow-hidden">
+                      <div className="absolute top-[-50%] right-[-20%] w-[60%] h-[200%] bg-blue-500/10 rotate-12"></div>
+                    </div>
+                    <div className="relative flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                        <Plus size={24} className="text-white" weight="bold" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold text-white">Create New Application</h2>
+                        <p className="text-slate-300 text-sm">Generate a new API key for your app</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setShowModal(false)}
+                      className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition-colors"
                     >
-                      {app.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() =>
-                          setEditingApp(editingApp === app.id ? null : app.id)
-                        }
+                      <X size={16} weight="bold" />
+                    </button>
+                  </div>
+
+                  {/* Form */}
+                  <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                    {/* App Name */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-slate-700">Application Name *</Label>
+                      <Input 
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        placeholder="My Awesome App"
+                        className="h-11"
+                        required
+                      />
+                      <p className="text-xs text-slate-500">This will be the name of your API key</p>
+                    </div>
+
+                    {/* Category (optional) */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-slate-700">Category (optional)</Label>
+                      <div className="relative">
+                        <MagnifyingGlass className="absolute left-3 top-3 text-slate-400" size={18} />
+                        <Input 
+                          value={categorySearch}
+                          onChange={(e) => setCategorySearch(e.target.value)}
+                          placeholder="Search categories..."
+                          className="h-11 pl-10 mb-3"
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 max-h-[140px] overflow-y-auto p-1">
+                        {filteredCategories.slice(0, 9).map((cat) => {
+                          const Icon = cat.icon;
+                          const isSelected = form.category === cat.name;
+                          return (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => setForm({ ...form, category: cat.name })}
+                              className={`p-2 rounded-xl border transition-all flex flex-col items-center text-center gap-1 ${
+                                isSelected 
+                                  ? 'border-blue-500 bg-blue-50' 
+                                  : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                              }`}
+                            >
+                              <div className={`h-7 w-7 rounded-lg flex items-center justify-center ${
+                                isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'
+                              }`}>
+                                <Icon size={14} weight={isSelected ? 'fill' : 'duotone'} />
+                              </div>
+                              <span className={`text-[10px] font-medium ${isSelected ? 'text-blue-700' : 'text-slate-600'}`}>
+                                {cat.name}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Info Box */}
+                    <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                      <p className="text-sm text-blue-800">
+                        <strong>Important:</strong> After creation, you'll receive an API key. 
+                        Copy it immediately - you won't be able to see it again!
+                      </p>
+                    </div>
+
+                    {/* Submit */}
+                    <div className="flex gap-3 pt-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setShowModal(false)}
+                        className="flex-1"
+                        disabled={creating}
                       >
-                        {editingApp === app.id ? 'Done' : 'Edit Share'}
+                        Cancel
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => toggleStatus(app.id)}
+                      <Button 
+                        type="submit" 
+                        className="flex-1 bg-slate-900 hover:bg-slate-800 text-white"
+                        disabled={creating}
                       >
-                        {app.status === 'active' ? 'Pause' : 'Activate'}
+                        {creating ? (
+                          <>
+                            <CircleNotch size={16} className="mr-2 animate-spin" />
+                            Creating...
+                          </>
+                        ) : (
+                          'Create Application'
+                        )}
                       </Button>
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </form>
+                </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

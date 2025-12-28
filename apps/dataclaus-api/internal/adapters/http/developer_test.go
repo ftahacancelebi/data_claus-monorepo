@@ -52,6 +52,14 @@ func (m *MockDeveloperService) UpdateUserShare(ctx context.Context, developerID 
 	return args.Get(0).(*domain.Developer), args.Error(1)
 }
 
+func (m *MockDeveloperService) Authenticate(ctx context.Context, email, password string) (*domain.Developer, error) {
+	args := m.Called(ctx, email, password)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.Developer), args.Error(1)
+}
+
 func TestDeveloperHandler_Register(t *testing.T) {
 	mockDevService := new(MockDeveloperService)
 	mockKeyService := new(MockAPIKeyService)

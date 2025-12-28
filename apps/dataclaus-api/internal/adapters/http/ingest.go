@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"apps/dataclaus-api/internal/adapters/http/validation"
@@ -20,16 +21,33 @@ func NewIngestHandler(producer ports.EventProducer) *IngestHandler {
 	return &IngestHandler{producer: producer}
 }
 
-// IngestRequest represents the payload for data ingestion.
-// It's a generic map for now, as we accept raw JSON.
+// IngestRequest represents the payload for single data ingestion.
 type IngestRequest struct {
-	EventID   string                 `json:"event_id" validate:"required,uuid"`
-	Timestamp int64                  `json:"timestamp" validate:"required,gt=0"`
-	Type      string                 `json:"type" validate:"required"`
-	Data      map[string]interface{} `json:"data" validate:"required"`
+	EventID     string                 `json:"event_id" validate:"required"`
+	DeveloperID string                 `json:"developer_id" validate:"required"`
+	UserID      string                 `json:"user_id" validate:"required"`
+	EventType   string                 `json:"event_type" validate:"required"`
+	Timestamp   string                 `json:"timestamp" validate:"required"`
+	Payload     map[string]interface{} `json:"payload" validate:"required"`
+	SessionID   string                 `json:"session_id,omitempty"`
+	CampaignID  string                 `json:"campaign_id,omitempty"`
+	Device      map[string]interface{} `json:"device,omitempty"`
 }
 
-// Ingest handles the ingestion of raw data events.
+// BatchIngestRequest represents the payload for batch data ingestion.
+type BatchIngestRequest struct {
+	Events  []IngestRequest `json:"events" validate:"required,min=1,dive"`
+	Session *SessionInfo    `json:"session,omitempty"`
+}
+
+// SessionInfo represents session metadata.
+type SessionInfo struct {
+	SessionID     string `json:"session_id"`
+	StartTime     string `json:"start_time"`
+	ActiveSeconds int    `json:"active_seconds"`
+}
+
+// Ingest handles the ingestion of a single raw data event.
 func (h *IngestHandler) Ingest(c echo.Context) error {
 	var req IngestRequest
 
@@ -38,6 +56,10 @@ func (h *IngestHandler) Ingest(c echo.Context) error {
 		return err
 	}
 
+	// Just for demo purposes: Log the incoming request
+	fmt.Printf("[Ingest] Event: %s, User: %s, Type: %s, Payload: %+v\n", 
+		req.EventID, req.UserID, req.EventType, req.Payload)
+
 	// Serialize to JSON for Kafka
 	payload, err := json.Marshal(req)
 	if err != nil {
@@ -45,12 +67,64 @@ func (h *IngestHandler) Ingest(c echo.Context) error {
 	}
 
 	// Publish to Kafka
-	// We use the EventID as the key to ensure ordering for the same event if needed (though unlikely for unique IDs)
-	// Or we could use a UserID/DeviceID if it were in the top level for partitioning.
-	// For now, let's use EventID.
 	if err := h.producer.Publish(c.Request().Context(), "ingest.raw_data", []byte(req.EventID), payload); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to publish event"})
 	}
 
-	return c.JSON(http.StatusAccepted, map[string]string{"status": "accepted", "event_id": req.EventID})
+	return c.JSON(http.StatusAccepted, map[string]string{
+		"status":   "accepted",
+		"event_id": req.EventID,
+	})
 }
+
+// IngestBatch handles the ingestion of multiple data events in a single request.
+func (h *IngestHandler) IngestBatch(c echo.Context) error {
+	var req BatchIngestRequest
+
+	// Bind and validate
+	if err := validation.ValidateDTO(c, &req); err != nil {
+		return err
+	}
+
+	fmt.Printf("[IngestBatch] Received %d events. First event: %+v\n", len(req.Events), req.Events[0])
+
+	successCount := 0
+	errors := make([]map[string]string, 0)
+
+	for _, event := range req.Events {
+		// Serialize to JSON for Kafka
+		payload, err := json.Marshal(event)
+		if err != nil {
+			errors = append(errors, map[string]string{
+				"event_id": event.EventID,
+				"error":    "failed to serialize event",
+			})
+			continue
+		}
+
+		// Publish to Kafka
+		if err := h.producer.Publish(c.Request().Context(), "ingest.raw_data", []byte(event.EventID), payload); err != nil {
+			errors = append(errors, map[string]string{
+				"event_id": event.EventID,
+				"error":    "failed to publish event",
+			})
+			continue
+		}
+
+		successCount++
+	}
+
+	response := map[string]interface{}{
+		"status":          "accepted",
+		"total_events":    len(req.Events),
+		"success_count":   successCount,
+		"failed_count":    len(errors),
+	}
+
+	if len(errors) > 0 {
+		response["errors"] = errors
+	}
+
+	return c.JSON(http.StatusAccepted, response)
+}
+

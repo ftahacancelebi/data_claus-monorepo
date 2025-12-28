@@ -1,0 +1,18 @@
+# Ignore everything by default
+*
+
+# Include the demo-mobile app
+!apps/demo-mobile/**
+
+# Include the package.json and npm files at root if needed
+!package.json
+!package-lock.json
+
+# Exclude items we don't want
+**/node_modules
+**/.git
+**/android
+**/ios
+**/.expo
+**/dist
+**/*.log

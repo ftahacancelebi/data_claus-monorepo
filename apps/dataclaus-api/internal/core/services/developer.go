@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 
+	"apps/dataclaus-api/internal/core/auth"
 	"apps/dataclaus-api/internal/core/domain"
 	"apps/dataclaus-api/internal/core/ports"
 
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type DeveloperService struct {
@@ -25,12 +25,12 @@ func (s *DeveloperService) Register(ctx context.Context, name, email, password s
 		return nil, errors.New("developer with this email already exists")
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedPassword, err := auth.HashPassword(password)
 	if err != nil {
 		return nil, errors.New("failed to hash password")
 	}
 
-	developer := domain.NewDeveloper(name, email, string(hashedPassword))
+	developer := domain.NewDeveloper(name, email, hashedPassword)
 
 	if err := s.repo.Save(ctx, developer); err != nil {
 		return nil, err
@@ -45,6 +45,20 @@ func (s *DeveloperService) Get(ctx context.Context, id uuid.UUID) (*domain.Devel
 
 func (s *DeveloperService) GetByEmail(ctx context.Context, email string) (*domain.Developer, error) {
 	return s.repo.GetByEmail(ctx, email)
+}
+
+// Authenticate verifies developer credentials and returns the developer if valid.
+func (s *DeveloperService) Authenticate(ctx context.Context, email, password string) (*domain.Developer, error) {
+	developer, err := s.repo.GetByEmail(ctx, email)
+	if err != nil || developer == nil {
+		return nil, errors.New("invalid credentials")
+	}
+
+	if err := auth.VerifyPassword(developer.Password, password); err != nil {
+		return nil, errors.New("invalid credentials")
+	}
+
+	return developer, nil
 }
 
 func (s *DeveloperService) UpdateUserShare(ctx context.Context, developerID uuid.UUID, userSharePercent int) (*domain.Developer, error) {

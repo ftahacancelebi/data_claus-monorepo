@@ -1,219 +1,222 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import type { AuthUser, Wallet, Transaction } from '@/lib/types';
-import { formatMoney, REVENUE_SHARES } from '@/lib/types';
-import {
-  getWalletsByOwner,
-  getWalletTransactions,
-  getUserQualityScore,
-} from '@/lib/api';
-import { Wallet as WalletIcon, TrendingUp, Star, Clock } from 'lucide-react';
+import type { AuthUser } from '@/lib/types';
+import { 
+    Wallet,
+    TrendUp,
+    ShieldCheck,
+    Clock,
+    CheckCircle,
+    Star,
+    ArrowRight,
+    Gift
+} from 'phosphor-react';
 
-interface Props {
+// Mock Data
+const earningsData = [
+  { name: 'Week 1', value: 2.50 },
+  { name: 'Week 2', value: 4.20 },
+  { name: 'Week 3', value: 3.80 },
+  { name: 'Week 4', value: 6.50 },
+];
+
+const recentActivity = [
+  { id: '1', app: 'FitTracker', action: 'Data Share', earned: 0.12, time: '2 min ago' },
+  { id: '2', app: 'Survey Widget', action: 'Survey Complete', earned: 0.25, time: '15 min ago' },
+  { id: '3', app: 'LocationAPI', action: 'Data Stream', earned: 0.08, time: '1 hour ago' },
+  { id: '4', app: 'FitTracker', action: 'Data Share', earned: 0.10, time: '3 hours ago' },
+];
+
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0 }
+};
+
+interface DashboardProps {
   user: AuthUser;
 }
 
-export function UserDashboard({ user }: Props) {
-  const [wallets, setWallets] = useState<Wallet[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [qualityScore, setQualityScore] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const walletsData = await getWalletsByOwner(user.id).catch(() => []);
-        setWallets(walletsData);
-
-        // Fetch transactions for first wallet
-        if (walletsData.length > 0) {
-          const txData = await getWalletTransactions(
-            walletsData[0].id,
-            5
-          ).catch(() => []);
-          setTransactions(txData);
-        }
-
-        // Fetch quality score
-        const scoreData = await getUserQualityScore(user.id).catch(() => ({
-          quality_score: 0,
-        }));
-        setQualityScore(scoreData.quality_score);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [user.id]);
-
-  const totalBalance = wallets.reduce((sum, w) => sum + w.balance, 0);
-  const pendingBalance = wallets.reduce(
-    (sum, w) => sum + (w.pending_balance || 0),
-    0
-  );
-
-  // Calculate estimated earnings based on quality score
-  // Formula: quality_score * active_time_hours * base_rate
-  const estimatedHourlyRate = qualityScore * 0.1; // $0.10 per hour at 100% quality
-
+export function UserDashboard({ user }: DashboardProps) {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Welcome back, {user.name}!</h1>
-        <p className="text-muted-foreground">Your personal dashboard</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Welcome back, {user.name}</h2>
+          <p className="text-slate-500 mt-1">
+             Your data is working for you. Here's what you've earned.
+          </p>
+        </div>
+        <Button className="bg-primary hover:bg-blue-800 text-white shadow-md">
+          <Gift weight="duotone" className="mr-2" size={18} />
+          Explore Apps
+        </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Available Balance
-            </CardTitle>
-            <WalletIcon className="h-4 w-4 text-muted-foreground" />
+      {/* Stats Grid */}
+      <motion.div 
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+      >
+        <motion.div variants={item}>
+          <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Total Earnings
+              </CardTitle>
+              <Wallet size={20} className="text-emerald-500" weight="duotone" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-slate-900">$17.00</div>
+              <div className="flex items-center text-xs mt-1 text-emerald-600 font-medium">
+                <TrendUp className="mr-1" weight="bold" size={14} />
+                +$6.50 this week
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={item}>
+          <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Quality Score
+              </CardTitle>
+              <Star size={20} className="text-amber-500" weight="duotone" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-slate-900">98.5%</div>
+              <p className="text-xs text-slate-500 mt-1">Excellent data quality</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={item}>
+          <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Active Apps
+              </CardTitle>
+              <ShieldCheck size={20} className="text-blue-500" weight="duotone" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-slate-900">3</div>
+              <p className="text-xs text-slate-500 mt-1">Sharing your data</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={item}>
+          <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Data Events
+              </CardTitle>
+              <Clock size={20} className="text-purple-500" weight="duotone" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-slate-900">1,247</div>
+              <p className="text-xs text-slate-500 mt-1">Total contributions</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
+
+      {/* Main Content */}
+      <div className="grid gap-6 md:grid-cols-7">
+        {/* Earnings Chart */}
+        <Card className="col-span-4 glass-panel border-0 shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-lg font-bold text-slate-900">Earnings Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {loading ? '...' : formatMoney(totalBalance, 2)}
+            <div className="h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={earningsData}>
+                  <defs>
+                    <linearGradient id="userEarningGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                  <XAxis dataKey="name" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'white', 
+                      borderRadius: '12px', 
+                      border: 'none', 
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)' 
+                    }}
+                  />
+                  <Area type="monotone" dataKey="value" stroke="#10B981" strokeWidth={3} fill="url(#userEarningGradient)" />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
-            {pendingBalance > 0 && (
-              <p className="text-xs text-muted-foreground">
-                +{formatMoney(pendingBalance, 6)} pending
-              </p>
-            )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Quality Score</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
+        {/* Recent Activity */}
+        <Card className="col-span-3 glass-panel border-0 shadow-xl">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg font-bold text-slate-900">Recent Activity</CardTitle>
+            <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50">
+              Live
+            </Badge>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {loading ? '...' : `${(qualityScore * 100).toFixed(1)}%`}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Your data quality rating
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Est. Hourly Rate
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatMoney(estimatedHourlyRate, 4)}/hr
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Based on quality score
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Your Share</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {REVENUE_SHARES.MIN_USER_SHARE_PERCENT}-
-              {REVENUE_SHARES.MAX_USER_SHARE_PERCENT}%
-            </div>
-            <p className="text-xs text-muted-foreground">Varies by app</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>How Earnings Work</CardTitle>
-          <CardDescription>
-            Revenue sharing breakdown (varies by app developer)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-              <span>You (User)</span>
-              <Badge variant="default" className="bg-green-600">
-                {REVENUE_SHARES.MIN_USER_SHARE_PERCENT}-
-                {REVENUE_SHARES.MAX_USER_SHARE_PERCENT}%
-              </Badge>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-              <span>App Developer</span>
-              <Badge variant="secondary">5-45%</Badge>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <span>Platform Fee (fixed)</span>
-              <Badge variant="outline">
-                {REVENUE_SHARES.PLATFORM_FEE_PERCENT}%
-              </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground mt-4">
-              Your earnings = Quality Score × Active Usage Time × Ad Revenue ×
-              User Share %
-              <br />
-              <span className="text-xs">
-                💡 Choose apps with higher user share to maximize earnings!
-                Amounts below ${REVENUE_SHARES.MIN_PAYOUT_THRESHOLD} are held as
-                pending.
-              </span>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Earnings</CardTitle>
-          <CardDescription>Your latest transactions</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {transactions.length === 0 ? (
-            <p className="text-center text-muted-foreground py-4">
-              No transactions yet
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {transactions.map((tx) => (
-                <div
-                  key={tx.id}
-                  className="flex items-center justify-between py-2 border-b last:border-0"
-                >
-                  <div>
-                    <p className="text-sm font-medium">{tx.type}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(tx.created_at).toLocaleString()}
-                    </p>
+            <div className="space-y-4">
+              {recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle size={18} className="text-emerald-500" weight="fill" />
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">{activity.action}</p>
+                      <p className="text-xs text-slate-500">{activity.app} • {activity.time}</p>
+                    </div>
                   </div>
-                  <span
-                    className={`text-sm font-medium ${
-                      tx.type === 'payout' ? 'text-green-600' : ''
-                    }`}
-                  >
-                    {tx.type === 'payout' ? '+' : ''}
-                    {formatMoney(tx.amount, 6)}
-                  </span>
+                  <span className="text-sm font-bold text-emerald-600">+${activity.earned.toFixed(2)}</span>
                 </div>
               ))}
             </div>
-          )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* CTA Section */}
+      <Card className="bg-gradient-to-r from-primary to-blue-700 text-white border-0">
+        <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <h3 className="text-2xl font-bold mb-2">Earn more with quality data</h3>
+            <p className="text-blue-100 max-w-md">
+              The higher your data quality score, the more you earn. Keep using trusted apps to boost your earnings.
+            </p>
+          </div>
+          <Button className="bg-white text-primary hover:bg-blue-50 font-semibold">
+            Learn More
+            <ArrowRight className="ml-2" size={18} />
+          </Button>
         </CardContent>
       </Card>
     </div>

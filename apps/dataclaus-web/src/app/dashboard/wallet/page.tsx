@@ -1,294 +1,422 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast';
+import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/lib/auth-context';
-import {
-  getWalletsByOwner,
-  getWalletTransactions,
-  creditWallet,
+import { 
+  Wallet as WalletIcon, 
+  ArrowUp, 
+  ArrowDown, 
+  Clock, 
+  TrendUp,
+  CircleNotch,
+  Warning,
+  CurrencyDollar,
+  CaretRight,
+  Receipt
+} from 'phosphor-react';
+import { 
+  getWalletsByOwner, 
+  getWalletTransactions, 
+  releasePendingBalance,
+  getRevenueShares,
+  RevenueShareConfig
 } from '@/lib/api';
-import type { Wallet, Transaction } from '@/lib/types';
-import { formatMoney, REVENUE_SHARES } from '@/lib/types';
-import {
-  Wallet as WalletIcon,
-  Plus,
-  ArrowUpRight,
-  ArrowDownLeft,
-  Clock,
-} from 'lucide-react';
+import { Wallet, Transaction, formatMoney } from '@/lib/types';
+
+// Animation variants
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08 } }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0 }
+};
+
+// Fallback chart data
+const fallbackEarningsData = [
+  { name: 'Mon', amount: 0 },
+  { name: 'Tue', amount: 0 },
+  { name: 'Wed', amount: 0 },
+  { name: 'Thu', amount: 0 },
+  { name: 'Fri', amount: 0 },
+  { name: 'Sat', amount: 0 },
+  { name: 'Sun', amount: 0 },
+];
+
+// Custom tooltip for chart
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-slate-900 text-white px-4 py-2 rounded-lg shadow-lg">
+        <p className="text-xs text-slate-400">{label}</p>
+        <p className="text-lg font-bold">${payload[0].value.toFixed(2)}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function WalletPage() {
   const { user } = useAuth();
-  const { toast } = useToast();
+  
+  // Real API state
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
-  const [depositAmount, setDepositAmount] = useState('');
+  const [revenueConfig, setRevenueConfig] = useState<RevenueShareConfig | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const fetchWallets = async () => {
-    if (!user) return;
-    try {
-      const data = await getWalletsByOwner(user.id);
-      setWallets(data);
-      if (data.length > 0 && !selectedWallet) {
-        setSelectedWallet(data[0].id);
+  const [error, setError] = useState<string | null>(null);
+  const [releasing, setReleasing] = useState(false);
+  
+  // Fetch wallet data from backend
+  useEffect(() => {
+    async function fetchData() {
+      if (!user?.id) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch wallets for this user
+        const userWallets = await getWalletsByOwner(user.id);
+        setWallets(userWallets || []);
+        
+        // Fetch transactions for the primary wallet
+        if (userWallets && userWallets.length > 0) {
+          const txns = await getWalletTransactions(userWallets[0].id, 10, 0);
+          setTransactions(txns || []);
+        }
+        
+        // Fetch revenue share configuration
+        const config = await getRevenueShares();
+        setRevenueConfig(config);
+      } catch (err) {
+        console.error('Failed to fetch wallet data:', err);
+        setError('Backend not connected. Start the Go API to see real data.');
+        setWallets([]);
+        setTransactions([]);
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      // No wallets
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const fetchTransactions = async () => {
-    if (!selectedWallet) return;
-    try {
-      const data = await getWalletTransactions(selectedWallet, 20);
-      setTransactions(data);
-    } catch {
-      setTransactions([]);
-    }
-  };
-
-  useEffect(() => {
-    fetchWallets();
-  }, [user]);
-
-  useEffect(() => {
-    if (selectedWallet) {
-      fetchTransactions();
-    }
-  }, [selectedWallet]);
-
-  const handleDeposit = async () => {
-    if (!selectedWallet || !depositAmount) return;
-    const amount = parseFloat(depositAmount);
-    if (amount <= 0) {
-      toast({
-        title: 'Error',
-        description: 'Amount must be positive',
-        variant: 'destructive',
-      });
-      return;
-    }
-    try {
-      await creditWallet(selectedWallet, amount);
-      toast({ title: 'Deposit successful' });
-      setDepositAmount('');
-      fetchWallets();
-      fetchTransactions();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Deposit failed';
-      toast({ title: 'Error', description: message, variant: 'destructive' });
-    }
-  };
-
-  const totalBalance = wallets.reduce((sum, w) => sum + w.balance, 0);
-  const totalPending = wallets.reduce(
-    (sum, w) => sum + (w.pending_balance || 0),
-    0
-  );
-  const currentWallet = wallets.find((w) => w.id === selectedWallet);
+    
+    fetchData();
+  }, [user?.id]);
 
   if (!user) return null;
 
+  // Calculate totals from wallets
+  const primaryWallet = wallets.find(w => w.type === 'developer') || wallets[0];
+  const totalBalance = wallets.reduce((sum, w) => sum + w.balance, 0);
+  const totalPending = wallets.reduce((sum, w) => sum + w.pending_balance, 0);
+
+  const handleReleasePending = async () => {
+    if (!primaryWallet) return;
+    
+    setReleasing(true);
+    try {
+      await releasePendingBalance(primaryWallet.id);
+      // Refresh wallet data
+      const userWallets = await getWalletsByOwner(user.id);
+      setWallets(userWallets || []);
+    } catch (err) {
+      console.error('Failed to release pending balance:', err);
+    } finally {
+      setReleasing(false);
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-6xl mx-auto">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">My Wallet</h1>
-        <p className="text-muted-foreground">
-          Manage your funds and view transactions
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Finances</h1>
+        <p className="text-slate-500 mt-1">
+          Track your earnings and manage your wallet.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Available Balance
-            </CardTitle>
-            <WalletIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatMoney(totalBalance, 2)}
-            </div>
-            <p className="text-xs text-muted-foreground">Ready to withdraw</p>
-          </CardContent>
-        </Card>
+      {/* Error Banner */}
+      {error && (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+          <Warning size={20} className="text-amber-600 mt-0.5" />
+          <div>
+            <p className="font-medium text-amber-800">{error}</p>
+            <p className="text-sm text-amber-600 mt-1">
+              Run the backend to see your real wallet balance and transactions.
+            </p>
+          </div>
+        </div>
+      )}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Balance
-            </CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+      {/* Balance Cards */}
+      <motion.div 
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+      >
+        {/* Available Balance - Primary Card */}
+        <motion.div variants={item} className="lg:col-span-2">
+          <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-0 shadow-2xl shadow-slate-900/30 overflow-hidden relative">
+            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+            <CardContent className="p-6 relative">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center">
+                  <WalletIcon size={24} className="text-white" weight="duotone" />
+                </div>
+                <div>
+                  <p className="text-slate-400 text-sm font-medium">Available Balance</p>
+                  <p className="text-3xl font-bold text-white">
+                    {loading ? '-' : formatMoney(totalBalance)}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 mt-4 pt-4 border-t border-white/10">
+                <div>
+                  <p className="text-slate-500 text-xs">Currency</p>
+                  <p className="text-white font-semibold">{primaryWallet?.currency || 'USD'}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500 text-xs">Wallet Type</p>
+                  <p className="text-white font-semibold capitalize">{primaryWallet?.type || 'Developer'}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Pending Balance */}
+        <motion.div variants={item}>
+          <Card className="glass-panel border-0 shadow-lg h-full">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                  <Clock size={20} className="text-amber-600" weight="duotone" />
+                </div>
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Pending</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {loading ? '-' : formatMoney(totalPending)}
+              </p>
+              <p className="text-xs text-slate-500 mt-2">
+                Micro-payments below $0.01
+              </p>
+              {totalPending >= 0.01 && (
+                <Button 
+                  size="sm" 
+                  className="mt-3 w-full"
+                  onClick={handleReleasePending}
+                  disabled={releasing}
+                >
+                  {releasing ? (
+                    <CircleNotch size={14} className="animate-spin mr-2" />
+                  ) : null}
+                  Release to Balance
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Revenue Share Info */}
+        <motion.div variants={item}>
+          <Card className="glass-panel border-0 shadow-lg h-full">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <TrendUp size={20} className="text-blue-600" weight="duotone" />
+                </div>
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Your Share</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {revenueConfig ? `${revenueConfig.developer_share_percent}%` : '-'}
+              </p>
+              <p className="text-xs text-slate-500 mt-2">
+                Platform fee: {revenueConfig?.platform_fee_percent ?? 5}%
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
+
+      {/* Charts and Transactions */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Earnings Chart */}
+        <Card className="lg:col-span-2 glass-panel border-0 shadow-xl">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold text-slate-800">Earnings Overview</CardTitle>
+            <p className="text-sm text-slate-500">Your earnings trend over time</p>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {formatMoney(totalPending, 6)}
+            <div className="h-[280px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={fallbackEarningsData}>
+                  <defs>
+                    <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="#94a3b8" 
+                    fontSize={12} 
+                    tickLine={false} 
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    stroke="#94a3b8" 
+                    fontSize={12} 
+                    tickLine={false} 
+                    axisLine={false}
+                    tickFormatter={(value) => `$${value}`}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area 
+                    type="monotone" 
+                    dataKey="amount" 
+                    stroke="#3B82F6" 
+                    strokeWidth={2}
+                    fill="url(#colorAmount)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Released when ≥{' '}
-              {formatMoney(REVENUE_SHARES.MIN_PAYOUT_THRESHOLD, 2)}
+            <p className="text-xs text-slate-400 text-center mt-4">
+              Real earnings data will appear after processing events
             </p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Add Funds</CardTitle>
+        
+        {/* Revenue Split Info */}
+        <Card className="glass-panel border-0 shadow-xl">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold text-slate-800">Revenue Split</CardTitle>
+            <p className="text-sm text-slate-500">How earnings are distributed</p>
           </CardHeader>
-          <CardContent className="flex gap-2">
-            <Input
-              type="number"
-              step="0.01"
-              min="0.01"
-              placeholder="Amount"
-              value={depositAmount}
-              onChange={(e) => setDepositAmount(e.target.value)}
-            />
-            <Button onClick={handleDeposit} disabled={!selectedWallet}>
-              <Plus className="h-4 w-4" />
-            </Button>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-600">Users</span>
+                <span className="text-sm font-bold text-slate-900">{revenueConfig?.user_share_percent ?? 70}%</span>
+              </div>
+              <Progress value={revenueConfig?.user_share_percent ?? 70} className="h-2" />
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-600">Developer (You)</span>
+                <span className="text-sm font-bold text-slate-900">{revenueConfig?.developer_share_percent ?? 25}%</span>
+              </div>
+              <Progress value={revenueConfig?.developer_share_percent ?? 25} className="h-2 [&>div]:bg-blue-500" />
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-600">Platform Fee</span>
+                <span className="text-sm font-bold text-slate-900">{revenueConfig?.platform_fee_percent ?? 5}%</span>
+              </div>
+              <Progress value={revenueConfig?.platform_fee_percent ?? 5} className="h-2 [&>div]:bg-slate-400" />
+            </div>
+
+            <div className="pt-4 border-t border-slate-100">
+              <p className="text-xs text-slate-500">
+                <strong>Min Payout:</strong> ${revenueConfig?.min_payout_threshold ?? 0.01}
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                Earnings below this threshold are held in pending balance.
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {wallets.length > 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Wallets</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2 flex-wrap">
-              {wallets.map((wallet) => (
-                <Button
-                  key={wallet.id}
-                  variant={selectedWallet === wallet.id ? 'default' : 'outline'}
-                  onClick={() => setSelectedWallet(wallet.id)}
-                >
-                  {wallet.type} - {formatMoney(wallet.balance, 2)}
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>How Earnings Work</CardTitle>
-          <CardDescription>Understanding micro-payments</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3 text-sm">
-            <p>
-              Your earnings are calculated as:{' '}
-              <strong>Quality Score × Active Usage Time × Revenue Share</strong>
-            </p>
-            <div className="p-3 bg-muted rounded-lg">
-              <p className="font-medium">Micro-payment Handling:</p>
-              <ul className="mt-2 space-y-1 text-muted-foreground">
-                <li>
-                  • Amounts below{' '}
-                  {formatMoney(REVENUE_SHARES.MIN_PAYOUT_THRESHOLD, 2)} are held
-                  as &quot;pending&quot;
-                </li>
-                <li>
-                  • Once pending reaches{' '}
-                  {formatMoney(REVENUE_SHARES.MIN_PAYOUT_THRESHOLD, 2)},
-                  it&apos;s released to your balance
-                </li>
-                <li>• This ensures fair distribution even with many users</li>
-              </ul>
-            </div>
+      {/* Recent Transactions */}
+      <Card className="glass-panel border-0 shadow-xl">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-semibold text-slate-800">Recent Transactions</CardTitle>
+            <p className="text-sm text-slate-500">Your latest financial activity</p>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
-          <CardDescription>
-            Recent transactions for selected wallet
-          </CardDescription>
+          <Button variant="ghost" size="sm" className="text-primary">
+            View All <CaretRight size={14} className="ml-1" />
+          </Button>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-center text-muted-foreground py-4">Loading...</p>
-          ) : transactions.length === 0 ? (
-            <p className="text-center text-muted-foreground py-4">
-              No transactions yet
-            </p>
+            <div className="flex items-center justify-center py-12">
+              <CircleNotch size={32} className="animate-spin text-slate-400" />
+            </div>
+          ) : transactions.length > 0 ? (
+            <div className="space-y-3">
+              {transactions.map((tx, i) => (
+                <motion.div 
+                  key={tx.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors"
+                >
+                  <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                    tx.type === 'payout' ? 'bg-emerald-50 text-emerald-600' : 
+                    tx.type === 'fee' ? 'bg-red-50 text-red-600' :
+                    'bg-blue-50 text-blue-600'
+                  }`}>
+                    {tx.type === 'payout' ? <ArrowDown size={18} /> : 
+                     tx.type === 'fee' ? <ArrowUp size={18} /> : 
+                     <Receipt size={18} />}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900 capitalize">{tx.type}</p>
+                    <p className="text-xs text-slate-500">
+                      {new Date(tx.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-bold ${
+                      tx.type === 'payout' ? 'text-emerald-600' : 'text-slate-900'
+                    }`}>
+                      {tx.type === 'payout' ? '+' : ''}{formatMoney(tx.amount)}
+                    </p>
+                    <Badge variant="outline" className="text-[10px]">
+                      {tx.status}
+                    </Badge>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.map((tx) => {
-                  const isIncoming = tx.dest_wallet_id === selectedWallet;
-                  return (
-                    <TableRow key={tx.id}>
-                      <TableCell className="flex items-center gap-2">
-                        {isIncoming ? (
-                          <ArrowDownLeft className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <ArrowUpRight className="h-4 w-4 text-red-500" />
-                        )}
-                        {tx.type}
-                      </TableCell>
-                      <TableCell
-                        className={
-                          isIncoming ? 'text-green-600' : 'text-red-600'
-                        }
-                      >
-                        {isIncoming ? '+' : '-'}
-                        {formatMoney(tx.amount, 6)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            tx.status === 'completed' ? 'success' : 'secondary'
-                          }
-                        >
-                          {tx.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {new Date(tx.created_at).toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            <div className="text-center py-12">
+              <div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                <CurrencyDollar size={28} className="text-slate-400" />
+              </div>
+              <p className="font-medium text-slate-600">No transactions yet</p>
+              <p className="text-sm text-slate-400 mt-1">
+                Transactions will appear here when data flows through the system.
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>

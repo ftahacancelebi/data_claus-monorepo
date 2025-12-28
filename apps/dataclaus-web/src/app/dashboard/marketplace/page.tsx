@@ -267,7 +267,7 @@ export default function MarketplacePage() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground mt-4 text-center">
-            💡 Look for apps with higher user share percentages to maximize your
+            Look for apps with higher user share percentages to maximize your
             earnings!
           </p>
         </CardContent>
