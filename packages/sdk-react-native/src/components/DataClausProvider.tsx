@@ -151,8 +151,8 @@ export function DataClausProvider({
   
   // Refs
   const collectorRef = useRef<DataClausCollector | null>(null);
-  const qualityIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const earningsIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const qualityIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const earningsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   
   // Initialize collector

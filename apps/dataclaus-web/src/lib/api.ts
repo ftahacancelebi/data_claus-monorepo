@@ -215,6 +215,7 @@ export interface Application {
   total_users: number;
   total_revenue: number;
   quality_score: number;
+  user_share_percent: number; // Revenue share for users (50-90%)
   api_key_prefix?: string;
   api_key?: string; // Only returned on create
   created_at: string;
@@ -239,6 +240,7 @@ export const createApplication = (
     description?: string;
     category?: string;
     website_url?: string;
+    user_share_percent?: number;
   }
 ) =>
   request<Application>(`/developers/${developerId}/applications`, {
@@ -262,6 +264,7 @@ export const updateApplication = (
     description?: string;
     category?: string;
     website_url?: string;
+    user_share_percent?: number;
   }
 ) =>
   request<Application>(`/applications/${id}`, {
@@ -279,4 +282,159 @@ export const deleteApplication = (id: string) =>
   request<{ status: string }>(`/applications/${id}`, {
     method: 'DELETE',
   });
+
+// ============================================================
+// USER IDENTITY LINKING
+// Links external user IDs from developer apps to DataClaus users
+// ============================================================
+
+export interface DataClausUser {
+  id: string;
+  email?: string;
+  phone?: string;
+  wallet_id: string;
+  quality_score: number;
+  total_earned: number;
+  created_at: string;
+}
+
+export interface UserLink {
+  id: string;
+  dataclaus_user_id: string;
+  developer_id: string;
+  application_id: string;
+  external_user_id: string;
+  device_fingerprint?: string;
+  created_at: string;
+}
+
+export interface LinkUserRequest {
+  external_user_id: string;
+  email?: string;
+  phone?: string;
+  device_fingerprint?: string;
+}
+
+export interface LinkUserResponse {
+  dataclaus_user_id: string;
+  user_token: string; // Short-lived token for subsequent API calls
+  is_new_user: boolean;
+  wallet_id: string;
+}
+
+export const linkUser = (applicationId: string, data: LinkUserRequest) =>
+  request<LinkUserResponse>(`/applications/${applicationId}/users/link`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const getUserByExternalId = (applicationId: string, externalUserId: string) =>
+  request<DataClausUser>(`/applications/${applicationId}/users/external/${externalUserId}`);
+
+export const getUserEarnings = (userId: string) =>
+  request<{
+    total_earned: number;
+    pending_balance: number;
+    available_balance: number;
+    quality_score: number;
+  }>(`/users/${userId}/earnings`);
+
+// ============================================================
+// AD REVENUE TRACKING
+// Track ad impressions and revenue through DataClaus-managed ads
+// ============================================================
+
+export type AdType = 'banner' | 'interstitial' | 'rewarded' | 'native';
+
+export interface AdImpression {
+  id: string;
+  application_id: string;
+  user_id: string;
+  ad_type: AdType;
+  ad_unit_id: string;
+  revenue: number;
+  currency: string;
+  created_at: string;
+}
+
+export interface AdConfig {
+  ad_unit_ids: {
+    banner?: string;
+    interstitial?: string;
+    rewarded?: string;
+    native?: string;
+  };
+  enabled: boolean;
+  test_mode: boolean;
+}
+
+export const getAdConfig = (applicationId: string) =>
+  request<AdConfig>(`/applications/${applicationId}/ads/config`);
+
+export const recordAdImpression = (
+  applicationId: string,
+  data: {
+    user_token: string;
+    ad_type: AdType;
+    ad_unit_id: string;
+    revenue: number;
+    currency?: string;
+  }
+) =>
+  request<{ status: string; impression_id: string }>(
+    `/applications/${applicationId}/ads/impression`,
+    {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }
+  );
+
+export const getAdRevenueSummary = (applicationId: string) =>
+  request<{
+    total_impressions: number;
+    total_revenue: number;
+    revenue_by_type: Record<AdType, number>;
+    today_revenue: number;
+  }>(`/applications/${applicationId}/ads/summary`);
+
+// ============================================================
+// WEBHOOK SECRETS
+// For secure server-to-server communication
+// ============================================================
+
+export interface WebhookSecret {
+  id: string;
+  developer_id: string;
+  secret_prefix: string; // First 8 chars for identification
+  created_at: string;
+  last_used_at?: string;
+}
+
+export const generateWebhookSecret = (developerId: string) =>
+  request<{ secret: string; id: string }>(`/developers/${developerId}/webhook-secret`, {
+    method: 'POST',
+  });
+
+export const getWebhookSecrets = (developerId: string) =>
+  request<WebhookSecret[]>(`/developers/${developerId}/webhook-secrets`);
+
+export const revokeWebhookSecret = (developerId: string, secretId: string) =>
+  request<{ status: string }>(`/developers/${developerId}/webhook-secrets/${secretId}`, {
+    method: 'DELETE',
+  });
+
+// Webhook event types that DataClaus sends to developer backends
+export type WebhookEventType =
+  | 'user.earnings.updated'
+  | 'user.quality.changed'
+  | 'payout.completed'
+  | 'ad.revenue.recorded'
+  | 'campaign.matched';
+
+export interface WebhookPayload {
+  event_type: WebhookEventType;
+  timestamp: string;
+  data: Record<string, unknown>;
+  signature: string; // HMAC-SHA256 signature using webhook secret
+}
 

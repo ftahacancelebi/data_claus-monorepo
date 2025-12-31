@@ -27,6 +27,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="earnings"
+        options={{
+          title: 'Earn',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="dollarsign.circle.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="recaptcha"
         options={{
           title: 'reCAPTCHA',

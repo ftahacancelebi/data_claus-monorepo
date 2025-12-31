@@ -11,7 +11,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@dataclaus/sdk-react-native": "^1.0.0",
+    "@dataclaus/sdk-react-native": "file:../../packages/sdk-react-native",
     "@expo/vector-icons": "^15.0.3",
     "@google-cloud/recaptcha-enterprise-react-native": "^18.8.2",
     "@react-native/virtualized-lists": "^0.83.1",

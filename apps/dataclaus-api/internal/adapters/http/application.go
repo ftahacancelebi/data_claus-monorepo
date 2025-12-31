@@ -28,29 +28,31 @@ func NewApplicationHandler(service *services.ApplicationService, apiKeySvc ports
 
 // CreateApplicationRequest is the request body for creating an application.
 type CreateApplicationRequest struct {
-	Name        string `json:"name" validate:"required"`
-	Description string `json:"description"`
-	Category    string `json:"category"`
-	WebsiteURL  string `json:"website_url"`
+	Name             string `json:"name" validate:"required"`
+	Description      string `json:"description"`
+	Category         string `json:"category"`
+	WebsiteURL       string `json:"website_url"`
+	UserSharePercent int    `json:"user_share_percent"` // 50-90%, 0 = use developer default
 }
 
 // ApplicationResponse is the response for an application.
 type ApplicationResponse struct {
-	ID           string  `json:"id"`
-	DeveloperID  string  `json:"developer_id"`
-	Name         string  `json:"name"`
-	Description  string  `json:"description"`
-	Category     string  `json:"category"`
-	WebsiteURL   string  `json:"website_url"`
-	IsActive     bool    `json:"is_active"`
-	TotalEvents  int64   `json:"total_events"`
-	TotalUsers   int64   `json:"total_users"`
-	TotalRevenue float64 `json:"total_revenue"`
-	QualityScore float64 `json:"quality_score"`
-	APIKeyPrefix string  `json:"api_key_prefix,omitempty"`
-	APIKey       string  `json:"api_key,omitempty"` // Only on create
-	CreatedAt    string  `json:"created_at"`
-	UpdatedAt    string  `json:"updated_at"`
+	ID               string  `json:"id"`
+	DeveloperID      string  `json:"developer_id"`
+	Name             string  `json:"name"`
+	Description      string  `json:"description"`
+	Category         string  `json:"category"`
+	WebsiteURL       string  `json:"website_url"`
+	IsActive         bool    `json:"is_active"`
+	TotalEvents      int64   `json:"total_events"`
+	TotalUsers       int64   `json:"total_users"`
+	TotalRevenue     float64 `json:"total_revenue"`
+	QualityScore     float64 `json:"quality_score"`
+	UserSharePercent int     `json:"user_share_percent"`
+	APIKeyPrefix     string  `json:"api_key_prefix,omitempty"`
+	APIKey           string  `json:"api_key,omitempty"` // Only on create
+	CreatedAt        string  `json:"created_at"`
+	UpdatedAt        string  `json:"updated_at"`
 }
 
 // Create creates a new application and its API key.
@@ -215,19 +217,20 @@ func (h *ApplicationHandler) Delete(c echo.Context) error {
 
 func appToResponse(app *domain.Application, keyPrefix, rawKey string) *ApplicationResponse {
 	resp := &ApplicationResponse{
-		ID:           app.ID.String(),
-		DeveloperID:  app.DeveloperID.String(),
-		Name:         app.Name,
-		Description:  app.Description,
-		Category:     app.Category,
-		WebsiteURL:   app.WebsiteURL,
-		IsActive:     app.IsActive,
-		TotalEvents:  app.TotalEvents,
-		TotalUsers:   app.TotalUsers,
-		TotalRevenue: app.TotalRevenue,
-		QualityScore: app.QualityScore,
-		CreatedAt:    app.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:    app.UpdatedAt.Format(time.RFC3339),
+		ID:               app.ID.String(),
+		DeveloperID:      app.DeveloperID.String(),
+		Name:             app.Name,
+		Description:      app.Description,
+		Category:         app.Category,
+		WebsiteURL:       app.WebsiteURL,
+		IsActive:         app.IsActive,
+		TotalEvents:      app.TotalEvents,
+		TotalUsers:       app.TotalUsers,
+		TotalRevenue:     app.TotalRevenue,
+		QualityScore:     app.QualityScore,
+		UserSharePercent: app.UserSharePercent,
+		CreatedAt:        app.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:        app.UpdatedAt.Format(time.RFC3339),
 	}
 	if keyPrefix != "" {
 		resp.APIKeyPrefix = keyPrefix

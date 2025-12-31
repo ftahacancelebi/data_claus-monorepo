@@ -8,17 +8,30 @@ import (
 )
 
 type Config struct {
-	DBHost       string
-	DBPort       string
-	DBUser       string
-	DBPassword   string
-	DBName       string
-	DBSSLMode    string
-	ServerPort   string
-	AppEnv       string
+	// Database
+	DBHost     string
+	DBPort     string
+	DBUser     string
+	DBPassword string
+	DBName     string
+	DBSSLMode  string
+
+	// Server
+	ServerPort string
+	AppEnv     string
+
+	// Kafka
 	KafkaBrokers []string
-	HMACSecret   string
-	JWTSecret    string
+
+	// Security
+	HMACSecret string
+	JWTSecret  string
+
+	// reCAPTCHA Enterprise
+	RecaptchaEnabled   bool
+	RecaptchaProjectID string
+	RecaptchaSiteKey   string
+	RecaptchaAPIKey    string
 }
 
 func LoadConfig() *Config {
@@ -29,17 +42,30 @@ func LoadConfig() *Config {
 	kafkaBrokers := strings.Split(kafkaBrokersStr, ",")
 
 	return &Config{
-		DBHost:       getEnv("POSTGRES_HOST", "localhost"),
-		DBPort:       getEnv("POSTGRES_PORT", "5432"),
-		DBUser:       getEnv("POSTGRES_USER", "postgres"),
-		DBPassword:   getEnv("POSTGRES_PASSWORD", "postgres"),
-		DBName:       getEnv("POSTGRES_DB", "dataclaus"),
-		DBSSLMode:    getEnv("POSTGRES_SSLMODE", "disable"),
-		ServerPort:   getEnv("SERVER_PORT", "3000"),
-		AppEnv:       getEnv("APP_ENV", "development"),
+		// Database
+		DBHost:     getEnv("POSTGRES_HOST", "localhost"),
+		DBPort:     getEnv("POSTGRES_PORT", "5432"),
+		DBUser:     getEnv("POSTGRES_USER", "postgres"),
+		DBPassword: getEnv("POSTGRES_PASSWORD", "postgres"),
+		DBName:     getEnv("POSTGRES_DB", "dataclaus"),
+		DBSSLMode:  getEnv("POSTGRES_SSLMODE", "disable"),
+
+		// Server
+		ServerPort: getEnv("SERVER_PORT", "3000"),
+		AppEnv:     getEnv("APP_ENV", "development"),
+
+		// Kafka
 		KafkaBrokers: kafkaBrokers,
-		HMACSecret:   getEnv("HMAC_SECRET", "default-secret-change-in-production"),
-		JWTSecret:    getEnv("JWT_SECRET", "jwt-secret-change-in-production-please"),
+
+		// Security
+		HMACSecret: getEnv("HMAC_SECRET", "default-secret-change-in-production"),
+		JWTSecret:  getEnv("JWT_SECRET", "jwt-secret-change-in-production-please"),
+
+		// reCAPTCHA Enterprise
+		RecaptchaEnabled:   getEnvBool("RECAPTCHA_ENABLED", false),
+		RecaptchaProjectID: getEnv("RECAPTCHA_PROJECT_ID", ""),
+		RecaptchaSiteKey:   getEnv("RECAPTCHA_SITE_KEY", ""),
+		RecaptchaAPIKey:    getEnv("RECAPTCHA_API_KEY", ""),
 	}
 }
 
@@ -55,6 +81,13 @@ func (c *Config) GetDSN() string {
 func getEnv(key, fallback string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value
+	}
+	return fallback
+}
+
+func getEnvBool(key string, fallback bool) bool {
+	if value, exists := os.LookupEnv(key); exists {
+		return strings.ToLower(value) == "true" || value == "1"
 	}
 	return fallback
 }

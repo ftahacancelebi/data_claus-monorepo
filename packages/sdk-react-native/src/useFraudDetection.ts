@@ -100,9 +100,9 @@ export function useFraudDetection(
   // Refs
   const collectorRef = useRef<FraudDetectionCollector | null>(null);
   const startTimeRef = useRef<number>(0);
-  const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const updateIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const batterySubscriptionRef = useRef<{ remove: () => void } | null>(null);
-  const pedometerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pedometerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sensorSubscriptionsRef = useRef<Array<{ remove: () => void }>>([]);
 
   // State

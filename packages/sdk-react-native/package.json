@@ -1,7 +1,7 @@
 {
   "name": "@dataclaus/sdk-react-native",
-  "version": "1.0.0",
-  "description": "DataClaus React Native SDK for collecting sensor and behavioral data with fraud detection and reCAPTCHA integration",
+  "version": "2.0.0",
+  "description": "DataClaus React Native SDK - User identity, ad revenue sharing, sensor data collection, and fraud detection",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -12,7 +12,8 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
-    "lint": "eslint src --ext .ts,.tsx"
+    "lint": "eslint src --ext .ts,.tsx",
+    "clean": "rm -rf dist"
   },
   "repository": {
     "type": "git",
@@ -23,22 +24,29 @@
     "dataclaus",
     "react-native",
     "sdk",
+    "ads",
+    "revenue-sharing",
+    "monetization",
     "sensors",
     "analytics",
     "fraud-detection",
-    "recaptcha",
+    "identity",
     "expo"
   ],
   "author": "DataClaus",
   "license": "MIT",
   "peerDependencies": {
-    "expo-battery": ">=10.0.0",
-    "expo-sensors": ">=13.0.0",
     "react": ">=18.0.0",
     "react-native": ">=0.70.0"
   },
   "peerDependenciesMeta": {
+    "expo-sensors": {
+      "optional": true
+    },
     "expo-battery": {
+      "optional": true
+    },
+    "react-native-device-info": {
       "optional": true
     },
     "@google-cloud/recaptcha-enterprise-react-native": {
@@ -46,10 +54,8 @@
     }
   },
   "devDependencies": {
-    "@google-cloud/recaptcha-enterprise-react-native": "^18.8.2",
     "@types/react": "^18.0.0",
     "@types/react-native": "^0.72.8",
-    "expo-battery": "^10.0.8",
     "typescript": "^5.0.0"
   },
   "publishConfig": {

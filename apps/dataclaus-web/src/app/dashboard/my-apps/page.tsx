@@ -44,7 +44,8 @@ import {
     Key,
     Copy,
     Warning,
-    CircleNotch
+    CircleNotch,
+    Info
 } from 'phosphor-react';
 import { getApplications, createApplication, getDashboard, DashboardStats, Application } from '@/lib/api';
 
@@ -92,6 +93,7 @@ export default function MyAppsPage() {
     name: '',
     description: '',
     category: '',
+    userSharePercent: 70, // Default 70% to users
   });
 
   // Fetch applications from backend
@@ -145,6 +147,7 @@ export default function MyAppsPage() {
         name: form.name,
         description: form.description,
         category: form.category,
+        user_share_percent: form.userSharePercent,
       });
       
       // Add to local state
@@ -158,7 +161,7 @@ export default function MyAppsPage() {
           description: 'Your API key has been generated. Copy it now!',
         });
       } else {
-        setForm({ name: '', description: '', category: '' });
+        setForm({ name: '', description: '', category: '', userSharePercent: 70 });
         setShowModal(false);
         toast({ title: 'Application Created! 🎉' });
       }
@@ -181,7 +184,7 @@ export default function MyAppsPage() {
 
   const closeModal = () => {
     setShowModal(false);
-    setForm({ name: '', description: '', category: '' });
+    setForm({ name: '', description: '', category: '', userSharePercent: 70 });
     setNewAppApiKey(null);
   };
 
@@ -513,6 +516,58 @@ export default function MyAppsPage() {
                             </button>
                           );
                         })}
+                      </div>
+                    </div>
+
+                    {/* Revenue Share Configuration */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium text-slate-700">Revenue Share Distribution</Label>
+                        <Badge variant="outline" className="text-xs font-normal">
+                          Configurable per app
+                        </Badge>
+                      </div>
+                      
+                      {/* Slider */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-4">
+                          <span className="text-sm text-slate-500 w-24">User Share</span>
+                          <div className="flex-1">
+                            <Slider
+                              value={[form.userSharePercent]}
+                              onValueChange={(value) => setForm({ ...form, userSharePercent: value[0] })}
+                              min={50}
+                              max={90}
+                              step={5}
+                              className="cursor-pointer"
+                            />
+                          </div>
+                          <span className="text-lg font-bold text-emerald-600 w-16 text-right">{form.userSharePercent}%</span>
+                        </div>
+                        
+                        {/* Visual breakdown */}
+                        <div className="grid grid-cols-3 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                          <div className="text-center">
+                            <div className="h-2 rounded-full bg-emerald-500 mb-2" style={{ width: `${form.userSharePercent}%`, minWidth: '20%' }} />
+                            <p className="text-xl font-bold text-emerald-600">{form.userSharePercent}%</p>
+                            <p className="text-xs text-slate-500">User Earnings</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="h-2 rounded-full bg-blue-500 mb-2" style={{ width: `${100 - 5 - form.userSharePercent}%`, minWidth: '10%' }} />
+                            <p className="text-xl font-bold text-blue-600">{100 - 5 - form.userSharePercent}%</p>
+                            <p className="text-xs text-slate-500">Your Revenue</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="h-2 rounded-full bg-slate-400 mb-2 w-[20%]" />
+                            <p className="text-xl font-bold text-slate-600">5%</p>
+                            <p className="text-xs text-slate-500">Platform Fee</p>
+                          </div>
+                        </div>
+                        
+                        <p className="text-xs text-slate-500 flex items-center gap-1">
+                          <Info size={12} />
+                          Higher user share attracts more users but reduces your margins
+                        </p>
                       </div>
                     </div>
 

@@ -1,0 +1,102 @@
+[
+  {
+    "id": "video_1",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "thumbnail": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+    "description": "Big Buck Bunny - A classic animated short film 🐰 #animation #fun",
+    "creator": {
+      "id": "creator_1",
+      "username": "animation_studio",
+      "avatar": "https://i.pravatar.cc/150?u=creator1",
+      "verified": true
+    },
+    "likes": 15420,
+    "comments": 892,
+    "shares": 234,
+    "views": 125000,
+    "music": {
+      "title": "Original Sound",
+      "artist": "Blender Foundation"
+    }
+  },
+  {
+    "id": "video_2",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "thumbnail": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg",
+    "description": "Elephants Dream - First Blender Open Movie 🐘 #openSourcet #blender",
+    "creator": {
+      "id": "creator_2",
+      "username": "blender_films",
+      "avatar": "https://i.pravatar.cc/150?u=creator2",
+      "verified": true
+    },
+    "likes": 8932,
+    "comments": 456,
+    "shares": 123,
+    "views": 87000,
+    "music": {
+      "title": "Dream",
+      "artist": "Proog & Emo"
+    }
+  },
+  {
+    "id": "video_3",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "thumbnail": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg",
+    "description": "For Bigger Blazes - Action packed! 🔥 #action #adventure",
+    "creator": {
+      "id": "creator_3",
+      "username": "action_clips",
+      "avatar": "https://i.pravatar.cc/150?u=creator3",
+      "verified": false
+    },
+    "likes": 5621,
+    "comments": 234,
+    "shares": 89,
+    "views": 45000,
+    "music": {
+      "title": "Blaze",
+      "artist": "Chrome"
+    }
+  },
+  {
+    "id": "video_4",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "thumbnail": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerEscapes.jpg",
+    "description": "For Bigger Escapes - The chase is on! 🏃 #escape #thriller",
+    "creator": {
+      "id": "creator_4",
+      "username": "thriller_vids",
+      "avatar": "https://i.pravatar.cc/150?u=creator4",
+      "verified": false
+    },
+    "likes": 7823,
+    "comments": 345,
+    "shares": 156,
+    "views": 62000,
+    "music": {
+      "title": "Escape",
+      "artist": "Chrome"
+    }
+  },
+  {
+    "id": "video_5",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "thumbnail": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerFun.jpg",
+    "description": "For Bigger Fun - Enjoy the ride! 🎢 #fun #entertainment",
+    "creator": {
+      "id": "creator_5",
+      "username": "fun_times",
+      "avatar": "https://i.pravatar.cc/150?u=creator5",
+      "verified": true
+    },
+    "likes": 12456,
+    "comments": 678,
+    "shares": 289,
+    "views": 98000,
+    "music": {
+      "title": "Fun Times",
+      "artist": "Chrome"
+    }
+  }
+]

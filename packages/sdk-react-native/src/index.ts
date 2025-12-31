@@ -88,7 +88,7 @@ export class DataClausCollector {
   private sessionId: string;
   private sessionStartTime: Date;
   private screenViews: number = 0;
-  private flushTimer?: NodeJS.Timeout;
+  private flushTimer?: ReturnType<typeof setInterval>;
   private isActive: boolean = false;
 
   constructor(config: DataClausConfig) {
@@ -420,5 +420,52 @@ export {
   type UseRecaptchaResult,
 } from './recaptcha';
 
+// User Identity Module
+export {
+  UserIdentityManager,
+  useIdentity,
+  generateDeviceFingerprint,
+  hashFingerprint,
+  type UserIdentityConfig,
+  type LinkUserRequest,
+  type LinkedUser,
+  type UserEarnings,
+  type DeviceFingerprint,
+  type UseIdentityResult,
+} from './identity';
+
+// Ads Revenue Module
+export {
+  AdManager,
+  AdProvider,
+  useAds,
+  BannerAd,
+  useInterstitialAd,
+  useRewardedAd,
+  type AdConfig,
+  type AdType,
+  type AdSize,
+  type AdImpression,
+  type AdReward,
+  type BannerAdProps,
+  type UseInterstitialResult,
+  type UseRewardedResult,
+} from './ads';
+
+// Auth exports (DataClaus authentication)
+export {
+  DataClausAuth,
+  DataClausAuthProvider,
+  useDataClausAuth,
+  type DataClausAuthConfig,
+  type DataClausUser,
+  type AuthTokens,
+  type AuthState,
+  type RequestOTPResult,
+  type VerifyOTPResult,
+  type AuthUserEarnings,
+} from './auth';
+
 // Default export
 export default DataClausCollector;
+
