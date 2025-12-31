@@ -7,15 +7,16 @@ import (
 )
 
 type Handlers struct {
-	User      *UserHandler
-	Auth      *AuthHandler
-	Ingest    *IngestHandler
-	Developer *DeveloperHandler
-	Wallet    *WalletHandler
-	Campaign  *CampaignHandler
-	Ledger    *LedgerHandler
-	Analytics *AnalyticsHandler
-	HMAC      *HMACMiddleware
+	User        *UserHandler
+	Auth        *AuthHandler
+	Ingest      *IngestHandler
+	Developer   *DeveloperHandler
+	Application *ApplicationHandler
+	Wallet      *WalletHandler
+	Campaign    *CampaignHandler
+	Ledger      *LedgerHandler
+	Analytics   *AnalyticsHandler
+	HMAC        *HMACMiddleware
 }
 
 func NewServer(h *Handlers) *echo.Echo {
@@ -40,13 +41,23 @@ func NewServer(h *Handlers) *echo.Echo {
 
 	e.POST("/auth/login", h.Auth.Login)
 
-
 	e.POST("/developers", h.Developer.Register)
 	e.GET("/developers/:id", h.Developer.Get)
 	e.PUT("/developers/:id/user-share", h.Developer.UpdateUserShare)
 	e.POST("/developers/:id/api-keys", h.Developer.GenerateAPIKey)
 	e.GET("/developers/:id/api-keys", h.Developer.ListAPIKeys)
 	e.DELETE("/developers/:id/api-keys/:keyId", h.Developer.RevokeAPIKey)
+
+	// Application routes (each app has its own API key)
+	if h.Application != nil {
+		e.POST("/developers/:developerId/applications", h.Application.Create)
+		e.GET("/developers/:developerId/applications", h.Application.GetByDeveloper)
+		e.GET("/applications/:id", h.Application.Get)
+		e.GET("/applications/:id/stats", h.Application.GetStats)
+		e.PUT("/applications/:id", h.Application.Update)
+		e.PATCH("/applications/:id/status", h.Application.ToggleStatus)
+		e.DELETE("/applications/:id", h.Application.Delete)
+	}
 
 	e.POST("/wallets", h.Wallet.Create)
 	e.GET("/wallets/:id", h.Wallet.Get)
@@ -77,3 +88,4 @@ func NewServer(h *Handlers) *echo.Echo {
 
 	return e
 }
+

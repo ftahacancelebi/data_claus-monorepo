@@ -124,6 +124,19 @@ func (r *APIKeyRepository) GetByDeveloperID(ctx context.Context, developerID uui
 	return keys, nil
 }
 
+func (r *APIKeyRepository) GetByApplicationID(ctx context.Context, applicationID uuid.UUID) ([]*domain.APIKey, error) {
+	var gormKeys []APIKeyGorm
+	if err := r.db.WithContext(ctx).Where("application_id = ?", applicationID).Find(&gormKeys).Error; err != nil {
+		return nil, err
+	}
+
+	keys := make([]*domain.APIKey, len(gormKeys))
+	for i, gk := range gormKeys {
+		keys[i] = toAPIKeyDomain(&gk)
+	}
+	return keys, nil
+}
+
 func (r *APIKeyRepository) Deactivate(ctx context.Context, id uuid.UUID) error {
 	return r.db.WithContext(ctx).Model(&APIKeyGorm{}).Where("id = ?", id).
 		Update("is_active", false).Error
@@ -137,28 +150,31 @@ func (r *APIKeyRepository) UpdateLastUsed(ctx context.Context, id uuid.UUID) err
 
 func toAPIKeyGorm(k *domain.APIKey) *APIKeyGorm {
 	return &APIKeyGorm{
-		ID:          k.ID,
-		DeveloperID: k.DeveloperID,
-		KeyHash:     k.KeyHash,
-		KeyPrefix:   k.KeyPrefix,
-		Name:        k.Name,
-		IsActive:    k.IsActive,
-		LastUsedAt:  k.LastUsedAt,
-		CreatedAt:   k.CreatedAt,
-		UpdatedAt:   k.UpdatedAt,
+		ID:            k.ID,
+		DeveloperID:   k.DeveloperID,
+		ApplicationID: k.ApplicationID,
+		KeyHash:       k.KeyHash,
+		KeyPrefix:     k.KeyPrefix,
+		Name:          k.Name,
+		IsActive:      k.IsActive,
+		LastUsedAt:    k.LastUsedAt,
+		CreatedAt:     k.CreatedAt,
+		UpdatedAt:     k.UpdatedAt,
 	}
 }
 
 func toAPIKeyDomain(k *APIKeyGorm) *domain.APIKey {
 	return &domain.APIKey{
-		ID:          k.ID,
-		DeveloperID: k.DeveloperID,
-		KeyHash:     k.KeyHash,
-		KeyPrefix:   k.KeyPrefix,
-		Name:        k.Name,
-		IsActive:    k.IsActive,
-		LastUsedAt:  k.LastUsedAt,
-		CreatedAt:   k.CreatedAt,
-		UpdatedAt:   k.UpdatedAt,
+		ID:            k.ID,
+		DeveloperID:   k.DeveloperID,
+		ApplicationID: k.ApplicationID,
+		KeyHash:       k.KeyHash,
+		KeyPrefix:     k.KeyPrefix,
+		Name:          k.Name,
+		IsActive:      k.IsActive,
+		LastUsedAt:    k.LastUsedAt,
+		CreatedAt:     k.CreatedAt,
+		UpdatedAt:     k.UpdatedAt,
 	}
 }
+

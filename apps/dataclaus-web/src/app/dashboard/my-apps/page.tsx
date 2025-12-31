@@ -46,7 +46,7 @@ import {
     Warning,
     CircleNotch
 } from 'phosphor-react';
-import { listApiKeys, generateApiKey, getDashboard, DashboardStats } from '@/lib/api';
+import { getApplications, createApplication, getDashboard, DashboardStats, Application } from '@/lib/api';
 
 // Categories with icons
 const categories = [
@@ -78,10 +78,11 @@ export default function MyAppsPage() {
   const { toast } = useToast();
   
   // Real data from API
-  const [apps, setApps] = useState<ApiKey[]>([]);
+  const [apps, setApps] = useState<Application[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [newAppApiKey, setNewAppApiKey] = useState<string | null>(null);
   
   // Modal state
   const [showModal, setShowModal] = useState(false);
@@ -93,7 +94,7 @@ export default function MyAppsPage() {
     category: '',
   });
 
-  // Fetch apps (API Keys) from backend
+  // Fetch applications from backend
   useEffect(() => {
     async function fetchData() {
       if (!user?.id) return;
@@ -102,9 +103,9 @@ export default function MyAppsPage() {
       setError(null);
       
       try {
-        // Fetch API keys for this developer
-        const apiKeys = await listApiKeys(user.id);
-        setApps(apiKeys || []);
+        // Fetch applications for this developer
+        const applications = await getApplications(user.id);
+        setApps(applications || []);
         
         // Fetch dashboard stats
         const dashboardStats = await getDashboard();
@@ -136,22 +137,31 @@ export default function MyAppsPage() {
     }
     
     setCreating(true);
+    setNewAppApiKey(null);
     
     try {
-      // Create API key with app name
-      const result = await generateApiKey(user.id, form.name);
+      // Create application (returns app with API key)
+      const result = await createApplication(user.id, {
+        name: form.name,
+        description: form.description,
+        category: form.category,
+      });
       
       // Add to local state
-      setApps([...apps, result]);
+      setApps([result, ...apps]);
       
-      // Reset form and close modal
-      setForm({ name: '', description: '', category: '' });
-      setShowModal(false);
-      
-      toast({
-        title: 'Application Created! 🎉',
-        description: `Your API key: ${result.raw_key}. Copy it now - you won't see it again!`,
-      });
+      // Store the API key to show to user
+      if (result.api_key) {
+        setNewAppApiKey(result.api_key);
+        toast({
+          title: 'Application Created! 🎉',
+          description: 'Your API key has been generated. Copy it now!',
+        });
+      } else {
+        setForm({ name: '', description: '', category: '' });
+        setShowModal(false);
+        toast({ title: 'Application Created! 🎉' });
+      }
     } catch (err) {
       console.error('Failed to create app:', err);
       toast({
@@ -164,9 +174,15 @@ export default function MyAppsPage() {
     }
   };
 
-  const copyApiKey = (keyPrefix: string) => {
-    navigator.clipboard.writeText(keyPrefix);
-    toast({ title: 'API Key prefix copied!' });
+  const copyApiKey = (key: string) => {
+    navigator.clipboard.writeText(key);
+    toast({ title: 'API Key copied!' });
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setForm({ name: '', description: '', category: '' });
+    setNewAppApiKey(null);
   };
 
   const activeApps = apps.filter(app => app.is_active).length;
@@ -326,35 +342,38 @@ export default function MyAppsPage() {
                     </div>
 
                     <h3 className="font-bold text-lg text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">{app.name}</h3>
-                    <p className="text-sm text-slate-500 mb-4">API Key for SDK integration</p>
+                    <p className="text-sm text-slate-500 mb-4">{app.description || 'Your SDK integration app'}</p>
                     
                     {/* API Key Preview */}
-                    <div className="p-3 bg-slate-100 rounded-lg mb-4">
-                      <div className="flex items-center justify-between">
-                        <code className="text-xs text-slate-600 font-mono">{app.key_prefix}••••••••</code>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => copyApiKey(app.key_prefix)}
-                          className="h-7 w-7 p-0"
-                        >
-                          <Copy size={14} />
-                        </Button>
+                    {app.api_key_prefix && (
+                      <div className="p-3 bg-slate-100 rounded-lg mb-4">
+                        <div className="flex items-center justify-between">
+                          <code className="text-xs text-slate-600 font-mono">{app.api_key_prefix}••••••••</code>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => copyApiKey(app.api_key_prefix || '')}
+                            className="h-7 w-7 p-0"
+                          >
+                            <Copy size={14} />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
-                    <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-slate-100">
-                      <div>
-                        <p className="text-xs text-slate-400 uppercase font-medium mb-1">Created</p>
-                        <p className="text-sm font-medium text-slate-900">
-                          {new Date(app.created_at).toLocaleDateString()}
-                        </p>
+                    {/* Stats */}
+                    <div className="grid grid-cols-3 gap-2 mb-4 pb-4 border-b border-slate-100">
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-slate-900">{app.total_events.toLocaleString()}</p>
+                        <p className="text-xs text-slate-400">Events</p>
                       </div>
-                      <div>
-                        <p className="text-xs text-slate-400 uppercase font-medium mb-1">Last Used</p>
-                        <p className="text-sm font-medium text-slate-900">
-                          {app.last_used_at ? new Date(app.last_used_at).toLocaleDateString() : 'Never'}
-                        </p>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-slate-900">{app.total_users.toLocaleString()}</p>
+                        <p className="text-xs text-slate-400">Users</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-emerald-600">${app.total_revenue.toFixed(2)}</p>
+                        <p className="text-xs text-slate-400">Revenue</p>
                       </div>
                     </div>
 

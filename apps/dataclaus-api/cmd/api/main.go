@@ -73,21 +73,27 @@ func run(ctx context.Context) error {
 	analyticsService := services.NewAnalyticsService(eventRepo, userRepo, devRepo, campaignRepo, ledgerRepo)
 	analyticsHandler := adapterHttp.NewAnalyticsHandler(analyticsService)
 
+	// Application (each app has its own API key)
+	appRepo := repository.NewApplicationRepository(db)
+	appService := services.NewApplicationService(appRepo)
+	appHandler := adapterHttp.NewApplicationHandler(appService, apiKeyService)
+
 	kafkaProducer := kafka.NewProducer(cfg.KafkaBrokers)
 	ingestHandler := adapterHttp.NewIngestHandler(kafkaProducer)
 
 	hmacMiddleware := adapterHttp.NewHMACMiddleware(apiKeyService)
 
 	handlers := &adapterHttp.Handlers{
-		User:      userHandler,
-		Auth:      authHandler,
-		Ingest:    ingestHandler,
-		Developer: devHandler,
-		Wallet:    walletHandler,
-		Campaign:  campaignHandler,
-		Ledger:    ledgerHandler,
-		Analytics: analyticsHandler,
-		HMAC:      hmacMiddleware,
+		User:        userHandler,
+		Auth:        authHandler,
+		Ingest:      ingestHandler,
+		Developer:   devHandler,
+		Application: appHandler,
+		Wallet:      walletHandler,
+		Campaign:    campaignHandler,
+		Ledger:      ledgerHandler,
+		Analytics:   analyticsHandler,
+		HMAC:        hmacMiddleware,
 	}
 
 	server := newServer(handlers)

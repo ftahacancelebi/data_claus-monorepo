@@ -67,15 +67,16 @@ func (DeveloperGorm) TableName() string {
 }
 
 type APIKeyGorm struct {
-	ID          uuid.UUID  `gorm:"type:uuid;primary_key;"`
-	DeveloperID uuid.UUID  `gorm:"type:uuid;index;not null"`
-	KeyHash     string     `gorm:"uniqueIndex;not null"`
-	KeyPrefix   string     `gorm:"not null"`
-	Name        string     `gorm:"not null"`
-	IsActive    bool       `gorm:"not null;default:true"`
-	LastUsedAt  *time.Time
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID            uuid.UUID  `gorm:"type:uuid;primary_key;"`
+	DeveloperID   uuid.UUID  `gorm:"type:uuid;index;not null"`
+	ApplicationID *uuid.UUID `gorm:"type:uuid;index"` // Optional: links key to specific application
+	KeyHash       string     `gorm:"uniqueIndex;not null"`
+	KeyPrefix     string     `gorm:"not null"`
+	Name          string     `gorm:"not null"`
+	IsActive      bool       `gorm:"not null;default:true"`
+	LastUsedAt    *time.Time
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 func (APIKeyGorm) TableName() string {

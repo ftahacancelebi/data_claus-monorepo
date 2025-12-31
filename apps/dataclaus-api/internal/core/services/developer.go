@@ -124,3 +124,26 @@ func (s *APIKeyService) ValidateKey(ctx context.Context, rawKey string) (*domain
 func (s *APIKeyService) Revoke(ctx context.Context, id uuid.UUID) error {
 	return s.repo.Deactivate(ctx, id)
 }
+
+// GenerateForApplication creates an API key linked to a specific application.
+func (s *APIKeyService) GenerateForApplication(ctx context.Context, developerID, applicationID uuid.UUID, name string) (*domain.APIKey, string, error) {
+	_, err := s.devRepo.GetByID(ctx, developerID)
+	if err != nil {
+		return nil, "", errors.New("developer not found")
+	}
+
+	apiKey, rawKey := domain.NewAPIKey(developerID, name)
+	apiKey.ApplicationID = &applicationID
+
+	if err := s.repo.Save(ctx, apiKey); err != nil {
+		return nil, "", err
+	}
+
+	return apiKey, rawKey, nil
+}
+
+// GetByApplication gets API keys for a specific application.
+func (s *APIKeyService) GetByApplication(ctx context.Context, applicationID uuid.UUID) ([]*domain.APIKey, error) {
+	return s.repo.GetByApplicationID(ctx, applicationID)
+}
+

@@ -20,6 +20,7 @@ type APIKeyRepository interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.APIKey, error)
 	GetByKeyHash(ctx context.Context, keyHash string) (*domain.APIKey, error)
 	GetByDeveloperID(ctx context.Context, developerID uuid.UUID) ([]*domain.APIKey, error)
+	GetByApplicationID(ctx context.Context, applicationID uuid.UUID) ([]*domain.APIKey, error)
 	Deactivate(ctx context.Context, id uuid.UUID) error
 	UpdateLastUsed(ctx context.Context, id uuid.UUID) error
 }
@@ -34,7 +35,10 @@ type DeveloperService interface {
 
 type APIKeyService interface {
 	Generate(ctx context.Context, developerID uuid.UUID, name string) (*domain.APIKey, string, error)
+	GenerateForApplication(ctx context.Context, developerID, applicationID uuid.UUID, name string) (*domain.APIKey, string, error)
 	GetByDeveloper(ctx context.Context, developerID uuid.UUID) ([]*domain.APIKey, error)
+	GetByApplication(ctx context.Context, applicationID uuid.UUID) ([]*domain.APIKey, error)
 	ValidateKey(ctx context.Context, rawKey string) (*domain.APIKey, error)
 	Revoke(ctx context.Context, id uuid.UUID) error
 }
+

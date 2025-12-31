@@ -201,3 +201,82 @@ export const releasePendingBalance = (walletId: string) =>
       method: 'POST',
     }
   );
+
+// Applications
+export interface Application {
+  id: string;
+  developer_id: string;
+  name: string;
+  description: string;
+  category: string;
+  website_url: string;
+  is_active: boolean;
+  total_events: number;
+  total_users: number;
+  total_revenue: number;
+  quality_score: number;
+  api_key_prefix?: string;
+  api_key?: string; // Only returned on create
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ApplicationStats {
+  application_id: string;
+  total_events: number;
+  total_users: number;
+  total_revenue: number;
+  avg_quality: number;
+  events_today: number;
+  events_week: number;
+  events_month: number;
+}
+
+export const createApplication = (
+  developerId: string,
+  data: {
+    name: string;
+    description?: string;
+    category?: string;
+    website_url?: string;
+  }
+) =>
+  request<Application>(`/developers/${developerId}/applications`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const getApplications = (developerId: string) =>
+  request<Application[]>(`/developers/${developerId}/applications`);
+
+export const getApplication = (id: string) =>
+  request<Application>(`/applications/${id}`);
+
+export const getApplicationStats = (id: string) =>
+  request<ApplicationStats>(`/applications/${id}/stats`);
+
+export const updateApplication = (
+  id: string,
+  data: {
+    name?: string;
+    description?: string;
+    category?: string;
+    website_url?: string;
+  }
+) =>
+  request<Application>(`/applications/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+
+export const toggleApplicationStatus = (id: string, isActive: boolean) =>
+  request<{ status: string; is_active: boolean }>(`/applications/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ is_active: isActive }),
+  });
+
+export const deleteApplication = (id: string) =>
+  request<{ status: string }>(`/applications/${id}`, {
+    method: 'DELETE',
+  });
+

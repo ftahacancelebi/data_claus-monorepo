@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/lib/auth-context';
+import { getApplication, getApplicationStats, listApiKeys, type Application, type ApplicationStats } from '@/lib/api';
 import { 
   ArrowLeft,
   Activity,
@@ -39,52 +40,35 @@ import {
   Copy,
   Eye,
   EyeSlash,
-  ChartBar
+  ChartBar,
+  Loader
 } from 'phosphor-react';
 
-// Mock data for this specific app
-const getAppData = (id: string) => ({
-  id,
-  name: id === '1' ? 'FitnessPro' : id === '2' ? 'MealTracker' : 'SleepWell',
-  status: 'active',
-  platform: 'react-native',
-  category: 'Health & Fitness',
-  createdAt: '2024-10-15',
-  apiKey: 'dc_live_' + id + '_a8f2k9d3m5n7p4q6r8s2',
-  stats: {
-    totalEvents: 125420,
-    activeUsers: 3240,
-    avgLatency: 18,
-    qualityScore: 94.5,
-    revenue: 4532.80,
-    todayEvents: 2340,
-  },
-  trafficData: [
-    { time: '00:00', events: 120 },
-    { time: '04:00', events: 80 },
-    { time: '08:00', events: 340 },
-    { time: '12:00', events: 520 },
-    { time: '16:00', events: 680 },
-    { time: '20:00', events: 420 },
-    { time: '23:59', events: 180 },
-  ],
-  weeklyData: [
-    { day: 'Mon', events: 2400, users: 320 },
-    { day: 'Tue', events: 2800, users: 380 },
-    { day: 'Wed', events: 3200, users: 420 },
-    { day: 'Thu', events: 2900, users: 390 },
-    { day: 'Fri', events: 3500, users: 450 },
-    { day: 'Sat', events: 2100, users: 280 },
-    { day: 'Sun', events: 1800, users: 240 },
-  ],
-  services: [
-    { id: 'recaptcha', name: 'reCAPTCHA v3', description: 'Bot protection and human verification', enabled: true, icon: ShieldCheck },
-    { id: 'quality', name: 'Quality Scoring', description: 'AI-powered data quality assessment', enabled: true, icon: ChartBar },
-    { id: 'realtime', name: 'Real-time Analytics', description: 'Live dashboard and metrics', enabled: true, icon: Activity },
-    { id: 'geo', name: 'Geo Intelligence', description: 'Location-based insights', enabled: false, icon: Globe },
-    { id: 'push', name: 'Push Notifications', description: 'Engagement and retention tools', enabled: false, icon: Lightning },
-  ],
-});
+// Fallback chart data when no real data available
+const getFallbackTrafficData = () => {
+  const now = new Date();
+  return Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(now);
+    date.setHours(date.getHours() - (6 - i));
+    return {
+      time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      events: 0,
+    };
+  });
+};
+
+const getFallbackWeeklyData = () => {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  return days.map(day => ({ day, events: 0, users: 0 }));
+};
+
+const services = [
+  { id: 'recaptcha', name: 'reCAPTCHA v3', description: 'Bot protection and human verification', enabled: true, icon: ShieldCheck },
+  { id: 'quality', name: 'Quality Scoring', description: 'AI-powered data quality assessment', enabled: true, icon: ChartBar },
+  { id: 'realtime', name: 'Real-time Analytics', description: 'Live dashboard and metrics', enabled: true, icon: Activity },
+  { id: 'geo', name: 'Geo Intelligence', description: 'Location-based insights', enabled: false, icon: Globe },
+  { id: 'push', name: 'Push Notifications', description: 'Engagement and retention tools', enabled: false, icon: Lightning },
+];
 
 export default function AppDetailPage() {
   const { user } = useAuth();
@@ -92,11 +76,87 @@ export default function AppDetailPage() {
   const router = useRouter();
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [app, setApp] = useState<Application | null>(null);
+  const [stats, setStats] = useState<ApplicationStats | null>(null);
+  const [apiKey, setApiKey] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const appId = params.id as string;
-  const app = getAppData(appId);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (!appId || !user?.id) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch application and stats in parallel
+        const [appData, statsData] = await Promise.all([
+          getApplication(appId).catch(() => null),
+          getApplicationStats(appId).catch(() => null),
+        ]);
+        
+        if (!appData) {
+          setError('Application not found');
+          setLoading(false);
+          return;
+        }
+        
+        setApp(appData);
+        setStats(statsData);
+        
+        // Try to get API key for this application
+        try {
+          const keys = await listApiKeys(user.id);
+          const appKey = keys.find(k => k.application_id === appId);
+          if (appKey?.key_prefix) {
+            setApiKey(appKey.key_prefix + '...');
+          }
+        } catch (err) {
+          // API key not available, that's okay
+          console.log('Could not fetch API key:', err);
+        }
+      } catch (err) {
+        console.error('Failed to fetch application data:', err);
+        setError('Failed to load application data');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchData();
+  }, [appId, user?.id]);
 
   if (!user) return null;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader size={32} className="animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error || !app) {
+    return (
+      <div className="space-y-4 max-w-7xl mx-auto">
+        <Button variant="ghost" size="sm" onClick={() => router.back()} className="text-slate-500">
+          <ArrowLeft size={20} className="mr-2" />
+          Back
+        </Button>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 text-red-600">
+              <Warning size={24} />
+              <p>{error || 'Application not found'}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const copyApiKey = () => {
     navigator.clipboard.writeText(app.apiKey);
