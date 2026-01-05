@@ -121,7 +121,7 @@ function HomeScreen() {
         onPress={show} 
         disabled={!isLoaded}
       >
-        <Text>Watch Ad for 50 Coins</Text>
+        <Text>Watch Ad for Cash</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

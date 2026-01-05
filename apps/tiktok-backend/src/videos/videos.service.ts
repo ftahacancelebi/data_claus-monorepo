@@ -115,7 +115,7 @@ export class VideosService {
         likes: 8932,
         comments: 456,
         shares: 123,
-        views: 87000,
+        views: 83000,
         music: { title: 'Dream', artist: 'Proog & Emo' },
       },
       {

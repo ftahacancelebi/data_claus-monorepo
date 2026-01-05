@@ -1,17 +1,25 @@
 /**
  * Auth Hook
- * 
- * Manages authentication state
+ *
+ * Manages authentication state.
  */
 
-import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  createContext,
+  useContext,
+  ReactNode,
+} from 'react';
 import { api, User } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (phone: string, otp: string) => Promise<{ isNewUser: boolean }>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, name: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: { username?: string; avatar?: string; bio?: string }) => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -31,30 +39,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const isLoggedIn = await api.isLoggedIn();
       if (isLoggedIn) {
-        const storedUser = await api.getStoredUser();
-        if (storedUser) {
-          setUser(storedUser);
-        } else {
+        try {
           const freshUser = await api.getMe();
           setUser(freshUser);
+          console.log('✅ User authenticated:', freshUser.username || freshUser.id);
+        } catch (error) {
+          console.log('⚠️ Token invalid, logging out');
+          await api.logout();
+          setUser(null);
         }
+      } else {
+        console.log('🔒 No stored credentials - user needs to login');
+        setUser(null);
       }
     } catch (error) {
       console.log('Auth check failed:', error);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const login = useCallback(async (phone: string, otp: string) => {
-    const result = await api.verifyOtp(phone, otp);
+  const login = useCallback(async (email: string, password: string) => {
+    const result = await api.login(email, password);
     setUser(result.user);
-    return { isNewUser: result.isNewUser };
+    console.log('✅ Logged in as:', result.user.username || result.user.id);
+  }, []);
+
+  const register = useCallback(async (email: string, name: string, password: string) => {
+    const result = await api.register(email, name, password);
+    setUser(result.user);
   }, []);
 
   const logout = useCallback(async () => {
     await api.logout();
     setUser(null);
+    console.log('👋 Logged out');
   }, []);
 
   const updateProfile = useCallback(async (data: { username?: string; avatar?: string; bio?: string }) => {
@@ -78,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         isAuthenticated: !!user,
         login,
+        register,
         logout,
         updateProfile,
         refreshUser,
@@ -88,12 +109,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
 }
-
-export default useAuth;

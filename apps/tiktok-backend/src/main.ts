@@ -27,14 +27,8 @@ async function bootstrap() {
   await app.listen(port);
 
   console.log(`
-╔═══════════════════════════════════════════════════════╗
-║                                                        ║
-║   🎵 TikTok Clone Backend (NestJS)                     ║
-║                                                        ║
-║   Server running on http://localhost:${port}            ║
-║   DataClaus API: ${process.env.DATACLAUS_API_URL || 'Not configured'}
-║                                                        ║
-╚═══════════════════════════════════════════════════════╝
+Server running on http://localhost:${port}
+DataClaus API: ${process.env.DATACLAUS_API_URL || 'Not configured'}
   `);
 }
 bootstrap();

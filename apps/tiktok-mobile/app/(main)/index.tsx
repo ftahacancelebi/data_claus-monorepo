@@ -19,6 +19,9 @@ import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { api, Video as VideoType } from '../../services/api';
+import { useAuth } from '../../hooks/useAuth';
+import { useRouter } from 'expo-router';
+import { DataClausBannerAd } from '../../components/ads/BannerAd';
 
 const { width, height } = Dimensions.get('window');
 const PLAYER_HEIGHT = height - 85; // Subtract tab bar
@@ -211,6 +214,13 @@ export default function FeedScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace('/auth');
+  };
 
   const loadFeed = useCallback(async (pageNum: number = 1) => {
     try {
@@ -274,6 +284,13 @@ export default function FeedScreen() {
         <Text style={[styles.headerText, styles.headerActive]}>For You</Text>
       </View>
 
+      <TouchableOpacity 
+        style={styles.logoutButton} 
+        onPress={handleLogout}
+      >
+        <Ionicons name="log-out-outline" size={24} color="#fff" />
+      </TouchableOpacity>
+
       {/* Feed */}
       <FlatList
         data={feed}
@@ -293,6 +310,11 @@ export default function FeedScreen() {
           index,
         })}
       />
+
+      {/* AdMob Banner */}
+      <View style={styles.bannerContainer}>
+        <DataClausBannerAd />
+      </View>
     </View>
   );
 }
@@ -317,6 +339,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 20,
     zIndex: 10,
+  },
+  logoutButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 20,
+    padding: 8,
   },
   headerText: {
     color: 'rgba(255, 255, 255, 0.6)',
@@ -495,5 +524,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: '600',
+  },
+  bannerContainer: {
+    position: 'absolute',
+    bottom: 50, // Above tab bar
+    alignSelf: 'center',
+    zIndex: 100,
   },
 });

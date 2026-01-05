@@ -50,54 +50,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     role: UserRole
   ) => {
-    let userId: string;
-    let userName: string;
-    let userEmail: string;
-
     if (role === 'developer') {
       // Register as developer
-      const dev = await registerDeveloper({ name, email, password });
-      userId = dev.id;
-      userName = dev.name;
-      userEmail = dev.email;
-
-      // Create developer wallet
-      await createWallet({
-        owner_id: userId,
-        type: 'developer',
-        currency: 'USD',
-      }).catch(() => {
-        // Wallet creation is optional
+      await registerDeveloper({ name, email, password });
+      
+      // Auto-login to get the real token
+      await login(email, password);
+      return;
+    } else if (role === 'user') {
+      // Register as end-user via /users/register
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email, 
+          password, 
+          displayName: name 
+        }),
       });
-    } else {
-      // Register as user (also used for buyers and admins)
-      const newUser = await createUser({ name, email, password });
-      userId = newUser.id;
-      userName = newUser.name;
-      userEmail = newUser.email;
 
-      // Create appropriate wallet type
-      const walletType = role === 'buyer' ? 'buyer' : 'user';
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Registration failed');
+      }
+
+      // Auto-login after registration
+      const loginResponse = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!loginResponse.ok) {
+        throw new Error('Login after registration failed');
+      }
+
+      const loginData = await loginResponse.json();
+      const userData = loginData.data || loginData;
+
+      const authUser: AuthUser = {
+        id: userData.user?.id || userData.id,
+        email: userData.user?.email || email,
+        name: userData.user?.displayName || name,
+        role: 'user',
+      };
+
+      setUser(authUser);
+      localStorage.setItem('dataclaus_user', JSON.stringify(authUser));
+      localStorage.setItem('dataclaus_token', userData.accessToken);
+      return;
+    } else {
+      // Register as buyer or other role
+      const newUser = await createUser({ name, email, password });
+
+      // Auto-login to get the real token
+      await login(email, password);
+
+      // Create buyer wallet
       await createWallet({
-        owner_id: userId,
-        type: walletType,
+        owner_id: newUser.id,
+        type: 'buyer',
         currency: 'USD',
       }).catch(() => {
-        // Wallet creation is optional
+        // Wallet creation might have been done by backend
       });
     }
-
-    const authUser: AuthUser = {
-      id: userId,
-      email: userEmail,
-      name: userName,
-      role,
-    };
-
-    setUser(authUser);
-    localStorage.setItem('dataclaus_user', JSON.stringify(authUser));
-    // In a real app, you'd get a JWT token from the backend
-    localStorage.setItem('dataclaus_token', `token-${userId}`);
   };
 
   const login = async (email: string, password: string) => {

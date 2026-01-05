@@ -1,5 +1,5 @@
 /**
- * Phone Input Screen
+ * Phone Input Screen - DataClaus Authentication
  */
 
 import { useState } from 'react';
@@ -58,9 +58,18 @@ export default function PhoneScreen() {
       </TouchableOpacity>
 
       <View style={styles.content}>
-        <Text style={styles.title}>Enter your phone</Text>
+        {/* DataClaus Logo */}
+        <View style={styles.logoSection}>
+          <View style={styles.dataclausLogo}>
+            <Ionicons name="shield-checkmark" size={40} color="#25f4ee" />
+          </View>
+          <Text style={styles.dataclausTitle}>DataClaus</Text>
+          <Text style={styles.dataclausSubtitle}>Universal Identity</Text>
+        </View>
+
+        <Text style={styles.title}>Sign in with phone</Text>
         <Text style={styles.subtitle}>
-          We'll send you a verification code
+          One account for all DataClaus apps. Your data, your earnings.
         </Text>
 
         {/* Phone Input */}
@@ -104,9 +113,16 @@ export default function PhoneScreen() {
         </TouchableOpacity>
 
         {/* Info */}
-        <View style={styles.info}>
-          <Ionicons name="shield-checkmark" size={20} color="#22c55e" />
+        <View style={styles.infoCard}>
+          <Ionicons name="sparkles" size={20} color="#25f4ee" />
           <Text style={styles.infoText}>
+            Earn money from your data across all apps using DataClaus authentication
+          </Text>
+        </View>
+
+        <View style={styles.footer}>
+          <Ionicons name="shield-checkmark" size={16} color="#22c55e" />
+          <Text style={styles.footerText}>
             Protected by reCAPTCHA Enterprise
           </Text>
         </View>
@@ -130,18 +146,42 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 140,
+    paddingTop: 100,
+  },
+  logoSection: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  dataclausLogo: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    backgroundColor: 'rgba(37, 244, 238, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  dataclausTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#25f4ee',
+  },
+  dataclausSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.5)',
+    marginTop: 4,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
     color: '#fff',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: 'rgba(255, 255, 255, 0.6)',
-    marginBottom: 32,
+    marginBottom: 24,
+    lineHeight: 22,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -176,28 +216,44 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   button: {
-    backgroundColor: '#fe2c55',
+    backgroundColor: '#25f4ee',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   buttonDisabled: {
     backgroundColor: '#3a3a3a',
   },
   buttonText: {
-    color: '#fff',
+    color: '#000',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  info: {
+  infoCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: 'rgba(37, 244, 238, 0.1)',
+    padding: 16,
+    borderRadius: 12,
+    gap: 12,
+    marginBottom: 20,
+  },
+  infoText: {
+    flex: 1,
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  footer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
   },
-  infoText: {
-    color: 'rgba(255, 255, 255, 0.5)',
-    fontSize: 14,
+  footerText: {
+    color: 'rgba(255, 255, 255, 0.4)',
+    fontSize: 12,
   },
 });
+

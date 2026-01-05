@@ -258,5 +258,18 @@ export {
   type RecaptchaMiddlewareOptions,
 } from './recaptcha';
 
+// Authentication Module
+export {
+  DataClausAuth,
+  type DataClausAuthConfig,
+  type DataClausUser,
+  type UserEarnings,
+  type AdImpressionResult,
+  type AdConfig,
+  type AdRates,
+  type AdRevenueSummary,
+  type TopEarner,
+} from './auth';
+
 // Default export
 export default DataClausClient;

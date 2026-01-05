@@ -24,58 +24,6 @@ import {
   Fingerprint
 } from 'phosphor-react';
 
-// Live Data Feed with fixed height to prevent flickering
-const LiveDataFeed = () => {
-    const [events, setEvents] = useState([
-      { id: 'init1', type: 'AUTH', latency: 24, status: 'OK' },
-      { id: 'init2', type: 'INGEST', latency: 18, status: 'OK' },
-      { id: 'init3', type: 'RISK_CHECK', latency: 32, status: 'OK' },
-      { id: 'init4', type: 'AUTH', latency: 15, status: 'OK' },
-    ]);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const newEvent = {
-                id: Math.random().toString(36).substr(2, 9),
-                type: ['AUTH', 'INGEST', 'RISK_CHECK'][Math.floor(Math.random() * 3)],
-                latency: Math.floor(Math.random() * 40) + 10,
-                status: 'OK'
-            };
-            setEvents(prev => [newEvent, ...prev.slice(0, 3)]);
-        }, 2500);
-        return () => clearInterval(interval);
-    }, []);
-
-    return (
-        <div className="glass-panel p-6 rounded-2xl w-full max-w-sm hidden xl:block mt-12">
-            <div className="flex items-center gap-3 mb-4 border-b border-slate-100 pb-3">
-                <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></div>
-                <span className="text-xs font-semibold tracking-wider text-slate-500 uppercase">Live System Metrics</span>
-            </div>
-            {/* Fixed height container to prevent layout shift */}
-            <div className="h-[120px] overflow-hidden">
-              <div className="space-y-3">
-                  {events.slice(0, 4).map((evt, i) => (
-                      <div 
-                        key={evt.id} 
-                        className="flex items-center justify-between text-xs h-[24px]" 
-                        style={{ opacity: 1 - i * 0.2 }}
-                      >
-                           <div className="flex items-center gap-2">
-                              <code className="text-primary font-mono w-20">{evt.type}</code>
-                              <span className="text-slate-400 font-mono text-[10px]">evt_{evt.id.slice(0,6)}</span>
-                           </div>
-                           <div className="flex items-center gap-2">
-                               <span className="text-slate-500 font-mono w-10 text-right">{evt.latency}ms</span>
-                               <CheckCircle size={12} className="text-blue-500" weight="fill" />
-                           </div>
-                      </div>
-                  ))}
-              </div>
-            </div>
-        </div>
-    );
-};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -171,9 +119,6 @@ export default function LoginPage() {
                  </div>
               </div>
 
-              {/* Visual Element (The Live Feed) */}
-              <LiveDataFeed />
-
           </div>
 
           {/* Right Side: The Access Terminal (Login Form) */}
@@ -238,14 +183,22 @@ export default function LoginPage() {
                     
                     {/* Role Selection (Register only) */}
                     {isRegister && (
-                         <div className="grid grid-cols-2 gap-3 pt-2">
+                         <div className="grid grid-cols-3 gap-2 pt-2">
                              <button type="button" onClick={() => setSelectedRole('developer')}
                                 className={`p-3 rounded-xl border text-left transition-all ${selectedRole === 'developer' ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'}`}
                              >
                                 <div className="text-xs font-bold text-slate-900 mb-1 flex items-center gap-1.5">
                                     <Cpu size={14} weight="duotone" className="text-primary"/> Developer
                                 </div>
-                                <div className="text-[10px] text-slate-500 leading-tight">Integrate SDK & Earn</div>
+                                <div className="text-[10px] text-slate-500 leading-tight">SDK & Earn</div>
+                             </button>
+                             <button type="button" onClick={() => setSelectedRole('user')}
+                                className={`p-3 rounded-xl border text-left transition-all ${selectedRole === 'user' ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'}`}
+                             >
+                                <div className="text-xs font-bold text-slate-900 mb-1 flex items-center gap-1.5">
+                                    <User size={14} weight="duotone" className="text-primary"/> User
+                                </div>
+                                <div className="text-[10px] text-slate-500 leading-tight">Earn Revenue</div>
                              </button>
                              <button type="button" onClick={() => setSelectedRole('buyer')}
                                 className={`p-3 rounded-xl border text-left transition-all ${selectedRole === 'buyer' ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'}`}
@@ -253,7 +206,7 @@ export default function LoginPage() {
                                 <div className="text-xs font-bold text-slate-900 mb-1 flex items-center gap-1.5">
                                     <TrendUp size={14} weight="duotone" className="text-primary"/> Buyer
                                 </div>
-                                <div className="text-[10px] text-slate-500 leading-tight">Access Data Streams</div>
+                                <div className="text-[10px] text-slate-500 leading-tight">Access Data</div>
                              </button>
                          </div>
                     )}

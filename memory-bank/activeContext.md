@@ -144,3 +144,13 @@ docs/
 
 ---
 *Last Updated: 2024-12-31 19:58*
+
+## [UPDATE SUGGESTION] Recent Backend Changes (2026-01-04)
+
+### NestJS Backend (Replacement for Go API):
+- **Revenue Distribution Engine Implemented:** 
+  - `AdsService` now directly credits `WalletService` upon modifying impressions.
+  - Implemented `LedgerService` integration to record all financial transactions permanently.
+  - Fixed logic where revenue was calculated but never distributed to users/developers.
+- **Security Decisions:** 
+  - Confirmed that Developers do not need a separate API Key for runtime application requests. The `Application ID` + `User Token` is sufficient for attribution.

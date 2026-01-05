@@ -8,16 +8,44 @@ import type {
 
 const API_BASE = '/api';
 
+// NestJS response wrapper interface
+interface NestJSResponse<T> {
+  data: T;
+  statusCode: number;
+  message: string;
+  timestamp: string;
+}
+
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  // Get the auth token from localStorage (support both developer and user contexts)
+  const token = typeof window !== 'undefined' 
+    ? (localStorage.getItem('dataclaus_token') || localStorage.getItem('dataclaus_user_access_token'))
+    : null;
+  
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...options?.headers,
+  };
+  
+  // Add Authorization header if token exists
+  if (token) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  }
+  
   const res = await fetch(`${API_BASE}${endpoint}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
     ...options,
+    headers,
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: 'Request failed' }));
     throw new Error(error.error || error.message || 'Request failed');
   }
-  return res.json();
+  const json = await res.json();
+  // Handle NestJS wrapped response format
+  if (json && typeof json === 'object' && 'data' in json && 'statusCode' in json) {
+    return json.data as T;
+  }
+  return json;
 }
 
 // Users
@@ -34,17 +62,30 @@ export const createUser = (data: {
 export const getUser = (id: string) =>
   request<{ id: string; email: string; name: string }>(`/users/${id}`);
 
-export const loginUser = (email: string, password: string) =>
-  request<{
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-    token: string;
+// Login returns NestJS format with accessToken and user object
+export const loginUser = async (email: string, password: string): Promise<{
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  token: string;
+}> => {
+  const response = await request<{
+    accessToken: string;
+    user: { id: string; email: string; name: string; role: string };
   }>('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
+  
+  return {
+    id: response.user.id,
+    email: response.user.email,
+    name: response.user.name,
+    role: response.user.role,
+    token: response.accessToken,
+  };
+};
 
 // Developers
 export const registerDeveloper = (data: {

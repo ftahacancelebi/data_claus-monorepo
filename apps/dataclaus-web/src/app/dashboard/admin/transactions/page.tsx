@@ -1,239 +1,195 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/lib/auth-context';
-import { getTransactions } from '@/lib/api';
-import type { Transaction } from '@/lib/types';
-import { formatMoney } from '@/lib/types';
-import { Search, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
+
+interface LedgerTransaction {
+  id: string;
+  source_wallet_id: string;
+  dest_wallet_id: string;
+  amount: number;
+  currency: string;
+  reference_id?: string;
+  type: string;
+  status: string;
+  created_at: string;
+}
 
 export default function AdminTransactionsPage() {
-  const { user } = useAuth();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [transactions, setTransactions] = useState<LedgerTransaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [filter, setFilter] = useState<string>('all');
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getTransactions(100);
-        setTransactions(data);
-      } catch {
-        // No transactions
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    loadTransactions();
   }, []);
 
-  if (!user || user.role !== 'admin') {
-    return <div className="p-4">Access denied</div>;
+  const loadTransactions = async () => {
+    try {
+      const token = localStorage.getItem('dataclaus_token');
+      const response = await fetch('/api/ledger', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        setTransactions([]);
+        return;
+      }
+
+      const data = await response.json();
+      setTransactions(data.data || data || []);
+    } catch (err) {
+      setError('Failed to load transactions');
+      setTransactions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredTransactions = filter === 'all' 
+    ? transactions 
+    : transactions.filter(tx => tx.type === filter);
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'ad_revenue': return 'bg-emerald-500/20 text-emerald-400';
+      case 'payout': return 'bg-blue-500/20 text-blue-400';
+      case 'fee': return 'bg-yellow-500/20 text-yellow-400';
+      case 'deposit': return 'bg-purple-500/20 text-purple-400';
+      default: return 'bg-slate-500/20 text-slate-400';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'bg-emerald-500/20 text-emerald-400';
+      case 'pending': return 'bg-yellow-500/20 text-yellow-400';
+      case 'failed': return 'bg-red-500/20 text-red-400';
+      default: return 'bg-slate-500/20 text-slate-400';
+    }
+  };
+
+  const shortenId = (id: string) => {
+    if (!id || id === '00000000-0000-0000-0000-000000000000') return 'Platform';
+    return `${id.slice(0, 8)}...`;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+      </div>
+    );
   }
-
-  const filteredTransactions = transactions.filter((tx) => {
-    const matchesSearch =
-      tx.id.toLowerCase().includes(search.toLowerCase()) ||
-      tx.type.toLowerCase().includes(search.toLowerCase());
-    const matchesType = typeFilter === 'all' || tx.type === typeFilter;
-    return matchesSearch && matchesType;
-  });
-
-  const totalAmount = filteredTransactions.reduce(
-    (sum, tx) => sum + tx.amount,
-    0
-  );
-  const payoutTotal = filteredTransactions
-    .filter((tx) => tx.type === 'payout')
-    .reduce((sum, tx) => sum + tx.amount, 0);
-  const feeTotal = filteredTransactions
-    .filter((tx) => tx.type === 'fee')
-    .reduce((sum, tx) => sum + tx.amount, 0);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">All Transactions</h1>
-          <p className="text-muted-foreground">
-            View and manage all platform transactions
-          </p>
+          <h1 className="text-2xl font-bold text-white">Transactions</h1>
+          <p className="text-slate-400">All ledger entries and financial transactions</p>
         </div>
-        <Button variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Export CSV
-        </Button>
-      </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search transactions..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        {/* Filter */}
         <div className="flex gap-2">
-          {['all', 'payout', 'deposit', 'fee'].map((type) => (
-            <Button
+          {['all', 'ad_revenue', 'payout', 'fee'].map((type) => (
+            <button
               key={type}
-              variant={typeFilter === type ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setTypeFilter(type)}
+              onClick={() => setFilter(type)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                filter === type
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-white/5 text-slate-400 hover:bg-white/10'
+              }`}
             >
-              {type.charAt(0).toUpperCase() + type.slice(1)}
-            </Button>
+              {type === 'all' ? 'All' : type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            </button>
           ))}
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Transactions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {filteredTransactions.length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Volume</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatMoney(totalAmount, 6)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Payouts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {formatMoney(payoutTotal, 6)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Platform Fees</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {formatMoney(feeTotal, 6)}
-            </div>
-          </CardContent>
-        </Card>
+      {error && (
+        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
+          {error}
+        </div>
+      )}
+
+      {/* Transactions Table */}
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-white/10">
+                <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">ID</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">From</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">To</th>
+                <th className="text-right px-6 py-4 text-sm font-medium text-slate-400">Amount</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Type</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Status</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTransactions.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                    No transactions found
+                  </td>
+                </tr>
+              ) : (
+                filteredTransactions.map((tx) => (
+                  <tr key={tx.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className="text-slate-300 font-mono text-sm">
+                        {shortenId(tx.id)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-slate-400 font-mono text-sm">
+                        {shortenId(tx.source_wallet_id)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-slate-400 font-mono text-sm">
+                        {shortenId(tx.dest_wallet_id)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="text-emerald-400 font-medium">
+                        ${tx.amount?.toFixed(6)} {tx.currency}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-md text-xs font-medium ${getTypeColor(tx.type)}`}>
+                        {tx.type?.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusColor(tx.status)}`}>
+                        {tx.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-slate-400 text-sm">
+                      {new Date(tx.created_at).toLocaleString()}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Transaction Ledger</CardTitle>
-          <CardDescription>
-            Complete transaction history with micro-payment precision
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <p className="text-center text-muted-foreground py-4">Loading...</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead>Destination</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTransactions.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={7}
-                      className="text-center text-muted-foreground"
-                    >
-                      No transactions found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredTransactions.map((tx) => (
-                    <TableRow key={tx.id}>
-                      <TableCell className="font-mono text-xs">
-                        {tx.id.slice(0, 8)}...
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            tx.type === 'payout'
-                              ? 'success'
-                              : tx.type === 'fee'
-                              ? 'destructive'
-                              : 'secondary'
-                          }
-                        >
-                          {tx.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {tx.source_wallet_id.slice(0, 8)}...
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {tx.dest_wallet_id.slice(0, 8)}...
-                      </TableCell>
-                      <TableCell className="font-mono">
-                        {formatMoney(tx.amount, 8)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            tx.status === 'completed' ? 'success' : 'secondary'
-                          }
-                        >
-                          {tx.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs">
-                        {new Date(tx.created_at).toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      {/* Summary */}
+      <div className="flex items-center justify-between text-sm text-slate-500">
+        <span>Showing {filteredTransactions.length} of {transactions.length} transactions</span>
+        <span className="text-emerald-400 font-medium">
+          Total: ${filteredTransactions.reduce((sum, tx) => sum + (tx.amount || 0), 0).toFixed(4)}
+        </span>
+      </div>
     </div>
   );
 }

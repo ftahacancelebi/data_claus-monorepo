@@ -1,10 +1,15 @@
 /**
  * Main App Layout with Bottom Tabs
+ * 
+ * The original implementation used @dataclaus/sdk-react-native but
+ * Metro has issues with local symlinked packages. 
+ * For now, SDK features are handled via the api.ts service layer
+ * which proxies all calls to the NestJS backend.
  */
 
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 
 export default function MainLayout() {
   return (

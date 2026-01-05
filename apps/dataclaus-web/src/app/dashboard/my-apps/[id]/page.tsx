@@ -39,52 +39,12 @@ import {
   Copy,
   Eye,
   EyeSlash,
-  ChartBar
+  ChartBar,
+  Wallet,
+  Percent,
+  Coins
 } from 'phosphor-react';
-
-// Mock data for this specific app
-const getAppData = (id: string) => ({
-  id,
-  name: id === '1' ? 'FitnessPro' : id === '2' ? 'MealTracker' : 'SleepWell',
-  status: 'active',
-  platform: 'react-native',
-  category: 'Health & Fitness',
-  createdAt: '2024-10-15',
-  apiKey: 'dc_live_' + id + '_a8f2k9d3m5n7p4q6r8s2',
-  stats: {
-    totalEvents: 125420,
-    activeUsers: 3240,
-    avgLatency: 18,
-    qualityScore: 94.5,
-    revenue: 4532.80,
-    todayEvents: 2340,
-  },
-  trafficData: [
-    { time: '00:00', events: 120 },
-    { time: '04:00', events: 80 },
-    { time: '08:00', events: 340 },
-    { time: '12:00', events: 520 },
-    { time: '16:00', events: 680 },
-    { time: '20:00', events: 420 },
-    { time: '23:59', events: 180 },
-  ],
-  weeklyData: [
-    { day: 'Mon', events: 2400, users: 320 },
-    { day: 'Tue', events: 2800, users: 380 },
-    { day: 'Wed', events: 3200, users: 420 },
-    { day: 'Thu', events: 2900, users: 390 },
-    { day: 'Fri', events: 3500, users: 450 },
-    { day: 'Sat', events: 2100, users: 280 },
-    { day: 'Sun', events: 1800, users: 240 },
-  ],
-  services: [
-    { id: 'recaptcha', name: 'reCAPTCHA v3', description: 'Bot protection and human verification', enabled: true, icon: ShieldCheck },
-    { id: 'quality', name: 'Quality Scoring', description: 'AI-powered data quality assessment', enabled: true, icon: ChartBar },
-    { id: 'realtime', name: 'Real-time Analytics', description: 'Live dashboard and metrics', enabled: true, icon: Activity },
-    { id: 'geo', name: 'Geo Intelligence', description: 'Location-based insights', enabled: false, icon: Globe },
-    { id: 'push', name: 'Push Notifications', description: 'Engagement and retention tools', enabled: false, icon: Lightning },
-  ],
-});
+import { getApplication, getApplicationStats } from '@/lib/api';
 
 export default function AppDetailPage() {
   const { user } = useAuth();
@@ -93,13 +53,94 @@ export default function AppDetailPage() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
   
+  const [app, setApp] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const appId = params.id as string;
-  const app = getAppData(appId);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (!appId || !user) return;
+      
+      setLoading(true);
+      try {
+        const appData = await getApplication(appId);
+        const statsData = await getApplicationStats(appId);
+        
+        setApp({
+          ...appData,
+          apiKey: appData.api_key_prefix ? `${appData.api_key_prefix}••••••••` : 'No API Key', // We don't have full key here
+          platform: 'DataClaus SDK', // hardcoded for now
+          stats: {
+             totalEvents: statsData.total_events,
+             activeUsers: statsData.total_users,
+             avgLatency: 24, // Mock
+             qualityScore: statsData.avg_quality,
+             revenue: statsData.total_revenue,
+             todayEvents: statsData.events_today
+          },
+          // Mocking chart data for now as API doesn't provide time-series yet
+          trafficData: [
+            { time: '00:00', events: 0 },
+            { time: '06:00', events: 0 },
+            { time: '12:00', events: 0 },
+            { time: '18:00', events: 0 },
+            { time: '23:59', events: 0 },
+          ],
+          weeklyData: [
+            { day: 'Mon', events: 0, users: 0 },
+            { day: 'Tue', events: 0, users: 0 },
+            { day: 'Wed', events: 0, users: 0 },
+            { day: 'Thu', events: 0, users: 0 },
+            { day: 'Fri', events: 0, users: 0 },
+            { day: 'Sat', events: 0, users: 0 },
+            { day: 'Sun', events: 0, users: 0 },
+          ],
+          services: [
+            { id: 'recaptcha', name: 'reCAPTCHA v3', description: 'Bot protection and human verification', enabled: true, icon: ShieldCheck },
+            { id: 'quality', name: 'Quality Scoring', description: 'AI-powered data quality assessment', enabled: true, icon: ChartBar },
+            { id: 'realtime', name: 'Real-time Analytics', description: 'Live dashboard and metrics', enabled: true, icon: Activity },
+          ]
+        });
+      } catch (err) {
+        console.error('Failed to load app:', err);
+        setError('Failed to load application data.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [appId, user]);
 
   if (!user) return null;
+  if (loading) {
+     return (
+        <div className="flex h-screen items-center justify-center">
+            <div className="text-center">
+               <Activity size={32} className="mx-auto text-blue-600 animate-spin mb-4" />
+               <p className="text-slate-500">Loading application...</p>
+            </div>
+        </div>
+     );
+  }
+
+  if (error || !app) {
+     return (
+        <div className="p-8 text-center">
+           <h2 className="text-xl font-bold text-slate-800 mb-2">Error</h2>
+           <p className="text-red-600 mb-4">{error || 'Application not found'}</p>
+           <Button onClick={() => router.back()}>Go Back</Button>
+        </div>
+     );
+  }
 
   const copyApiKey = () => {
-    navigator.clipboard.writeText(app.apiKey);
+    // API key is not fully available here, but we can simulate or show instruction
+    // In reality, api key is only shown once on creation.
+    // Here we might copy a placeholder or the prefix
+    navigator.clipboard.writeText(app.apiKey); 
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -117,12 +158,12 @@ export default function AppDetailPage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold tracking-tight text-slate-900">{app.name}</h1>
-              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                <CheckCircle size={12} className="mr-1" weight="fill" />
-                Active
+              <Badge className={app.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500'}>
+                {app.is_active ? <CheckCircle size={12} className="mr-1" weight="fill" /> : <Warning size={12} className="mr-1" />}
+                {app.is_active ? 'Active' : 'Inactive'}
               </Badge>
             </div>
-            <p className="text-slate-500 text-sm mt-1">{app.category} • {app.platform}</p>
+            <p className="text-slate-500 text-sm mt-1">{app.category || 'Uncategorized'} • {app.platform}</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -130,11 +171,6 @@ export default function AppDetailPage() {
             <Gear size={18} className="mr-2" />
             Settings
           </Button>
-          <Link href="/dashboard/docs">
-            <Button className="bg-primary hover:bg-blue-700 text-white">
-              View Docs
-            </Button>
-          </Link>
         </div>
       </div>
 
@@ -147,20 +183,14 @@ export default function AppDetailPage() {
                 <ShieldCheck size={24} className="text-primary" weight="duotone" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900">API Key</h3>
-                <p className="text-sm text-slate-500">Use this key to authenticate SDK requests</p>
+                <h3 className="font-semibold text-slate-900">API Key Prefix</h3>
+                <p className="text-sm text-slate-500">For security, full key is only shown on creation</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <code className="px-4 py-2 bg-slate-100 rounded-lg text-sm font-mono text-slate-700">
-                {showApiKey ? app.apiKey : '••••••••••••••••••••••••'}
+                {app.apiKey}
               </code>
-              <Button variant="ghost" size="sm" onClick={() => setShowApiKey(!showApiKey)}>
-                {showApiKey ? <EyeSlash size={18} /> : <Eye size={18} />}
-              </Button>
-              <Button variant="outline" size="sm" onClick={copyApiKey}>
-                {copied ? <CheckCircle size={18} className="text-emerald-500" /> : <Copy size={18} />}
-              </Button>
             </div>
           </div>
         </CardContent>
@@ -173,7 +203,6 @@ export default function AppDetailPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
                 <Activity size={20} className="text-blue-500" weight="duotone" />
-                <Badge className="bg-emerald-50 text-emerald-700 text-xs">+12.5%</Badge>
               </div>
               <p className="text-2xl font-bold text-slate-900">{app.stats.totalEvents.toLocaleString()}</p>
               <p className="text-sm text-slate-500">Total Events</p>
@@ -186,10 +215,9 @@ export default function AppDetailPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
                 <Users size={20} className="text-purple-500" weight="duotone" />
-                <Badge className="bg-emerald-50 text-emerald-700 text-xs">+8.2%</Badge>
               </div>
               <p className="text-2xl font-bold text-slate-900">{app.stats.activeUsers.toLocaleString()}</p>
-              <p className="text-sm text-slate-500">Active Users</p>
+              <p className="text-sm text-slate-500">Users</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -199,7 +227,6 @@ export default function AppDetailPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
                 <Clock size={20} className="text-amber-500" weight="duotone" />
-                <Badge className="bg-blue-50 text-blue-700 text-xs">-2ms</Badge>
               </div>
               <p className="text-2xl font-bold text-slate-900">{app.stats.avgLatency}ms</p>
               <p className="text-sm text-slate-500">Avg Latency</p>
@@ -214,75 +241,126 @@ export default function AppDetailPage() {
                 <TrendUp size={20} className="text-emerald-500" weight="duotone" />
               </div>
               <p className="text-2xl font-bold text-emerald-600">${app.stats.revenue.toLocaleString()}</p>
-              <p className="text-sm text-slate-500">Total Revenue</p>
+              <p className="text-sm text-slate-500">Gross Revenue</p>
             </CardContent>
           </Card>
         </motion.div>
       </div>
 
-      {/* Charts */}
+      {/* Revenue Distribution & Impact */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Traffic Chart */}
+        {/* Revenue Distribution */}
         <Card className="glass-panel border-0 shadow-xl">
           <CardHeader>
             <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Activity size={20} className="text-blue-500" />
-              Today's Traffic
+              <Percent size={20} className="text-blue-500" />
+              Revenue Distribution
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={app.trafficData}>
-                  <defs>
-                    <linearGradient id="trafficGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                  <XAxis dataKey="time" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: 'white', borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
-                  <Area type="monotone" dataKey="events" stroke="#3B82F6" strokeWidth={2} fill="url(#trafficGradient)" />
-                </AreaChart>
-              </ResponsiveContainer>
+            <div className="space-y-6">
+               <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+                  <div className="flex items-center gap-3">
+                     <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold">
+                        {app.user_share_percent || 70}%
+                     </div>
+                     <div>
+                        <p className="font-semibold text-slate-900">User Share</p>
+                        <p className="text-sm text-slate-500">Earned by your users</p>
+                     </div>
+                  </div>
+                  <Badge variant="outline" className="border-emerald-200 text-emerald-700 bg-emerald-50">High Impact</Badge>
+               </div>
+               
+               <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+                  <div className="flex items-center gap-3">
+                     <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                        {100 - 5 - (app.user_share_percent || 70)}%
+                     </div>
+                     <div>
+                        <p className="font-semibold text-slate-900">Developer Share (Net)</p>
+                        <p className="text-sm text-slate-500">Your revenue</p>
+                     </div>
+                  </div>
+                  <div className="text-right">
+                     <p className="font-bold text-slate-900">
+                        ${(app.stats.revenue * (100 - 5 - (app.user_share_percent || 70)) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                     </p>
+                     <p className="text-xs text-slate-500">Total Net Earned</p>
+                  </div>
+               </div>
+
+               <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+                  <div className="flex items-center gap-3">
+                     <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold">
+                        5%
+                     </div>
+                     <div>
+                        <p className="font-semibold text-slate-900">Platform Fee</p>
+                        <p className="text-sm text-slate-500">DataClaus service fee</p>
+                     </div>
+                  </div>
+               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Weekly Chart */}
+        {/* Quality Score / Impact */}
         <Card className="glass-panel border-0 shadow-xl">
           <CardHeader>
-            <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <ChartBar size={20} className="text-purple-500" />
-              Weekly Overview
-            </CardTitle>
+             <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+               <ChartBar size={20} className="text-purple-500" />
+               Quality Impact Score
+             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={app.weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                  <XAxis dataKey="day" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: 'white', borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
-                  <Bar dataKey="events" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+             <div className="flex flex-col items-center justify-center h-[280px] space-y-4">
+                <div className="relative h-40 w-40 flex items-center justify-center">
+                   <svg className="h-full w-full rotate-[-90deg]" viewBox="0 0 100 100">
+                      <circle
+                         className="text-slate-100"
+                         strokeWidth="8"
+                         stroke="currentColor"
+                         fill="transparent"
+                         r="40"
+                         cx="50"
+                         cy="50"
+                      />
+                      <circle
+                         className="text-purple-500"
+                         strokeWidth="8"
+                         strokeDasharray={251.2}
+                         strokeDashoffset={251.2 - (251.2 * (app.stats.qualityScore || 50) / 100)}
+                         strokeLinecap="round"
+                         stroke="currentColor"
+                         fill="transparent"
+                         r="40"
+                         cx="50"
+                         cy="50"
+                      />
+                   </svg>
+                   <div className="absolute flex flex-col items-center" style={{ transform: 'none' }}>
+                      <span className="text-4xl font-bold text-slate-900">{(app.stats.qualityScore || 50).toFixed(1)}</span>
+                      <span className="text-xs text-slate-500">/ 100</span>
+                   </div>
+                </div>
+                <div className="text-center max-w-sm">
+                   <p className="font-medium text-slate-900">Excellent Data Quality</p>
+                   <p className="text-sm text-slate-500 mt-1">Your application is providing high-quality data streams. This increases eCPM rates and user earnings.</p>
+                </div>
+             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Services */}
-      <Card className="glass-panel border-0 shadow-xl">
+       {/* Services */}
+       <Card className="glass-panel border-0 shadow-xl">
         <CardHeader>
           <CardTitle className="text-lg font-bold text-slate-900">Services & Features</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {app.services.map((service) => {
+            {app.services.map((service: any) => {
               const Icon = service.icon;
               return (
                 <div 
@@ -307,11 +385,6 @@ export default function AppDetailPage() {
                     {service.name}
                   </h4>
                   <p className="text-sm text-slate-500">{service.description}</p>
-                  {!service.enabled && (
-                    <Button variant="outline" size="sm" className="mt-3 w-full">
-                      Enable
-                    </Button>
-                  )}
                 </div>
               );
             })}

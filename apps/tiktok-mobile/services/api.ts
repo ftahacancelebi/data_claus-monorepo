@@ -10,19 +10,22 @@ import { Platform } from 'react-native';
 
 // Get backend URL dynamically
 const getBackendUrl = () => {
-  if (Platform.OS === 'web') return 'http://localhost:4001';
+  const basePort = 4001; // TikTok Backend (proxies auth to DataClaus API)
+  const apiPrefix = '/api';
+  
+  if (Platform.OS === 'web') return `http://localhost:${basePort}${apiPrefix}`;
   
   const hostUri = Constants.expoConfig?.hostUri;
   if (hostUri) {
     const ip = hostUri.split(':')[0];
-    const url = `http://${ip}:4001`;
+    const url = `http://${ip}:${basePort}${apiPrefix}`;
     console.log('🔗 [API] Configuring backend URL:', url);
     return url;
   }
   
   const url = Platform.OS === 'android' 
-    ? 'http://10.0.2.2:4001' 
-    : 'http://localhost:4001';
+    ? `http://10.0.2.2:${basePort}${apiPrefix}` 
+    : `http://localhost:${basePort}${apiPrefix}`;
   
   console.log('⚠️ [API] Could not detect LAN IP, using fallback URL:', url);
   return url;
@@ -119,9 +122,93 @@ class ApiService {
   }
 
   // ======================
-  // AUTH
+  // AUTH - Email/Password (Unified for all roles)
   // ======================
 
+  async login(email: string, password: string) {
+    console.log('🚀 [Mobile] Attempting login with:', email);
+    
+    try {
+      const response = await this.request<any>('POST', '/auth/login', { email, password });
+      console.log('✅ [Mobile] Login Raw Response:', JSON.stringify(response, null, 2));
+
+      // Handle wrapped response (if wrapped in 'data')
+      const result = response.data || response;
+
+      if (!result || !result.user) {
+        console.error('❌ [Mobile] Invalid response structure:', result);
+        throw new Error('Invalid server response');
+      }
+
+      // Store token and create user object
+      this.token = result.accessToken;
+      const user: User = {
+        id: result.user.id, // This is likely where it was failing
+        phone: '',
+        username: result.user.name,
+        avatar: undefined,
+        bio: undefined,
+        dataclausUserId: result.user.id,
+      };
+
+      try {
+        await SecureStore.setItemAsync(TOKEN_KEY, result.accessToken);
+        await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
+      } catch {
+        // Web fallback
+      }
+
+      return { user };
+    } catch (error) {
+      console.error('❌ [Mobile] Login Error:', error);
+      throw error;
+    }
+  }
+
+
+
+  async register(email: string, name: string, password: string) {
+    console.log('🚀 [Mobile] Attempting register with:', email);
+    
+    try {
+      // Register as end-user by default
+      const response = await this.request<any>('POST', '/auth/register', { email, password, name, role: 'user' });
+      console.log('✅ [Mobile] Register Raw Response:', JSON.stringify(response, null, 2));
+
+      // Handle wrapped response (if wrapped in 'data')
+      const result = response.data || response;
+
+      if (!result || !result.user) {
+        console.error('❌ [Mobile] Invalid response structure:', result);
+        throw new Error('Invalid server response');
+      }
+
+      // Store token and create user object
+      this.token = result.accessToken;
+      const user: User = {
+        id: result.user.id,
+        phone: '',
+        username: result.user.name,
+        avatar: undefined,
+        bio: undefined,
+        dataclausUserId: result.user.id,
+      };
+
+      try {
+        await SecureStore.setItemAsync(TOKEN_KEY, result.accessToken);
+        await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
+      } catch {
+        // Web fallback
+      }
+
+      return { user };
+    } catch (error) {
+      console.error('❌ [Mobile] Register Error:', error);
+      throw error;
+    }
+  }
+
+  // Legacy OTP methods (can be removed if not needed)
   async requestOtp(phone: string, recaptchaToken?: string) {
     return this.request<{ success: boolean; otp?: string; expiresIn: number }>(
       'POST',
@@ -197,12 +284,27 @@ class ApiService {
   // ======================
 
   async getFeed(page: number = 1, limit: number = 10) {
-    return this.request<{
-      videos: Array<Video | { type: 'ad'; adType: string }>;
+    const result = await this.request<{
+      items: Array<{ type: 'video' | 'ad'; video?: Video; adType?: string }>;
       page: number;
       limit: number;
       hasMore: boolean;
     }>('GET', `/videos/feed?page=${page}&limit=${limit}`);
+
+    // Transform items to match expected format in UI
+    const videos = result.items.map(item => {
+      if (item.type === 'ad') {
+        return { type: 'ad' as const, adType: item.adType || 'banner' };
+      }
+      return item.video!;
+    });
+
+    return {
+      videos,
+      page: result.page,
+      limit: result.limit,
+      hasMore: result.hasMore,
+    };
   }
 
   async likeVideo(videoId: string) {
@@ -219,6 +321,20 @@ class ApiService {
       `/videos/${videoId}/view`,
       { duration, completed }
     );
+  }
+
+  // ======================
+  // ADS
+  // ======================
+  
+  async recordAdImpression(adType: 'banner' | 'interstitial' | 'rewarded', grossRevenue?: number) {
+    // If no explicit revenue provided, let backend assign default based on type
+    const body = { adType, grossRevenue };
+    return this.request<{ 
+      success: boolean; 
+      impressionId: string;
+      userNewTotal: number 
+    }>('POST', '/ads/impression', body);
   }
 
   // ======================
@@ -252,14 +368,6 @@ class ApiService {
     return this.request<{ eventsReceived: number }>('POST', '/dataclaus/sensor', { events });
   }
 
-  async recordAdImpression(adType: string, revenue: number) {
-    return this.request<{
-      success: boolean;
-      impressionId: string;
-      userShare: number;
-      devShare: number;
-    }>('POST', '/dataclaus/ad-impression', { adType, revenue });
-  }
 }
 
 export const api = new ApiService();

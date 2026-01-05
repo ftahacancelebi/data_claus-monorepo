@@ -1,11 +1,11 @@
 /**
  * Root Layout
- * 
- * Handles auth state and navigation structure
+ *
+ * Handles auth state and navigation structure.
  */
 
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Slot, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
@@ -13,8 +13,22 @@ import { AuthProvider, useAuth } from '../hooks/useAuth';
 
 SplashScreen.preventAutoHideAsync();
 
-function RootLayoutNav() {
+function AuthGate() {
   const { isLoading, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const segments = useSegments();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === 'auth';
+
+    if (!isAuthenticated && !inAuthGroup) {
+      router.replace('/auth');
+    } else if (isAuthenticated && inAuthGroup) {
+      router.replace('/');
+    }
+  }, [isLoading, isAuthenticated, segments]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -33,19 +47,7 @@ function RootLayoutNav() {
   return (
     <>
       <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: '#000' },
-          animation: 'fade',
-        }}
-      >
-        {isAuthenticated ? (
-          <Stack.Screen name="(main)" />
-        ) : (
-          <Stack.Screen name="auth" />
-        )}
-      </Stack>
+      <Slot />
     </>
   );
 }
@@ -53,7 +55,7 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <AuthGate />
     </AuthProvider>
   );
 }

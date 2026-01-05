@@ -1,6 +1,6 @@
 {
   "name": "@dataclaus/sdk-react-native",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "DataClaus React Native SDK - User identity, ad revenue sharing, sensor data collection, and fraud detection",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -54,8 +54,10 @@
     }
   },
   "devDependencies": {
+    "@google-cloud/recaptcha-enterprise-react-native": "^18.8.2",
     "@types/react": "^18.0.0",
     "@types/react-native": "^0.72.8",
+    "expo-battery": "^10.0.8",
     "typescript": "^5.0.0"
   },
   "publishConfig": {

@@ -1,7 +1,7 @@
 /**
  * Earnings Screen
- * 
- * Shows DataClaus earnings with ad integration
+ *
+ * Shows DataClaus earnings with pull-to-refresh
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -22,13 +22,15 @@ export default function EarningsScreen() {
   const [earnings, setEarnings] = useState<Earnings | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [coins, setCoins] = useState(0);
+  const [isWatchingAd, setIsWatchingAd] = useState(false);
 
   const loadEarnings = useCallback(async () => {
     try {
       const data = await api.getEarnings();
+      console.log('[Earnings] Loaded:', data);
       setEarnings(data);
     } catch (error) {
-      console.log('Failed to load earnings');
+      console.log('[Earnings] Failed to load:', error);
     }
   }, []);
 
@@ -36,6 +38,7 @@ export default function EarningsScreen() {
     loadEarnings();
   }, [loadEarnings]);
 
+  // Pull-to-refresh handler
   const onRefresh = async () => {
     setIsRefreshing(true);
     await loadEarnings();
@@ -43,26 +46,35 @@ export default function EarningsScreen() {
   };
 
   const handleWatchAd = async () => {
-    Alert.alert(
-      '🎬 Watching Ad...',
-      'Simulating rewarded ad...',
-      [{ text: 'OK' }]
-    );
+    if (isWatchingAd) return;
+    
+    setIsWatchingAd(true);
+    Alert.alert('🎬 Watching Ad...', 'Simulating rewarded ad...');
 
-    // Simulate ad revenue
+    // Simulate watching a rewarded ad
     setTimeout(async () => {
       try {
-        const result = await api.recordAdImpression('rewarded', 0.0025);
+        // Record the impression - backend calculates revenue
+        const result = await api.recordAdImpression('rewarded');
+        console.log('[Earnings] Ad result:', result);
+        
         setCoins(prev => prev + 50);
+        
+        // The userNewTotal from the API is the updated total
+        const earnedThisAd = 0.0105; // Rewarded ad user share
         
         Alert.alert(
           '🎉 Reward Earned!',
-          `You earned 50 coins + $${result.userShare.toFixed(4)}!`
+          `+50 coins\n+$${earnedThisAd.toFixed(4)} USD\n\nNew Total: $${result.userNewTotal?.toFixed(4) || 'N/A'}`
         );
 
-        loadEarnings();
+        // Refresh earnings to get updated total
+        await loadEarnings();
       } catch (error) {
-        console.log('Ad impression failed');
+        console.log('[Earnings] Ad failed:', error);
+        Alert.alert('Error', 'Failed to record ad. Please try again.');
+      } finally {
+        setIsWatchingAd(false);
       }
     }, 2000);
   };
@@ -78,25 +90,35 @@ export default function EarningsScreen() {
     );
   };
 
+  const totalEarned = earnings?.totalEarned || 0;
+  const availableBalance = earnings?.availableBalance || 0;
+  const pendingBalance = earnings?.pendingBalance || 0;
   const qualityPercent = ((earnings?.qualityScore || 0) * 100).toFixed(0);
 
   return (
     <ScrollView
       style={styles.container}
+      contentContainerStyle={styles.scrollContent}
       refreshControl={
-        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} tintColor="#fff" />
+        <RefreshControl 
+          refreshing={isRefreshing} 
+          onRefresh={onRefresh} 
+          tintColor="#fff"
+          colors={['#fe2c55']}
+        />
       }
+      showsVerticalScrollIndicator={false}
     >
-      {/* Header */}
+      {/* Header with Total Earnings */}
       <LinearGradient
         colors={['#fe2c55', '#000']}
         style={styles.header}
       >
         <Text style={styles.headerTitle}>Your Earnings</Text>
         <Text style={styles.totalAmount}>
-          ${earnings?.totalEarned.toFixed(4) || '0.0000'}
+          ${totalEarned.toFixed(4)}
         </Text>
-        <Text style={styles.totalLabel}>Total Earned</Text>
+        <Text style={styles.totalLabel}>Total Earned (Pull down to refresh)</Text>
       </LinearGradient>
 
       {/* Balance Cards */}
@@ -104,14 +126,14 @@ export default function EarningsScreen() {
         <View style={styles.balanceCard}>
           <Ionicons name="time" size={24} color="#fbbf24" />
           <Text style={styles.balanceAmount}>
-            ${earnings?.pendingBalance.toFixed(4) || '0.0000'}
+            ${pendingBalance.toFixed(4)}
           </Text>
           <Text style={styles.balanceLabel}>Pending</Text>
         </View>
         <View style={styles.balanceCard}>
           <Ionicons name="wallet" size={24} color="#22c55e" />
           <Text style={styles.balanceAmount}>
-            ${earnings?.availableBalance.toFixed(4) || '0.0000'}
+            ${availableBalance.toFixed(4)}
           </Text>
           <Text style={styles.balanceLabel}>Available</Text>
         </View>
@@ -126,7 +148,7 @@ export default function EarningsScreen() {
             <Text style={styles.qualityHint}>Higher = More earnings</Text>
           </View>
           <View style={styles.qualityBar}>
-            <View style={[styles.qualityFill, { width: `${qualityPercent}%` }]} />
+            <View style={[styles.qualityFill, { width: `${qualityPercent}%` as `${number}%` }]} />
           </View>
           <Text style={styles.qualityTip}>
             💡 Watch more videos and engage to increase your score
@@ -134,7 +156,7 @@ export default function EarningsScreen() {
         </View>
       </View>
 
-      {/* Coins */}
+      {/* Coins & Watch Ad */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>In-App Coins</Text>
         <View style={styles.coinsCard}>
@@ -143,9 +165,15 @@ export default function EarningsScreen() {
             <Text style={styles.coinsValue}>{coins}</Text>
             <Text style={styles.coinsLabel}>coins</Text>
           </View>
-          <TouchableOpacity style={styles.watchAdButton} onPress={handleWatchAd}>
+          <TouchableOpacity 
+            style={[styles.watchAdButton, isWatchingAd && styles.watchAdButtonDisabled]} 
+            onPress={handleWatchAd}
+            disabled={isWatchingAd}
+          >
             <Ionicons name="videocam" size={20} color="#fff" />
-            <Text style={styles.watchAdText}>Watch Ad for 50 Coins</Text>
+            <Text style={styles.watchAdText}>
+              {isWatchingAd ? 'Watching...' : 'Watch Ad for Cash'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -168,13 +196,13 @@ export default function EarningsScreen() {
       </View>
 
       {/* Withdraw Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
           styles.withdrawButton,
-          (earnings?.availableBalance || 0) < 1 && styles.withdrawButtonDisabled,
+          availableBalance < 1 && styles.withdrawButtonDisabled,
         ]}
         onPress={handleWithdraw}
-        disabled={(earnings?.availableBalance || 0) < 1}
+        disabled={availableBalance < 1}
       >
         <Text style={styles.withdrawButtonText}>Withdraw Funds</Text>
         <Text style={styles.withdrawHint}>Minimum $1.00</Text>
@@ -183,6 +211,7 @@ export default function EarningsScreen() {
       {/* DataClaus Badge */}
       <View style={styles.badge}>
         <Text style={styles.badgeText}>Powered by DataClaus</Text>
+        <Text style={styles.badgeSubtext}>Pull down to refresh earnings</Text>
       </View>
     </ScrollView>
   );
@@ -192,6 +221,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+  },
+  scrollContent: {
+    paddingBottom: 120,
   },
   header: {
     paddingTop: 80,
@@ -317,6 +349,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 8,
   },
+  watchAdButtonDisabled: {
+    backgroundColor: '#4c1d95',
+    opacity: 0.7,
+  },
   watchAdText: {
     color: '#fff',
     fontSize: 16,
@@ -370,10 +406,14 @@ const styles = StyleSheet.create({
   badge: {
     alignItems: 'center',
     paddingVertical: 20,
-    marginBottom: 100,
   },
   badgeText: {
     color: 'rgba(255, 255, 255, 0.3)',
     fontSize: 12,
+  },
+  badgeSubtext: {
+    color: 'rgba(255, 255, 255, 0.2)',
+    fontSize: 11,
+    marginTop: 4,
   },
 });

@@ -2,16 +2,15 @@
  * Videos Module
  *
  * Handles video feed and interactions.
- * This is the core content module for the TikTok clone.
  */
 
 import { Module } from '@nestjs/common';
 import { VideosController } from './videos.controller';
 import { VideosService } from './videos.service';
-import { AuthModule } from '../auth/auth.module';
+import { DataClausModule } from '../dataclaus/dataclaus.module';
 
 @Module({
-  imports: [AuthModule],
+  imports: [DataClausModule],
   controllers: [VideosController],
   providers: [VideosService],
   exports: [VideosService],

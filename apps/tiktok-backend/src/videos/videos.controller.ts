@@ -16,7 +16,7 @@ import {
   DefaultValuePipe,
 } from '@nestjs/common';
 import { VideosService, FeedItem, Video } from './videos.service';
-import { AuthService } from '../auth/auth.service';
+import { DataClausService } from '../dataclaus/dataclaus.service';
 
 class RecordViewDto {
   duration!: number;
@@ -27,7 +27,7 @@ class RecordViewDto {
 export class VideosController {
   constructor(
     private readonly videosService: VideosService,
-    private readonly authService: AuthService,
+    private readonly dataClausService: DataClausService,
   ) {}
 
   /**
@@ -51,8 +51,8 @@ export class VideosController {
     if (authHeader) {
       try {
         const token = authHeader.replace('Bearer ', '');
-        const user = await this.authService.verifyToken(token);
-        userId = user.id;
+        const user = await this.dataClausService.getUserProfile(token);
+        userId = user?.id;
       } catch {
         // Token invalid, continue without user context
       }
@@ -79,7 +79,11 @@ export class VideosController {
     @Headers('authorization') authHeader: string,
   ): Promise<{ success: boolean; isLiked: boolean; likesCount: number }> {
     const token = authHeader?.replace('Bearer ', '');
-    const user = await this.authService.verifyToken(token);
+    const user = await this.dataClausService.getUserProfile(token);
+
+    if (!user) {
+      return { success: false, isLiked: false, likesCount: 0 };
+    }
 
     const result = this.videosService.toggleLike(id, user.id);
     return { success: true, ...result };
@@ -100,8 +104,10 @@ export class VideosController {
     if (authHeader) {
       try {
         const token = authHeader.replace('Bearer ', '');
-        const user = await this.authService.verifyToken(token);
-        userId = user.id;
+        const user = await this.dataClausService.getUserProfile(token);
+        if (user) {
+          userId = user.id;
+        }
       } catch {
         // Continue with anonymous
       }

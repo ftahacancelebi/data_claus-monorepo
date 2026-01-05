@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   AreaChart,
@@ -22,23 +23,9 @@ import {
     CheckCircle,
     Star,
     ArrowRight,
-    Gift
+    Gift,
+    CircleNotch
 } from 'phosphor-react';
-
-// Mock Data
-const earningsData = [
-  { name: 'Week 1', value: 2.50 },
-  { name: 'Week 2', value: 4.20 },
-  { name: 'Week 3', value: 3.80 },
-  { name: 'Week 4', value: 6.50 },
-];
-
-const recentActivity = [
-  { id: '1', app: 'FitTracker', action: 'Data Share', earned: 0.12, time: '2 min ago' },
-  { id: '2', app: 'Survey Widget', action: 'Survey Complete', earned: 0.25, time: '15 min ago' },
-  { id: '3', app: 'LocationAPI', action: 'Data Stream', earned: 0.08, time: '1 hour ago' },
-  { id: '4', app: 'FitTracker', action: 'Data Share', earned: 0.10, time: '3 hours ago' },
-];
 
 const container = {
   hidden: { opacity: 0 },
@@ -50,11 +37,57 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
+interface UserEarnings {
+  userId: string;
+  walletId: string | null;
+  balance: number;
+  pendingBalance: number;
+  totalEarned: number;
+  currency: string;
+}
+
 interface DashboardProps {
   user: AuthUser;
 }
 
 export function UserDashboard({ user }: DashboardProps) {
+  const [earnings, setEarnings] = useState<UserEarnings | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchEarnings() {
+      try {
+        const token = localStorage.getItem('dataclaus_token');
+        const response = await fetch(`/api/users/${user.id}/earnings`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setEarnings(data.data || data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch earnings:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    if (user?.id) {
+      fetchEarnings();
+    }
+  }, [user?.id]);
+
+  // Generate chart data from earnings
+  const chartData = [
+    { name: 'Week 1', value: 0 },
+    { name: 'Week 2', value: 0 },
+    { name: 'Week 3', value: 0 },
+    { name: 'Week 4', value: earnings?.totalEarned || 0 },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -87,11 +120,59 @@ export function UserDashboard({ user }: DashboardProps) {
               <Wallet size={20} className="text-emerald-500" weight="duotone" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-slate-900">$17.00</div>
+              <div className="text-3xl font-bold text-slate-900">
+                {loading ? (
+                  <CircleNotch size={24} className="animate-spin text-slate-400" />
+                ) : (
+                  `$${(earnings?.totalEarned || 0).toFixed(4)}`
+                )}
+              </div>
               <div className="flex items-center text-xs mt-1 text-emerald-600 font-medium">
                 <TrendUp className="mr-1" weight="bold" size={14} />
-                +$6.50 this week
+                Real-time from blockchain
               </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={item}>
+          <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Pending Balance
+              </CardTitle>
+              <Clock size={20} className="text-amber-500" weight="duotone" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-slate-900">
+                {loading ? (
+                  <CircleNotch size={24} className="animate-spin text-slate-400" />
+                ) : (
+                  `$${(earnings?.pendingBalance || 0).toFixed(4)}`
+                )}
+              </div>
+              <p className="text-xs text-slate-500 mt-1">Awaiting payout</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={item}>
+          <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Available Balance
+              </CardTitle>
+              <ShieldCheck size={20} className="text-blue-500" weight="duotone" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-slate-900">
+                {loading ? (
+                  <CircleNotch size={24} className="animate-spin text-slate-400" />
+                ) : (
+                  `$${(earnings?.balance || 0).toFixed(4)}`
+                )}
+              </div>
+              <p className="text-xs text-slate-500 mt-1">Ready to withdraw</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -102,41 +183,11 @@ export function UserDashboard({ user }: DashboardProps) {
               <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Quality Score
               </CardTitle>
-              <Star size={20} className="text-amber-500" weight="duotone" />
+              <Star size={20} className="text-purple-500" weight="duotone" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-slate-900">98.5%</div>
-              <p className="text-xs text-slate-500 mt-1">Excellent data quality</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div variants={item}>
-          <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Active Apps
-              </CardTitle>
-              <ShieldCheck size={20} className="text-blue-500" weight="duotone" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">3</div>
-              <p className="text-xs text-slate-500 mt-1">Sharing your data</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div variants={item}>
-          <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Data Events
-              </CardTitle>
-              <Clock size={20} className="text-purple-500" weight="duotone" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">1,247</div>
-              <p className="text-xs text-slate-500 mt-1">Total contributions</p>
+              <div className="text-3xl font-bold text-slate-900">50%</div>
+              <p className="text-xs text-slate-500 mt-1">Default score</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -152,7 +203,7 @@ export function UserDashboard({ user }: DashboardProps) {
           <CardContent>
             <div className="h-[250px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={earningsData}>
+                <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="userEarningGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
@@ -177,28 +228,46 @@ export function UserDashboard({ user }: DashboardProps) {
           </CardContent>
         </Card>
 
-        {/* Recent Activity */}
+        {/* How It Works */}
         <Card className="col-span-3 glass-panel border-0 shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-bold text-slate-900">Recent Activity</CardTitle>
+            <CardTitle className="text-lg font-bold text-slate-900">How You Earn</CardTitle>
             <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50">
-              Live
+              Active
             </Badge>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle size={18} className="text-emerald-500" weight="fill" />
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{activity.action}</p>
-                      <p className="text-xs text-slate-500">{activity.app} • {activity.time}</p>
-                    </div>
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <CheckCircle size={18} className="text-emerald-500" weight="fill" />
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">Watch Rewarded Ads</p>
+                    <p className="text-xs text-slate-500">$0.015 per view</p>
                   </div>
-                  <span className="text-sm font-bold text-emerald-600">+${activity.earned.toFixed(2)}</span>
                 </div>
-              ))}
+                <span className="text-sm font-bold text-emerald-600">70% share</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <CheckCircle size={18} className="text-emerald-500" weight="fill" />
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">View Banner Ads</p>
+                    <p className="text-xs text-slate-500">$0.002 per view</p>
+                  </div>
+                </div>
+                <span className="text-sm font-bold text-emerald-600">70% share</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <CheckCircle size={18} className="text-emerald-500" weight="fill" />
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">Interstitial Ads</p>
+                    <p className="text-xs text-slate-500">$0.007 per view</p>
+                  </div>
+                </div>
+                <span className="text-sm font-bold text-emerald-600">70% share</span>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -210,7 +279,7 @@ export function UserDashboard({ user }: DashboardProps) {
           <div>
             <h3 className="text-2xl font-bold mb-2">Earn more with quality data</h3>
             <p className="text-blue-100 max-w-md">
-              The higher your data quality score, the more you earn. Keep using trusted apps to boost your earnings.
+              Use apps with DataClaus integration to automatically earn money when you view ads.
             </p>
           </div>
           <Button className="bg-white text-primary hover:bg-blue-50 font-semibold">
