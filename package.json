@@ -4,11 +4,28 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "demo:mobile": "cd apps/demo-mobile && npm start",
-    "demo:backend": "cd apps/demo-backend && npm start"
+    "demo:mobile": "cd apps/tiktok-mobile && npx expo start",
+    "demo:backend": "cd apps/tiktok-backend && npm run start:dev",
+    "demo:seed": "ts-node --transpile-only --project scripts/tsconfig.json scripts/demo-seed.ts",
+    "demo:replay": "ts-node --transpile-only --project scripts/tsconfig.json scripts/demo-replay.ts",
+    "demo:reset": "ts-node --transpile-only --project scripts/tsconfig.json scripts/demo-reset.ts",
+    "dev:api": "cd apps/dataclaus-nestjs-api && pnpm run start:dev",
+    "dev:web": "cd apps/dataclaus-web && npm run dev",
+    "dev:tiktok-be": "cd apps/tiktok-backend && npm run start:dev",
+    "dev:tiktok-mb": "cd apps/tiktok-mobile && npx expo start",
+    "dev:all": "concurrently -n api,web,tk-be,tk-mb -c blue,green,yellow,magenta \"pnpm run dev:api\" \"pnpm run dev:web\" \"pnpm run dev:tiktok-be\" \"pnpm run dev:tiktok-mb\""
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/node": "^22.10.7",
+    "bcrypt": "^6.0.0",
+    "concurrently": "^9.1.2",
+    "dotenv": "^16.4.5",
     "prettier": "^2.6.2",
+    "reflect-metadata": "^0.2.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typeorm": "^0.3.28",
     "typescript": "~5.5.2"
   }
 }

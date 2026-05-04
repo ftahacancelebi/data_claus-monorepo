@@ -1,17 +1,17 @@
 # @dataclaus/sdk-react-native
 
-> React Native SDK for DataClaus - Monetize user data fairly with revenue sharing.
+> React Native SDK for DataClaus - Monetize your app with fair revenue sharing.
 
 [![npm version](https://badge.fury.io/js/@dataclaus%2Fsdk-react-native.svg)](https://www.npmjs.com/package/@dataclaus/sdk-react-native)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
 
-DataClaus enables developers to share advertising and data revenue with their users. This SDK provides:
+DataClaus enables developers to share advertising revenue with their users. This SDK provides:
 
 - **User Identity Linking** - Connect your users to DataClaus accounts for earnings tracking
 - **Ad Revenue Components** - Banner, interstitial, and rewarded ads with automatic revenue sharing
-- **Sensor Data Collection** - Collect behavioral data to earn from data marketplace
+- **Earnings Display** - Show users how much they've earned in real-time
 - **Fraud Detection** - AI-powered bot detection to ensure payouts go to real humans
 
 ## Installation
@@ -128,33 +128,6 @@ function HomeScreen() {
 }
 ```
 
-### 3. Collect Sensor Data (Optional)
-
-For higher earnings, collect behavioral data:
-
-```tsx
-import { useDataClaus, useSensorTracking } from '@dataclaus/sdk-react-native';
-import { Accelerometer, Gyroscope } from 'expo-sensors';
-
-function DataCollection() {
-  const { collector, startCollection, stopCollection } = useDataClaus({
-    backendUrl: 'https://your-backend.com',
-    userId: user.id,
-    debug: __DEV__,
-  });
-
-  // Auto-track sensors
-  useSensorTracking(collector, { Accelerometer, Gyroscope });
-
-  useEffect(() => {
-    startCollection();
-    return () => stopCollection();
-  }, []);
-
-  return <YourApp />;
-}
-```
-
 ## API Reference
 
 ### User Identity
@@ -261,43 +234,6 @@ const { isLoaded, load, show, reward } = useRewardedAd({
   onPaidEvent: (impression) => {
     console.log(`Ad revenue: $${impression.revenue}`);
   },
-});
-```
-
-### Data Collection
-
-#### `useDataClaus(config)`
-
-Main hook for data collection.
-
-```ts
-const {
-  collector,
-  isCollecting,
-  startCollection,
-  stopCollection,
-  trackScreenView,
-  trackCustomEvent,
-} = useDataClaus({
-  backendUrl: string;
-  userId: string;
-  sessionId?: string;
-  collectionInterval?: number;  // Default: 100ms
-  batchSize?: number;           // Default: 50 events
-  flushInterval?: number;       // Default: 5000ms
-  debug?: boolean;
-});
-```
-
-#### `useSensorTracking(collector, sensors)`
-
-Automatically tracks accelerometer and gyroscope data.
-
-```ts
-import { Accelerometer, Gyroscope } from 'expo-sensors';
-
-useSensorTracking(collector, { Accelerometer, Gyroscope }, {
-  interval: 100,  // Collection interval in ms
 });
 ```
 

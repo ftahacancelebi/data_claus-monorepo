@@ -8,7 +8,7 @@
  * ```typescript
  * const auth = new DataClausAuth({
  *   apiKey: 'your_api_key',
- *   apiUrl: 'http://localhost:3000',
+ *   apiUrl: 'http://localhost:3002',
  * });
  *
  * // Verify a user's access token
@@ -22,7 +22,7 @@
 import fetch from 'node-fetch';
 
 export interface DataClausAuthConfig {
-  /** DataClaus API URL (default: http://localhost:3000) */
+  /** DataClaus API URL (default: http://localhost:3002) */
   apiUrl?: string;
   /** API Key for HMAC authentication (required for some endpoints) */
   apiKey?: string;
@@ -108,7 +108,7 @@ export class DataClausAuth {
 
   constructor(config: DataClausAuthConfig = {}) {
     this.config = {
-      apiUrl: config.apiUrl || 'http://localhost:3000',
+      apiUrl: config.apiUrl || 'http://localhost:3002',
       apiKey: config.apiKey,
     };
   }

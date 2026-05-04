@@ -17,6 +17,11 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { api, Earnings } from '../../services/api';
+import {
+  useDataClausRealtime,
+  type WalletCreditedEvent,
+  type ScoreCalculatedEvent,
+} from '../../hooks/useDataClausRealtime';
 
 export default function EarningsScreen() {
   const [earnings, setEarnings] = useState<Earnings | null>(null);
@@ -37,6 +42,44 @@ export default function EarningsScreen() {
   useEffect(() => {
     loadEarnings();
   }, [loadEarnings]);
+
+  // Phase 4 — Realtime: live balance + quality score updates.
+  const { status: realtimeStatus, on } = useDataClausRealtime();
+  const [pulse, setPulse] = useState(0);
+
+  useEffect(() => {
+    const offCredit = on<WalletCreditedEvent>('wallet:credited', (event) => {
+      const credit = event.userShare ?? 0;
+      if (credit <= 0) return;
+      setEarnings((prev) =>
+        prev
+          ? {
+              ...prev,
+              totalEarned: prev.totalEarned + credit,
+              availableBalance: prev.availableBalance + credit,
+            }
+          : prev,
+      );
+      setPulse((p) => p + 1);
+    });
+
+    const offScore = on<ScoreCalculatedEvent>('event:scored', (event) => {
+      setEarnings((prev) =>
+        prev
+          ? {
+              ...prev,
+              qualityScore:
+                prev.qualityScore * 0.85 + Number(event.qualityScore) * 0.15,
+            }
+          : prev,
+      );
+    });
+
+    return () => {
+      offCredit();
+      offScore();
+    };
+  }, [on]);
 
   // Pull-to-refresh handler
   const onRefresh = async () => {
@@ -114,11 +157,35 @@ export default function EarningsScreen() {
         colors={['#fe2c55', '#000']}
         style={styles.header}
       >
-        <Text style={styles.headerTitle}>Your Earnings</Text>
-        <Text style={styles.totalAmount}>
+        <View style={styles.headerRow}>
+          <Text style={styles.headerTitle}>Your Earnings</Text>
+          <View style={styles.liveBadge}>
+            <View
+              style={[
+                styles.liveDot,
+                {
+                  backgroundColor:
+                    realtimeStatus === 'connected'
+                      ? '#22c55e'
+                      : realtimeStatus === 'connecting'
+                        ? '#fbbf24'
+                        : 'rgba(255,255,255,0.4)',
+                },
+              ]}
+            />
+            <Text style={styles.liveText}>
+              {realtimeStatus === 'connected' ? 'LIVE' : realtimeStatus.toUpperCase()}
+            </Text>
+          </View>
+        </View>
+        <Text style={[styles.totalAmount, pulse > 0 && styles.totalAmountPulse]}>
           ${totalEarned.toFixed(4)}
         </Text>
-        <Text style={styles.totalLabel}>Total Earned (Pull down to refresh)</Text>
+        <Text style={styles.totalLabel}>
+          {realtimeStatus === 'connected'
+            ? 'Streaming live from DataClaus'
+            : 'Pull down to refresh'}
+        </Text>
       </LinearGradient>
 
       {/* Balance Cards */}
@@ -230,17 +297,46 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     alignItems: 'center',
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
   headerTitle: {
     color: 'rgba(255, 255, 255, 0.8)',
     fontSize: 16,
     fontWeight: '500',
-    marginBottom: 8,
+  },
+  liveBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  liveText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.6,
   },
   totalAmount: {
     color: '#fff',
     fontSize: 48,
     fontWeight: '800',
     marginBottom: 4,
+  },
+  totalAmountPulse: {
+    textShadowColor: 'rgba(34, 197, 94, 0.6)',
+    textShadowRadius: 18,
   },
   totalLabel: {
     color: 'rgba(255, 255, 255, 0.6)',

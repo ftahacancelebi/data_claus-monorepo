@@ -244,28 +244,11 @@ export class RecaptchaVerifier {
         `Verification complete: score=${score}, isBot=${isBot}, valid=${tokenValid}`
       );
 
-      // REPORT TO DATACLAUS ANALYTICS (Fire and Forget)
-      if (this.analyticsClient && request.userId) {
-        this.analyticsClient
-          .ingest({
-            userId: request.userId,
-            eventType: 'recaptcha_assessment',
-            timestamp: new Date().toISOString(),
-            payload: {
-              raw: {
-                score,
-                is_bot: isBot,
-                valid: tokenValid,
-                action: request.expectedAction,
-                reasons,
-                assessment_id: assessment.name,
-              },
-            },
-          })
-          .catch((err) => {
-            this.log('Failed to report analytics to DataClaus:', err);
-          });
-      }
+      // NOTE: Recaptcha analytics reporting was removed — the new
+      // /v1/ingest/batch endpoint requires fraudScore + externalUserId +
+      // session info that this caller doesn't have. recaptcha results
+      // should be reported via a dedicated /v1/recaptcha endpoint
+      // (Phase 3) instead of piggy-backing on the sensor ingest path.
 
       return result;
     } catch (error) {

@@ -1,23 +1,35 @@
 {
   "name": "@dataclaus/sdk-node",
-  "version": "1.0.0",
-  "description": "DataClaus Node.js SDK for server-side data ingestion with HMAC authentication",
+  "version": "2.0.0",
+  "description": "DataClaus Node.js SDK for server-side ad impression recording, user management, and revenue tracking with HMAC authentication",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "dataclaus",
     "sdk",
-    "analytics",
-    "data",
-    "hmac"
+    "ads",
+    "revenue",
+    "authentication",
+    "hmac",
+    "ad-monetization",
+    "revenue-sharing"
   ],
   "author": "DataClaus",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dataclaus/dataclaus-sdk-node"
+  },
+  "homepage": "https://docs.dataclaus.io",
+  "bugs": {
+    "url": "https://github.com/dataclaus/dataclaus-sdk-node/issues"
+  },
   "dependencies": {
     "@google-cloud/recaptcha-enterprise": "^6.3.1",
     "node-fetch": "^2.7.0"
@@ -28,6 +40,10 @@
     "typescript": "^5.0.0"
   },
   "files": [
-    "dist"
-  ]
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  }
 }

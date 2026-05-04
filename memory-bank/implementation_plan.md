@@ -1,4 +1,4 @@
-# DataClaus Platform - Implementation Plan (Revised)
+# DataClaus Platform - Implementation Plan (NestJS Edition)
 
 ## Key Clarification: Unified User System
 
@@ -28,7 +28,7 @@
 
 ---
 
-## Entity Architecture
+## Entity Architecture (TypeORM)
 
 ### Platform Entities (Staff/Business)
 
@@ -74,193 +74,119 @@ erDiagram
 
 ---
 
-## Phase 1: DataClaus User System
+## Phase 1: DataClaus User System (NestJS)
 
 ### 1.1 Database Entity
 
-#### [NEW] `dataclaus-api/internal/core/domain/dataclaus_user.go`
+#### [NEW] `apps/dataclaus-nestjs-api/src/dataclaus-user/entities/dataclaus-user.entity.ts`
 
-```go
-package domain
+```typescript
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Wallet } from '../../wallet/entities/wallet.entity';
 
-import (
-    "time"
-    "github.com/google/uuid"
-)
+@Entity('dataclaus_users')
+export class DataClausUser {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-// DataClausUser represents an end-user of the platform
-// This is the SAME user across all developer apps AND the web portal
-type DataClausUser struct {
-    ID                uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+  // Authentication
+  @Column({ unique: true })
+  phone: string;
 
-    // Authentication
-    Phone             string     `gorm:"uniqueIndex;not null"` // Primary login method
-    PhoneVerified     bool       `gorm:"default:false"`
-    Email             *string    `gorm:"uniqueIndex"`          // Optional, for web login
-    EmailVerified     bool       `gorm:"default:false"`
-    PasswordHash      *string    // For web portal login (optional)
+  @Column({ default: false })
+  phoneVerified: boolean;
 
-    // Profile
-    DisplayName       *string
-    AvatarURL         *string
+  @Column({ unique: true, nullable: true })
+  email: string;
 
-    // Device fingerprinting for fraud detection
-    DeviceFingerprints []DeviceFingerprint `gorm:"foreignKey:UserID"`
+  @Column({ default: false })
+  emailVerified: boolean;
 
-    // Financial
-    WalletID          uuid.UUID  `gorm:"type:uuid"`
-    Wallet            Wallet     `gorm:"foreignKey:WalletID"`
+  @Column({ nullable: true })
+  passwordHash: string;
 
-    // Quality & Earnings
-    QualityScore      float64    `gorm:"default:0.5"`  // 0.0 to 1.0
-    TotalEarned       float64    `gorm:"default:0"`
-    PendingBalance    float64    `gorm:"default:0"`    // Below threshold amounts
+  // Profile
+  @Column({ nullable: true })
+  displayName: string;
 
-    // Metadata
-    LastLoginAt       *time.Time
-    LastActiveAt      *time.Time
-    CreatedAt         time.Time
-    UpdatedAt         time.Time
-}
+  @Column({ nullable: true })
+  avatarUrl: string;
 
-// DeviceFingerprint stores device info for fraud detection
-type DeviceFingerprint struct {
-    ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-    UserID    uuid.UUID `gorm:"type:uuid;index"`
-    Hash      string    `gorm:"index"` // Hashed fingerprint
-    Platform  string    // ios, android, web
-    LastSeenAt time.Time
-    CreatedAt time.Time
-}
+  // Financial
+  @Column('uuid')
+  walletId: string;
 
-// OTPCode stores pending OTP verifications
-type OTPCode struct {
-    ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-    Phone     string    `gorm:"index;not null"`
-    Code      string    `gorm:"not null"` // Hashed OTP
-    ExpiresAt time.Time
-    Used      bool      `gorm:"default:false"`
-    CreatedAt time.Time
-}
+  @OneToOne(() => Wallet)
+  @JoinColumn({ name: 'walletId' })
+  wallet: Wallet;
 
-// UserSession stores active user sessions
-type UserSession struct {
-    ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-    UserID       uuid.UUID `gorm:"type:uuid;index"`
-    Token        string    `gorm:"uniqueIndex"` // JWT or session token
-    DeviceInfo   string    // JSON device info
-    IPAddress    string
-    ExpiresAt    time.Time
-    CreatedAt    time.Time
+  // Quality & Earnings
+  @Column('decimal', { precision: 5, scale: 4, default: 0.5 })
+  qualityScore: number;
+
+  @Column('decimal', { precision: 12, scale: 4, default: 0 })
+  totalEarned: number;
+
+  @Column('decimal', { precision: 12, scale: 4, default: 0 })
+  pendingBalance: number;
+
+  // Metadata
+  @Column({ type: 'timestamp', nullable: true })
+  lastLoginAt: Date;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
 ```
 
 ---
 
-### 1.2 Repository Layer
+### 1.2 Service Layer
 
-#### [NEW] `dataclaus-api/internal/adapters/repository/postgres/dataclaus_user_repo.go`
+#### [NEW] `apps/dataclaus-nestjs-api/src/dataclaus-user/dataclaus-user.service.ts`
 
-```go
-type DataClausUserRepository interface {
-    Create(ctx context.Context, user *domain.DataClausUser) error
-    GetByID(ctx context.Context, id uuid.UUID) (*domain.DataClausUser, error)
-    GetByPhone(ctx context.Context, phone string) (*domain.DataClausUser, error)
-    GetByEmail(ctx context.Context, email string) (*domain.DataClausUser, error)
-    Update(ctx context.Context, user *domain.DataClausUser) error
+```typescript
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { DataClausUser } from './entities/dataclaus-user.entity';
 
-    // OTP methods
-    CreateOTP(ctx context.Context, otp *domain.OTPCode) error
-    GetValidOTP(ctx context.Context, phone, code string) (*domain.OTPCode, error)
-    MarkOTPUsed(ctx context.Context, id uuid.UUID) error
+@Injectable()
+export class DataClausUserService {
+  constructor(
+    @InjectRepository(DataClausUser)
+    private userRepository: Repository<DataClausUser>,
+  ) {}
 
-    // Session methods
-    CreateSession(ctx context.Context, session *domain.UserSession) error
-    GetSession(ctx context.Context, token string) (*domain.UserSession, error)
-    DeleteSession(ctx context.Context, token string) error
-    DeleteUserSessions(ctx context.Context, userID uuid.UUID) error
+  async findByPhone(phone: string): Promise<DataClausUser | undefined> {
+    return this.userRepository.findOne({ where: { phone } });
+  }
+
+  // OTP Logic
+  async requestOtp(phone: string): Promise<void> { /* ... */ }
+  async verifyOtp(phone: string, code: string): Promise<DataClausUser> { /* ... */ }
 }
 ```
 
 ---
 
-### 1.3 Service Layer
+### 1.3 Controllers & Auth
 
-#### [NEW] `dataclaus-api/internal/core/services/dataclaus_user_service.go`
+#### [NEW] `apps/dataclaus-nestjs-api/src/auth/auth.controller.ts`
 
-```go
-type DataClausUserService interface {
-    // OTP Authentication
-    RequestOTP(ctx context.Context, phone string) error
-    VerifyOTP(ctx context.Context, phone, code string) (*LoginResponse, error)
-
-    // Session Management
-    ValidateToken(ctx context.Context, token string) (*domain.DataClausUser, error)
-    RefreshToken(ctx context.Context, token string) (*LoginResponse, error)
-    Logout(ctx context.Context, token string) error
-
-    // Profile
-    GetProfile(ctx context.Context, userID uuid.UUID) (*UserProfile, error)
-    UpdateProfile(ctx context.Context, userID uuid.UUID, req UpdateProfileRequest) error
-
-    // Earnings
-    GetEarnings(ctx context.Context, userID uuid.UUID) (*UserEarnings, error)
-    GetTransactionHistory(ctx context.Context, userID uuid.UUID, page, limit int) ([]Transaction, error)
-}
-
-type LoginResponse struct {
-    User         UserProfile `json:"user"`
-    AccessToken  string      `json:"access_token"`
-    RefreshToken string      `json:"refresh_token"`
-    ExpiresIn    int         `json:"expires_in"` // seconds
-}
-```
-
----
-
-### 1.4 HTTP Handlers
-
-#### [NEW] `dataclaus-api/internal/adapters/http/dataclaus_user_auth.go`
-
-Endpoints for user authentication:
+NestJS controllers handle the routing and guard logic (JWT & HMAC).
 
 | Method | Endpoint                 | Description                |
 | ------ | ------------------------ | -------------------------- |
-| POST   | `/auth/user/request-otp` | Send OTP to phone          |
-| POST   | `/auth/user/verify-otp`  | Verify OTP, create session |
-| POST   | `/auth/user/refresh`     | Refresh access token       |
-| POST   | `/auth/user/logout`      | Invalidate session         |
-| GET    | `/auth/user/me`          | Get current user profile   |
-| PUT    | `/auth/user/profile`     | Update profile             |
+| POST   | `/api/auth/request-otp`  | Send OTP to phone          |
+| POST   | `/api/auth/verify-otp`   | Verify OTP, return JWT     |
+| POST   | `/api/auth/refresh`      | Refresh access token       |
+| GET    | `/api/auth/me`           | Get current user profile   |
 
----
-
-### 1.5 Update Server Routes
-
-#### [MODIFY] `dataclaus-api/internal/adapters/http/server.go`
-
-Add new handler and routes:
-
-```go
-type Handlers struct {
-    // ... existing handlers
-    DataClausUser *DataClausUserHandler // NEW
-}
-
-// In NewServer:
-// User Authentication (End Users)
-userAuth := e.Group("/auth/user")
-userAuth.POST("/request-otp", h.DataClausUser.RequestOTP)
-userAuth.POST("/verify-otp", h.DataClausUser.VerifyOTP)
-userAuth.POST("/refresh", h.DataClausUser.RefreshToken)
-userAuth.POST("/logout", h.DataClausUser.Logout)
-userAuth.GET("/me", h.DataClausUser.GetMe, userAuthMiddleware)
-userAuth.PUT("/profile", h.DataClausUser.UpdateProfile, userAuthMiddleware)
-
-// User Earnings
-e.GET("/users/:userId/earnings", h.DataClausUser.GetEarnings, userAuthMiddleware)
-e.GET("/users/:userId/transactions", h.DataClausUser.GetTransactions, userAuthMiddleware)
-```
+*(Note: Data Ingestion endpoints are protected by `HmacAuthGuard`)*
 
 ---
 
@@ -276,284 +202,83 @@ export interface DataClausAuthConfig {
   siteKey: string; // reCAPTCHA site key
 }
 
-export interface AuthState {
-  user: DataClausUser | null;
-  accessToken: string | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-}
-
-export interface DataClausUser {
-  id: string;
-  phone: string;
-  displayName?: string;
-  avatarUrl?: string;
-  qualityScore: number;
-  totalEarned: number;
-  pendingBalance: number;
-}
-
 export class DataClausAuth {
-  private config: DataClausAuthConfig;
-  private state: AuthState;
-
-  constructor(config: DataClausAuthConfig);
-
   // OTP Flow
   async requestOTP(phone: string, recaptchaToken: string): Promise<void>;
   async verifyOTP(phone: string, otp: string): Promise<LoginResult>;
-
-  // Session
-  async refreshToken(): Promise<void>;
-  async logout(): Promise<void>;
-
-  // Token for API calls
-  getAccessToken(): string | null;
-  getUser(): DataClausUser | null;
-  isAuthenticated(): boolean;
-
-  // Persistence
-  async restoreSession(): Promise<boolean>;
+  
+  // HMAC Signatures for API integration
+  signPayload(payload: any, secret: string): string;
 }
 ```
 
 ---
 
-### 2.2 React Hooks
-
-#### [NEW] `packages/sdk-react-native/src/auth/useDataClausAuth.ts`
-
-```typescript
-export function useDataClausAuth(): {
-  user: DataClausUser | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  requestOTP: (phone: string) => Promise<void>;
-  verifyOTP: (phone: string, otp: string) => Promise<void>;
-  logout: () => Promise<void>;
-  refreshEarnings: () => Promise<void>;
-};
-```
-
----
-
-### 2.3 Auth Provider
-
-#### [NEW] `packages/sdk-react-native/src/auth/DataClausAuthProvider.tsx`
-
-```typescript
-export function DataClausAuthProvider({
-  children,
-  config,
-  onAuthStateChange,
-}: {
-  children: React.ReactNode;
-  config: DataClausAuthConfig;
-  onAuthStateChange?: (state: AuthState) => void;
-}): JSX.Element;
-```
-
----
-
-## Phase 3: Ad Revenue System (Real Implementation)
+## Phase 3: Ad Revenue System (NestJS & Double-Entry Ledger)
 
 ### 3.1 Ad Impression Entity
 
-#### [NEW] `dataclaus-api/internal/core/domain/ad_impression.go`
-
-```go
-type AdImpression struct {
-    ID            uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-
-    // Relationships
-    ApplicationID uuid.UUID `gorm:"type:uuid;index;not null"`
-    UserID        uuid.UUID `gorm:"type:uuid;index;not null"`
-
-    // Ad Details
-    AdType        string    `gorm:"not null"` // banner, interstitial, rewarded
-    AdUnitID      string    // Google AdMob unit ID
-    AdNetworkName string    `gorm:"default:'admob'"`
-
-    // Revenue (in USD)
-    GrossRevenue  float64   `gorm:"not null"` // Total from ad network
-    UserShare     float64   `gorm:"not null"` // User's portion
-    DevShare      float64   `gorm:"not null"` // Developer's portion
-    PlatformFee   float64   `gorm:"not null"` // Platform's 5%
-
-    // Distribution Status
-    Distributed   bool      `gorm:"default:false"`
-    DistributedAt *time.Time
-
-    // Metadata
-    Currency      string    `gorm:"default:'USD'"`
-    IPAddress     string
-    DeviceInfo    string    // JSON
-    CreatedAt     time.Time
-}
-```
-
----
-
-### 3.2 Ads Service
-
-#### [NEW] `dataclaus-api/internal/core/services/ads_service.go`
-
-```go
-type AdsService interface {
-    // Record impression and distribute revenue
-    RecordImpression(ctx context.Context, req RecordImpressionRequest) (*ImpressionResult, error)
-
-    // Get ad config for application
-    GetAdConfig(ctx context.Context, appID uuid.UUID) (*AdConfig, error)
-
-    // Revenue summaries
-    GetAppRevenueSummary(ctx context.Context, appID uuid.UUID, period string) (*RevenueSummary, error)
-    GetUserRevenueSummary(ctx context.Context, userID uuid.UUID, period string) (*RevenueSummary, error)
-}
-
-type RecordImpressionRequest struct {
-    ApplicationID uuid.UUID
-    UserID        uuid.UUID
-    AdType        string
-    GrossRevenue  float64
-    AdUnitID      string
-    IPAddress     string
-    DeviceInfo    string
-}
-
-type ImpressionResult struct {
-    ImpressionID  uuid.UUID `json:"impression_id"`
-    UserShare     float64   `json:"user_share"`
-    DevShare      float64   `json:"dev_share"`
-    PlatformFee   float64   `json:"platform_fee"`
-    UserNewTotal  float64   `json:"user_new_total"`
-}
-```
-
----
-
-## Phase 4: reCAPTCHA Enterprise Backend Proxy
-
-### 4.1 reCAPTCHA Handler
-
-#### [NEW] `dataclaus-api/internal/adapters/http/recaptcha.go`
-
-```go
-type RecaptchaHandler struct {
-    client *recaptchaenterprise.Client
-    config RecaptchaConfig
-}
-
-type RecaptchaConfig struct {
-    ProjectID      string
-    SiteKey        string
-    ScoreThreshold float64
-}
-
-// Endpoints
-func (h *RecaptchaHandler) Verify(c echo.Context) error
-func (h *RecaptchaHandler) Annotate(c echo.Context) error
-```
-
----
-
-### 4.2 Environment Configuration
-
-#### [MODIFY] `dataclaus-api/internal/config/config.go`
-
-```go
-type Config struct {
-    // ... existing
-
-    // reCAPTCHA Enterprise
-    RecaptchaProjectID      string
-    RecaptchaSiteKey        string
-    RecaptchaScoreThreshold float64
-    GoogleCredentialsPath   string // Path to service account JSON
-}
-```
-
----
-
-## Phase 5: Web Portal User Dashboard
-
-### 5.1 User Pages
-
-#### [NEW] `dataclaus-web/src/app/(user)/layout.tsx`
-
-User-specific layout with navigation.
-
-#### [NEW] `dataclaus-web/src/app/(user)/earnings/page.tsx`
-
-- Current balance (available + pending)
-- Quality score with explanation
-- Earnings chart over time
-- Breakdown by app
-
-#### [NEW] `dataclaus-web/src/app/(user)/history/page.tsx`
-
-- Transaction history table
-- Filter by type (ad revenue, withdrawal, etc.)
-- Export functionality
-
-#### [NEW] `dataclaus-web/src/app/(user)/settings/page.tsx`
-
-- Profile settings
-- Linked devices
-- Withdrawal settings (future)
-
----
-
-## Phase 6: Update Demo Apps
-
-### 6.1 TikTok Mobile
-
-#### [MODIFY] `apps/tiktok-mobile/app/_layout.tsx`
-
-Replace custom auth with DataClaus SDK auth:
+#### [NEW] `apps/dataclaus-nestjs-api/src/ads/entities/ad-impression.entity.ts`
 
 ```typescript
-import { DataClausAuthProvider } from "@dataclaus/sdk-react-native";
+@Entity('ad_impressions')
+export class AdImpression {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-export default function RootLayout() {
-  return (
-    <DataClausAuthProvider
-      config={{
-        apiUrl: process.env.EXPO_PUBLIC_DATACLAUS_API_URL!,
-        siteKey: process.env.EXPO_PUBLIC_RECAPTCHA_SITE_KEY!,
-      }}
-    >
-      <Stack />
-    </DataClausAuthProvider>
-  );
+  @Column('uuid')
+  applicationId: string;
+
+  @Column('uuid')
+  userId: string;
+
+  @Column()
+  adType: string; // banner, interstitial, rewarded
+
+  @Column('decimal', { precision: 10, scale: 6 })
+  grossRevenue: number;
+
+  @Column('decimal', { precision: 10, scale: 6 })
+  userShare: number;
+
+  @Column('decimal', { precision: 10, scale: 6 })
+  devShare: number;
+
+  @Column('decimal', { precision: 10, scale: 6 })
+  platformFee: number;
+
+  @Column({ default: false })
+  distributed: boolean;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }
 ```
 
 ---
 
-### 6.2 TikTok Backend
+### 3.2 Ads Service & Ledger Integration
 
-#### [MODIFY] `apps/tiktok-backend/src/routes/auth.ts`
-
-Remove custom auth, add DataClaus token verification:
+#### [NEW] `apps/dataclaus-nestjs-api/src/ads/ads.service.ts`
 
 ```typescript
-import { DataClausClient } from "@dataclaus/sdk-node";
+@Injectable()
+export class AdsService {
+  constructor(
+    private walletService: WalletService,
+    private ledgerService: LedgerService,
+  ) {}
 
-const dataclaus = new DataClausClient({
-  apiKey: process.env.DATACLAUS_API_KEY!,
-  apiUrl: process.env.DATACLAUS_API_URL!,
-  developerId: process.env.DATACLAUS_DEVELOPER_ID!,
-});
-
-// Middleware to verify DataClaus user token
-async function verifyDataClausUser(req, res, next) {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-  if (!token) return res.status(401).json({ error: "No token" });
-
-  const user = await dataclaus.verifyUserToken(token);
-  req.dataclausUser = user;
-  next();
+  @Transactional() // All financial operations must be atomic
+  async recordImpression(req: RecordImpressionDto): Promise<ImpressionResult> {
+    // 1. Calculate shares based on Application.userSharePercent
+    // 2. Insert AdImpression
+    // 3. Create LedgerTransaction entries (Double-Entry)
+    //    - Debit Platform/AdNetwork Wallet
+    //    - Credit User Wallet
+    //    - Credit Developer Wallet
+    // 4. Return result
+  }
 }
 ```
 
@@ -561,52 +286,33 @@ async function verifyDataClausUser(req, res, next) {
 
 ## Implementation Order
 
-1. **Phase 1.1-1.5**: DataClaus User backend (entities, repos, services, handlers)
-2. **Phase 3**: Ad Impression system (needs user system first)
-3. **Phase 4**: reCAPTCHA proxy (needed for mobile auth)
-4. **Phase 2**: Mobile SDK auth module
+1. **Phase 1**: DataClaus User backend (Entities, Services, Controllers in NestJS)
+2. **Phase 2**: Ad Impression system & Ledger Atomicity
+3. **Phase 3**: HMAC Guards for Webhook and SDK security (`HmacAuthGuard`)
+4. **Phase 4**: Mobile SDK auth module updates
 5. **Phase 5**: Web portal user pages
-6. **Phase 6**: Update demo apps
+6. **Phase 6**: Update demo apps (TikTok clone to use new NestJS API)
 
 ---
 
-## Files to Create/Modify Summary
+## Files to Create/Modify Summary (NestJS Stack)
 
-### New Files (Backend)
+### Backend (`apps/dataclaus-nestjs-api`)
+- `src/dataclaus-user/entities/dataclaus-user.entity.ts`
+- `src/dataclaus-user/dataclaus-user.service.ts`
+- `src/auth/auth.controller.ts`
+- `src/auth/guards/hmac-auth.guard.ts` (Critical for SDK)
+- `src/ads/entities/ad-impression.entity.ts`
+- `src/ads/ads.service.ts`
+- `src/ledger/ledger.service.ts`
 
-- `dataclaus-api/internal/core/domain/dataclaus_user.go`
-- `dataclaus-api/internal/adapters/repository/postgres/dataclaus_user_repo.go`
-- `dataclaus-api/internal/core/services/dataclaus_user_service.go`
-- `dataclaus-api/internal/adapters/http/dataclaus_user_auth.go`
-- `dataclaus-api/internal/core/domain/ad_impression.go`
-- `dataclaus-api/internal/adapters/repository/postgres/ad_impression_repo.go`
-- `dataclaus-api/internal/core/services/ads_service.go`
-- `dataclaus-api/internal/adapters/http/ads.go`
-- `dataclaus-api/internal/adapters/http/recaptcha.go`
+### SDK (`packages/sdk-react-native`)
+- `src/auth/DataClausAuth.ts`
+- `src/utils/hmac.ts`
 
-### New Files (SDK)
+### Web (`apps/dataclaus-web`)
+- `src/app/(user)/layout.tsx`
+- `src/app/(user)/earnings/page.tsx`
+- `src/app/(user)/history/page.tsx`
 
-- `sdk-react-native/src/auth/DataClausAuth.ts`
-- `sdk-react-native/src/auth/useDataClausAuth.ts`
-- `sdk-react-native/src/auth/DataClausAuthProvider.tsx`
-- `sdk-react-native/src/auth/index.ts`
-
-### New Files (Web)
-
-- `dataclaus-web/src/app/(user)/layout.tsx`
-- `dataclaus-web/src/app/(user)/earnings/page.tsx`
-- `dataclaus-web/src/app/(user)/history/page.tsx`
-- `dataclaus-web/src/app/(user)/settings/page.tsx`
-
-### Modified Files
-
-- `dataclaus-api/internal/adapters/http/server.go`
-- `dataclaus-api/internal/database/migrations.go`
-- `dataclaus-api/cmd/api/main.go`
-- `sdk-react-native/src/index.ts`
-- `tiktok-mobile/app/_layout.tsx`
-- `tiktok-backend/src/routes/auth.ts`
-
----
-
-_Ready to proceed with Phase 1 implementation._
+_Ready to proceed with Phase 1 implementation under NestJS architecture._

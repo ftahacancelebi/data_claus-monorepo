@@ -13,29 +13,47 @@ import fetch from 'node-fetch';
 export interface DataClausConfig {
   /** Your DataClaus API Key (the raw key returned when generating) */
   apiKey: string;
-  /** DataClaus API URL (default: http://localhost:3000) */
+  /** DataClaus API URL (default: http://localhost:3002) */
   apiUrl?: string;
   /** Developer ID (your developer UUID) */
   developerId: string;
 }
 
 export interface SensorEvent {
-  /** Unique event ID (generated if not provided) */
+  /** Unique event ID (generated if not provided). Used by API as replay guard. */
   eventId?: string;
-  /** User ID in your system */
-  userId: string;
-  /** Event type: 'accelerometer' | 'gyroscope' | 'touch' | 'scroll' | 'session' */
-  eventType: string;
-  /** Timestamp in ISO format */
+  /**
+   * The DataClaus user id (UUID) representing the end user of your app.
+   * Capstone constraint: must match a DataClausUser id.
+   */
+  externalUserId: string;
+  /** Event type: 'accelerometer' | 'gyroscope' | 'touch' | 'scroll' | 'session' | 'screen_view' */
+  eventType:
+    | 'accelerometer'
+    | 'gyroscope'
+    | 'touch'
+    | 'scroll'
+    | 'session'
+    | 'screen_view';
+  /** Timestamp in ISO 8601 format */
   timestamp: string;
+  /**
+   * SDK-computed fraud score in [0,1]. 0 = trusted human, 1 = bot.
+   * Required by the DataClaus ingest endpoint.
+   */
+  fraudScore: number;
   /** Sensor payload data */
   payload: SensorPayload;
-  /** Optional campaign ID for targeting */
-  campaignId?: string;
   /** Session ID to group events */
   sessionId?: string;
   /** Device metadata */
   device?: DeviceInfo;
+}
+
+export interface IngestSessionInfo {
+  sessionId: string;
+  startedAt?: string;
+  externalUserId?: string;
 }
 
 export interface SensorPayload {
@@ -98,14 +116,19 @@ export interface BatchIngestResponse {
  *   developerId: 'your_developer_uuid'
  * });
  *
- * await client.ingest({
- *   userId: 'user123',
- *   eventType: 'accelerometer',
- *   timestamp: new Date().toISOString(),
- *   payload: {
- *     accelerometer: { x: 0.1, y: 0.2, z: 9.8 }
- *   }
- * });
+ * await client.ingestBatch(
+ *   [
+ *     {
+ *       eventId: 'evt-1',
+ *       externalUserId: 'dataclaus-user-uuid',
+ *       eventType: 'accelerometer',
+ *       timestamp: new Date().toISOString(),
+ *       fraudScore: 0.12, // computed by mobile SDK
+ *       payload: { accelerometer: { x: 0.1, y: 0.2, z: 9.8 } },
+ *     },
+ *   ],
+ *   { session: { sessionId: 'session-uuid' } },
+ * );
  * ```
  */
 export class DataClausClient {
@@ -121,18 +144,25 @@ export class DataClausClient {
 
     this.config = {
       ...config,
-      apiUrl: config.apiUrl || 'http://localhost:3000',
+      apiUrl: config.apiUrl || 'http://localhost:3002',
     };
   }
 
   /**
-   * Generate HMAC signature for the request body
-   * Uses the API Key as the HMAC secret (matching API's hmac.go implementation)
+   * Compute the canonical HMAC signature.
+   * Message format: METHOD|PATH|TIMESTAMP|RAW_BODY
+   * Secret: the apiKey itself (matches NestJS HmacGuard.computeSignature).
    */
-  private generateSignature(body: string): string {
+  private signRequest(
+    method: string,
+    path: string,
+    timestamp: string,
+    body: string,
+  ): string {
+    const message = `${method.toUpperCase()}|${path}|${timestamp}|${body}`;
     return crypto
       .createHmac('sha256', this.config.apiKey)
-      .update(body)
+      .update(message)
       .digest('hex');
   }
 
@@ -144,94 +174,90 @@ export class DataClausClient {
   }
 
   /**
-   * Ingest a single sensor event
+   * Ingest multiple sensor events in a batch (HMAC-protected).
+   *
+   * Wire format matches NestJS IngestBatchDto (camelCase, see the
+   * dataclaus-nestjs-api ingest module).
    */
-  async ingest(event: SensorEvent): Promise<IngestResponse> {
-    const eventId = event.eventId || this.generateEventId();
+  async ingestBatch(
+    events: SensorEvent[],
+    options: {
+      session: IngestSessionInfo;
+      recaptchaToken?: string;
+    },
+  ): Promise<BatchIngestResponse> {
+    if (!Array.isArray(events) || events.length === 0) {
+      throw new Error('ingestBatch: events array is empty');
+    }
+    if (events.length > 100) {
+      throw new Error('ingestBatch: max 100 events per request');
+    }
 
-    const payload = {
-      event_id: eventId,
-      developer_id: this.config.developerId,
-      user_id: event.userId,
-      event_type: event.eventType,
-      timestamp: event.timestamp,
-      payload: event.payload,
-      campaign_id: event.campaignId,
-      session_id: event.sessionId,
-      device: event.device,
+    const processedEvents = events.map((event) => {
+      if (typeof event.fraudScore !== 'number') {
+        throw new Error(
+          `ingestBatch: event ${event.eventId ?? '<no-id>'} missing fraudScore`,
+        );
+      }
+      return {
+        eventId: event.eventId || this.generateEventId(),
+        externalUserId: event.externalUserId,
+        eventType: event.eventType,
+        timestamp: event.timestamp,
+        fraudScore: event.fraudScore,
+        payload: event.payload,
+        sessionId: event.sessionId,
+        device: event.device,
+      };
+    });
+
+    const requestBody = {
+      events: processedEvents,
+      session: options.session,
+      recaptchaToken: options.recaptchaToken,
     };
+    const body = JSON.stringify(requestBody);
+    const path = '/v1/ingest/batch';
+    const timestamp = String(Math.floor(Date.now() / 1000));
+    const signature = this.signRequest('POST', path, timestamp, body);
 
-    const body = JSON.stringify(payload);
-    const signature = this.generateSignature(body);
-
-    const response = await fetch(`${this.config.apiUrl}/v1/ingest`, {
+    const response = await fetch(`${this.config.apiUrl}${path}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-API-Key': this.config.apiKey,
+        'X-Timestamp': timestamp,
         'X-Signature': signature,
       },
       body,
     });
 
     if (!response.ok) {
-      const error = await response
+      const error = (await response
         .json()
-        .catch(() => ({ error: 'Unknown error' }));
+        .catch(() => ({ message: 'Unknown error' }))) as {
+        message?: string;
+        error?: string;
+      };
       throw new Error(
-        `DataClaus API error: ${error.error || response.statusText}`
+        `DataClaus API error: ${error.message || error.error || response.statusText}`,
       );
     }
 
-    return {
-      success: true,
-      eventId,
-      message: 'Event ingested successfully',
+    const data = (await response.json()) as {
+      accepted: number;
+      rejected: number;
+      scoredEventIds: string[];
+      rejections: { eventId: string; reason: string }[];
     };
-  }
-
-  /**
-   * Ingest multiple sensor events in a batch
-   */
-  async ingestBatch(events: SensorEvent[]): Promise<BatchIngestResponse> {
-    const processedEvents = events.map((event) => ({
-      event_id: event.eventId || this.generateEventId(),
-      developer_id: this.config.developerId,
-      user_id: event.userId,
-      event_type: event.eventType,
-      timestamp: event.timestamp,
-      payload: event.payload,
-      campaign_id: event.campaignId,
-      session_id: event.sessionId,
-      device: event.device,
-    }));
-
-    const payload = { events: processedEvents };
-    const body = JSON.stringify(payload);
-    const signature = this.generateSignature(body);
-
-    const response = await fetch(`${this.config.apiUrl}/v1/ingest/batch`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': this.config.apiKey,
-        'X-Signature': signature,
-      },
-      body,
-    });
-
-    if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ error: 'Unknown error' }));
-      throw new Error(
-        `DataClaus API error: ${error.error || response.statusText}`
-      );
-    }
 
     return {
       success: true,
-      processedCount: events.length,
+      processedCount: data.accepted,
+      errors: data.rejections.map((r) => ({
+        eventId: r.eventId,
+        error: r.reason,
+      })),
     };
   }
 
