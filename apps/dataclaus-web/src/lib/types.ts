@@ -29,13 +29,30 @@ export interface Transaction {
   created_at: string;
 }
 
+export interface CampaignTargeting {
+  appCategories?: string[];
+  countries?: string[];
+  minQualityScore?: number;
+  deviceTypes?: ('ios' | 'android')[];
+}
+
 export interface Campaign {
   id: string;
   buyer_id: string;
   name: string;
+  description?: string | null;
+  // Server returns `budget`; legacy clients also expect `total_budget`.
   total_budget: number;
+  budget?: number;
   remaining: number;
+  spent_budget?: number;
+  bid_per_impression?: number;
+  targeting?: CampaignTargeting;
   status: string;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  impressions_served?: number;
+  unique_users_reached?: number;
   created_at: string;
 }
 

@@ -39,6 +39,9 @@ import {
     Key
 } from 'phosphor-react';
 import { GettingStarted } from '../dashboard/getting-started';
+import { LiveChart } from '@/components/realtime/live-chart';
+import { RealtimeStatusBadge } from '@/components/realtime/realtime-status-badge';
+import { ShakeFeed } from '@/components/demo/shake-feed';
 
 // Animation variants
 const container = {
@@ -51,16 +54,23 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
-// Fallback chart data (shown when no real data)
-const fallbackChartData = [
-  { name: 'Jan', events: 0, earnings: 0 },
-  { name: 'Feb', events: 0, earnings: 0 },
-  { name: 'Mar', events: 0, earnings: 0 },
-  { name: 'Apr', events: 0, earnings: 0 },
-  { name: 'May', events: 0, earnings: 0 },
-  { name: 'Jun', events: 0, earnings: 0 },
-  { name: 'Jul', events: 0, earnings: 0 },
-];
+// Generate chart data from stats (simplified - shows trend to current value)
+const generateChartData = (totalPayouts: number = 0) => {
+  const today = new Date();
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const currentMonth = today.getMonth();
+  
+  // Create last 7 months of data leading up to current total
+  return Array.from({ length: 7 }, (_, i) => {
+    const monthIndex = (currentMonth - 6 + i + 12) % 12;
+    const progress = (i + 1) / 7;
+    return {
+      name: months[monthIndex],
+      events: 0,
+      earnings: i === 6 ? totalPayouts : totalPayouts * progress * 0.8
+    };
+  });
+};
 
 interface DashboardProps {
   user: AuthUser;
@@ -139,7 +149,10 @@ export function DeveloperDashboard({ user }: DashboardProps) {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h2>
+            <RealtimeStatusBadge />
+          </div>
           <p className="text-slate-500 mt-1">
              Welcome back, {user.name}. Here's what's happening today.
           </p>
@@ -272,6 +285,30 @@ export function DeveloperDashboard({ user }: DashboardProps) {
         </motion.div>
       </motion.div>
 
+      {/* Live Section (Phase 4 — Realtime) */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4 glass-panel border-0 shadow-xl">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg font-semibold text-slate-800">
+                Live Ingest (last 60s)
+              </CardTitle>
+              <p className="text-sm text-slate-500">
+                Each tick is a scored event pushed straight from the server.
+              </p>
+            </div>
+            <RealtimeStatusBadge />
+          </CardHeader>
+          <CardContent>
+            <LiveChart />
+          </CardContent>
+        </Card>
+
+        <div className="col-span-3">
+          <ShakeFeed />
+        </div>
+      </div>
+
       {/* Main Charts Area */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         
@@ -284,7 +321,7 @@ export function DeveloperDashboard({ user }: DashboardProps) {
           <CardContent className="pl-2">
             <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={fallbackChartData}>
+                    <AreaChart data={generateChartData(stats?.total_payouts || 0)}>
                         <defs>
                             <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>

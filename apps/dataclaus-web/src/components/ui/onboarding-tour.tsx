@@ -26,7 +26,7 @@ interface TourStep {
 
 const tourSteps: TourStep[] = [
   {
-    title: "Welcome to DataClaus! 🎉",
+    title: "Welcome to DataClaus!",
     description: "We're excited to have you here. Let's take a quick tour to help you get started with our platform and understand how everything works.",
     icon: Rocket,
   },

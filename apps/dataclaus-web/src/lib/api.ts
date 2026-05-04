@@ -161,12 +161,28 @@ export const debitWallet = (id: string, amount: number) =>
 export const createCampaign = (data: {
   buyer_id: string;
   name: string;
+  description?: string;
   budget: number;
+  bid_per_impression?: number;
+  targeting?: {
+    appCategories?: string[];
+    countries?: string[];
+    minQualityScore?: number;
+    deviceTypes?: ('ios' | 'android')[];
+  };
+  starts_at?: string;
+  ends_at?: string;
 }) =>
   request<Campaign>('/campaigns', {
     method: 'POST',
     body: JSON.stringify(data),
   });
+
+export const pauseCampaign = (id: string) =>
+  request<Campaign>(`/campaigns/${id}/pause`, { method: 'POST' });
+
+export const resumeCampaign = (id: string) =>
+  request<Campaign>(`/campaigns/${id}/resume`, { method: 'POST' });
 
 export const getCampaigns = () => request<Campaign[]>('/campaigns');
 
@@ -242,6 +258,58 @@ export const releasePendingBalance = (walletId: string) =>
       method: 'POST',
     }
   );
+
+// Payouts (Phase 2 - Financial Integrity)
+export type PayoutMethod = 'bank_simulation' | 'crypto_simulation';
+export type PayoutStatus =
+  | 'requested'
+  | 'approved'
+  | 'completed'
+  | 'rejected'
+  | 'failed';
+
+export interface PayoutRecord {
+  id: string;
+  user_id: string;
+  wallet_id: string;
+  amount: number;
+  currency: string;
+  method: PayoutMethod;
+  status: PayoutStatus;
+  requested_at: string;
+  approved_at: string | null;
+  completed_at: string | null;
+  rejected_at: string | null;
+  rejection_reason: string | null;
+  metadata: Record<string, unknown> | null;
+}
+
+export const requestPayout = (data: {
+  amount: number;
+  method: PayoutMethod;
+  destination?: string;
+}) =>
+  request<PayoutRecord>(`/payouts/request`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const listMyPayouts = () =>
+  request<PayoutRecord[]>('/payouts/me');
+
+export const getPayout = (id: string) =>
+  request<PayoutRecord>(`/payouts/${id}`);
+
+export interface LedgerInvariantStatus {
+  ok: boolean;
+  net: number;
+  totalRows: number;
+  orphans: number;
+  checkedAt: string;
+}
+
+export const checkLedgerInvariant = () =>
+  request<LedgerInvariantStatus>('/admin/ledger/invariant');
 
 // Applications
 export interface Application {
@@ -463,6 +531,103 @@ export const revokeWebhookSecret = (developerId: string, secretId: string) =>
   request<{ status: string }>(`/developers/${developerId}/webhook-secrets/${secretId}`, {
     method: 'DELETE',
   });
+
+// ============================================================
+// USER PORTAL (/me/*) — Phase 5
+// ============================================================
+
+export interface EarningsByApp {
+  applicationId: string;
+  appName: string;
+  category: string | null;
+  totalEarned: number;
+  last7Days: number;
+  qualityScoreAvg: number;
+  impressionCount: number;
+}
+
+export interface LedgerEntry {
+  id: string;
+  date: string;
+  type: string;
+  amount: number;
+  currency: string;
+  applicationId: string | null;
+  applicationName: string | null;
+  status: string;
+  referenceId: string | null;
+}
+
+export interface LedgerPage {
+  items: LedgerEntry[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface QualityHistoryPoint {
+  date: string;
+  averageQuality: number;
+  earnings: number;
+  impressions: number;
+}
+
+export interface UserSession {
+  id: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  lastActiveAt: string;
+  isCurrent: boolean;
+}
+
+export const getMyEarningsByApp = () =>
+  request<EarningsByApp[]>('/me/earnings/by-app');
+
+export const getMyLedger = (params?: {
+  from?: string;
+  to?: string;
+  type?: string;
+  applicationId?: string;
+  page?: number;
+  pageSize?: number;
+}) => {
+  const search = new URLSearchParams();
+  if (params?.from) search.set('from', params.from);
+  if (params?.to) search.set('to', params.to);
+  if (params?.type) search.set('type', params.type);
+  if (params?.applicationId) search.set('applicationId', params.applicationId);
+  if (params?.page) search.set('page', String(params.page));
+  if (params?.pageSize) search.set('pageSize', String(params.pageSize));
+  const qs = search.toString();
+  return request<LedgerPage>(`/me/ledger${qs ? `?${qs}` : ''}`);
+};
+
+export const getMyQualityHistory = (days = 30) =>
+  request<QualityHistoryPoint[]>(`/me/quality-score-history?days=${days}`);
+
+export const getMySessions = () => request<UserSession[]>('/me/sessions');
+
+export const revokeMySession = (id: string) =>
+  request<{ status: string }>(`/me/sessions/${id}`, { method: 'DELETE' });
+
+export const revokeAllMySessions = () =>
+  request<{ status: string }>('/me/sessions', { method: 'DELETE' });
+
+export const getMyEarningsSummary = () =>
+  request<{
+    userId: string;
+    walletId: string | null;
+    balance: number;
+    pendingBalance: number;
+    totalEarned: number;
+    currency: string;
+  }>('/users/me/earnings');
+
+export const requestAccountDeletion = () =>
+  request<{ status: string }>('/me/account/delete-request', { method: 'POST' });
+
+export const cancelAccountDeletion = () =>
+  request<void>('/me/account/delete-request', { method: 'DELETE' });
 
 // Webhook event types that DataClaus sends to developer backends
 export type WebhookEventType =

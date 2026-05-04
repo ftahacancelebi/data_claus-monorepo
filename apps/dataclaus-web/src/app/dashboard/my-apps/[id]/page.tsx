@@ -2,21 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
-import {
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,7 +30,9 @@ import {
   Percent,
   Coins
 } from 'phosphor-react';
-import { getApplication, getApplicationStats } from '@/lib/api';
+import { getApplication, getApplicationStats, getWalletsByOwner, getWalletTransactions } from '@/lib/api';
+import { DeveloperRevenueFlow } from '@/components/apps/developer-revenue-flow';
+import { Transaction } from '@/lib/types';
 
 export default function AppDetailPage() {
   const { user } = useAuth();
@@ -54,6 +42,7 @@ export default function AppDetailPage() {
   const [copied, setCopied] = useState(false);
   
   const [app, setApp] = useState<any>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,6 +92,17 @@ export default function AppDetailPage() {
             { id: 'realtime', name: 'Real-time Analytics', description: 'Live dashboard and metrics', enabled: true, icon: Activity },
           ]
         });
+
+        // Fetch developer wallet transactions
+        try {
+          const wallets = await getWalletsByOwner(user.id);
+          if (wallets && wallets.length > 0) {
+            const txns = await getWalletTransactions(wallets[0].id, 10, 0);
+            setTransactions(txns || []);
+          }
+        } catch (txErr) {
+          console.log('Could not fetch transactions:', txErr);
+        }
       } catch (err) {
         console.error('Failed to load app:', err);
         setError('Failed to load application data.');
@@ -247,111 +247,15 @@ export default function AppDetailPage() {
         </motion.div>
       </div>
 
-      {/* Revenue Distribution & Impact */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Revenue Distribution */}
-        <Card className="glass-panel border-0 shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Percent size={20} className="text-blue-500" />
-              Revenue Distribution
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-               <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100">
-                  <div className="flex items-center gap-3">
-                     <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold">
-                        {app.user_share_percent || 70}%
-                     </div>
-                     <div>
-                        <p className="font-semibold text-slate-900">User Share</p>
-                        <p className="text-sm text-slate-500">Earned by your users</p>
-                     </div>
-                  </div>
-                  <Badge variant="outline" className="border-emerald-200 text-emerald-700 bg-emerald-50">High Impact</Badge>
-               </div>
-               
-               <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100">
-                  <div className="flex items-center gap-3">
-                     <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
-                        {100 - 5 - (app.user_share_percent || 70)}%
-                     </div>
-                     <div>
-                        <p className="font-semibold text-slate-900">Developer Share (Net)</p>
-                        <p className="text-sm text-slate-500">Your revenue</p>
-                     </div>
-                  </div>
-                  <div className="text-right">
-                     <p className="font-bold text-slate-900">
-                        ${(app.stats.revenue * (100 - 5 - (app.user_share_percent || 70)) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                     </p>
-                     <p className="text-xs text-slate-500">Total Net Earned</p>
-                  </div>
-               </div>
-
-               <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100">
-                  <div className="flex items-center gap-3">
-                     <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold">
-                        5%
-                     </div>
-                     <div>
-                        <p className="font-semibold text-slate-900">Platform Fee</p>
-                        <p className="text-sm text-slate-500">DataClaus service fee</p>
-                     </div>
-                  </div>
-               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quality Score / Impact */}
-        <Card className="glass-panel border-0 shadow-xl">
-          <CardHeader>
-             <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
-               <ChartBar size={20} className="text-purple-500" />
-               Quality Impact Score
-             </CardTitle>
-          </CardHeader>
-          <CardContent>
-             <div className="flex flex-col items-center justify-center h-[280px] space-y-4">
-                <div className="relative h-40 w-40 flex items-center justify-center">
-                   <svg className="h-full w-full rotate-[-90deg]" viewBox="0 0 100 100">
-                      <circle
-                         className="text-slate-100"
-                         strokeWidth="8"
-                         stroke="currentColor"
-                         fill="transparent"
-                         r="40"
-                         cx="50"
-                         cy="50"
-                      />
-                      <circle
-                         className="text-purple-500"
-                         strokeWidth="8"
-                         strokeDasharray={251.2}
-                         strokeDashoffset={251.2 - (251.2 * (app.stats.qualityScore || 50) / 100)}
-                         strokeLinecap="round"
-                         stroke="currentColor"
-                         fill="transparent"
-                         r="40"
-                         cx="50"
-                         cy="50"
-                      />
-                   </svg>
-                   <div className="absolute flex flex-col items-center" style={{ transform: 'none' }}>
-                      <span className="text-4xl font-bold text-slate-900">{(app.stats.qualityScore || 50).toFixed(1)}</span>
-                      <span className="text-xs text-slate-500">/ 100</span>
-                   </div>
-                </div>
-                <div className="text-center max-w-sm">
-                   <p className="font-medium text-slate-900">Excellent Data Quality</p>
-                   <p className="text-sm text-slate-500 mt-1">Your application is providing high-quality data streams. This increases eCPM rates and user earnings.</p>
-                </div>
-             </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Revenue Flow Section */}
+      <DeveloperRevenueFlow
+        userSharePercent={app.user_share_percent || 70}
+        platformFee={5}
+        grossRevenue={app.stats.revenue}
+        totalEvents={app.stats.totalEvents}
+        totalUsers={app.stats.activeUsers}
+        transactions={transactions}
+      />
 
        {/* Services */}
        <Card className="glass-panel border-0 shadow-xl">

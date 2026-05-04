@@ -157,13 +157,13 @@ export default function MyAppsPage() {
       if (result.api_key) {
         setNewAppApiKey(result.api_key);
         toast({
-          title: 'Application Created! 🎉',
+          title: 'Application Created!',
           description: 'Your API key has been generated. Copy it now!',
         });
       } else {
         setForm({ name: '', description: '', category: '', userSharePercent: 70 });
         setShowModal(false);
-        toast({ title: 'Application Created! 🎉' });
+        toast({ title: 'Application Created!' });
       }
     } catch (err) {
       console.error('Failed to create app:', err);

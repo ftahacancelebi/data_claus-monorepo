@@ -39,7 +39,7 @@ export default function LoginPage() {
 
   // Redirect if already logged in
   if (!isLoading && user) {
-    router.push('/dashboard');
+    router.push(user.role === 'user' ? '/u/dashboard' : '/dashboard');
     return null;
   }
 
@@ -48,13 +48,21 @@ export default function LoginPage() {
     setSubmitting(true);
 
     try {
+      let resolvedRole: UserRole | undefined;
       if (isRegister) {
         await register(name, email, password, selectedRole);
+        resolvedRole = selectedRole;
         toast({ title: 'Account created successfully' });
       } else {
         await login(email, password);
+        resolvedRole =
+          (typeof window !== 'undefined'
+            ? (JSON.parse(
+                window.localStorage.getItem('dataclaus_user') ?? 'null',
+              )?.role as UserRole | undefined)
+            : undefined) ?? undefined;
       }
-      router.push('/dashboard');
+      router.push(resolvedRole === 'user' ? '/u/dashboard' : '/dashboard');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Authentication failed';
       toast({ title: 'Error', description: message, variant: 'destructive' });

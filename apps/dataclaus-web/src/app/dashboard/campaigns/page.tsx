@@ -47,7 +47,14 @@ export default function CampaignsPage() {
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [showFundForm, setShowFundForm] = useState(false);
-  const [form, setForm] = useState({ name: '', budget: '' });
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    budget: '',
+    bid_per_impression: '',
+    min_quality_score: '',
+    app_categories: '',
+  });
   const [fundAmount, setFundAmount] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -74,6 +81,12 @@ export default function CampaignsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const budget = parseFloat(form.budget);
+    const bid = form.bid_per_impression
+      ? parseFloat(form.bid_per_impression)
+      : undefined;
+    const minQuality = form.min_quality_score
+      ? parseFloat(form.min_quality_score)
+      : undefined;
 
     if (budget <= 0) {
       toast({
@@ -84,14 +97,41 @@ export default function CampaignsPage() {
       return;
     }
 
+    if (bid !== undefined && (bid <= 0 || bid > budget)) {
+      toast({
+        title: 'Error',
+        description: 'Bid must be positive and not exceed total budget',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const appCategories = form.app_categories
+      .split(',')
+      .map((c) => c.trim())
+      .filter(Boolean);
+
     try {
       await createCampaign({
         buyer_id: user.id,
         name: form.name,
+        description: form.description || undefined,
         budget,
+        bid_per_impression: bid,
+        targeting: {
+          minQualityScore: minQuality,
+          appCategories: appCategories.length ? appCategories : undefined,
+        },
       });
       toast({ title: 'Campaign created successfully' });
-      setForm({ name: '', budget: '' });
+      setForm({
+        name: '',
+        description: '',
+        budget: '',
+        bid_per_impression: '',
+        min_quality_score: '',
+        app_categories: '',
+      });
       setShowForm(false);
       fetchData();
     } catch (error: unknown) {
@@ -285,7 +325,7 @@ export default function CampaignsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Budget ($)</Label>
+                <Label>Total Budget ($)</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -294,6 +334,56 @@ export default function CampaignsPage() {
                   onChange={(e) => setForm({ ...form, budget: e.target.value })}
                   placeholder="1000.00"
                   required
+                />
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <Label>Description (optional)</Label>
+                <Input
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
+                  }
+                  placeholder="Audience or goal"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Bid per Impression ($)</Label>
+                <Input
+                  type="number"
+                  step="0.0001"
+                  min="0"
+                  value={form.bid_per_impression}
+                  onChange={(e) =>
+                    setForm({ ...form, bid_per_impression: e.target.value })
+                  }
+                  placeholder="0.0050"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty to use default eCPM (no campaign auction).
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Min Quality Score (0-1)</Label>
+                <Input
+                  type="number"
+                  step="0.05"
+                  min="0"
+                  max="1"
+                  value={form.min_quality_score}
+                  onChange={(e) =>
+                    setForm({ ...form, min_quality_score: e.target.value })
+                  }
+                  placeholder="0.7"
+                />
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <Label>App Categories (comma-separated)</Label>
+                <Input
+                  value={form.app_categories}
+                  onChange={(e) =>
+                    setForm({ ...form, app_categories: e.target.value })
+                  }
+                  placeholder="social, fitness, gaming"
                 />
               </div>
               <div className="md:col-span-2 flex gap-2">
@@ -330,6 +420,8 @@ export default function CampaignsPage() {
                   <TableHead>Budget</TableHead>
                   <TableHead>Remaining</TableHead>
                   <TableHead>Spent</TableHead>
+                  <TableHead>Bid</TableHead>
+                  <TableHead>Impressions</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -349,6 +441,14 @@ export default function CampaignsPage() {
                         campaign.total_budget - campaign.remaining,
                         2
                       )}
+                    </TableCell>
+                    <TableCell>
+                      {campaign.bid_per_impression
+                        ? formatMoney(campaign.bid_per_impression, 4)
+                        : '—'}
+                    </TableCell>
+                    <TableCell>
+                      {(campaign.impressions_served ?? 0).toLocaleString()}
                     </TableCell>
                     <TableCell>
                       <Badge

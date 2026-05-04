@@ -59,12 +59,6 @@ const navItems: NavItem[] = [
     roles: ['developer'],
   },
   {
-    href: '/dashboard/api-keys',
-    label: 'API Keys',
-    icon: ShieldCheck,
-    roles: ['developer'],
-  },
-  {
     href: '/dashboard/docs',
     label: 'SDK Docs',
     icon: Book,
