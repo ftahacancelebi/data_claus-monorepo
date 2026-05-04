@@ -39,6 +39,15 @@ export class RecordImpressionDto {
   @IsUUID()
   @Expose({ name: 'session_id' })
   session_id?: string;
+
+  @ApiPropertyOptional({
+    example: 0.85,
+    description: 'User quality score (0-1) used for campaign targeting',
+  })
+  @IsOptional()
+  @IsNumber()
+  @Expose({ name: 'quality_score' })
+  quality_score?: number;
 }
 
 export class AdRatesResponseDto {
@@ -154,6 +163,12 @@ export class ImpressionResponseDto {
   @ApiProperty()
   @Expose({ name: 'platform_fee' })
   platform_fee: number;
+
+  @ApiPropertyOptional({
+    description: 'Campaign that funded this impression (null = fallback eCPM)',
+  })
+  @Expose({ name: 'campaign_id' })
+  campaign_id: string | null;
 
   @ApiProperty()
   @Expose({ name: 'created_at' })

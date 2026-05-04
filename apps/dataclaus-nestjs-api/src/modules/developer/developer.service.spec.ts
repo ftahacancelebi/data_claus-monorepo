@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { DeveloperService } from './developer.service';
 import { Developer, ApiKey } from './entities';
+import { WalletService } from '../wallet/wallet.service';
 
 describe('DeveloperService', () => {
   let service: DeveloperService;
@@ -42,6 +43,13 @@ describe('DeveloperService', () => {
             find: jest.fn(),
             create: jest.fn(),
             save: jest.fn(),
+          },
+        },
+        {
+          provide: WalletService,
+          useValue: {
+            create: jest.fn(async () => ({ id: 'wallet-1' })),
+            findById: jest.fn(),
           },
         },
       ],
@@ -126,8 +134,8 @@ describe('DeveloperService', () => {
       });
 
       expect(result.name).toBe('Test Key');
-      expect(result.rawKey).toBeDefined();
-      expect(result.rawKey.length).toBe(64);
+      expect(result.raw_key).toBeDefined();
+      expect(result.raw_key.length).toBe(64);
     });
   });
 
@@ -149,6 +157,89 @@ describe('DeveloperService', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('Key 1');
+    });
+  });
+
+  describe('rotateApiKey', () => {
+    const oldKey = {
+      id: 'old-key-id',
+      developerId: mockDeveloper.id,
+      applicationId: null,
+      name: 'Production',
+      keyHash: 'old-hash',
+      keyPrefix: 'oldprfx0',
+      isActive: true,
+      lastUsedAt: null,
+      expiresAt: null,
+      rotatedToId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as unknown as ApiKey;
+
+    it('issues a new key and schedules the old one for expiry', async () => {
+      apiKeyRepo.findOne.mockResolvedValue(oldKey);
+      apiKeyRepo.create.mockReturnValue({
+        id: 'new-key-id',
+        keyPrefix: 'newprfx0',
+        name: 'Production (rotated)',
+        isActive: true,
+        createdAt: new Date(),
+      } as ApiKey);
+      apiKeyRepo.save.mockImplementation(async (v) => v as ApiKey);
+
+      const result = await service.rotateApiKey(mockDeveloper.id, oldKey.id);
+
+      expect(result.newKey.raw_key).toBeDefined();
+      expect(result.newKey.raw_key.length).toBe(64);
+      expect(result.oldKey.id).toBe(oldKey.id);
+      // Grace period: ~7 days from now
+      const expectedMs = Date.now() + 7 * 24 * 60 * 60 * 1000;
+      expect(
+        Math.abs(result.oldKey.expiresAt.getTime() - expectedMs),
+      ).toBeLessThan(2_000);
+    });
+
+    it('rejects rotation of an inactive key', async () => {
+      apiKeyRepo.findOne.mockResolvedValue({
+        ...oldKey,
+        isActive: false,
+      } as unknown as ApiKey);
+      await expect(
+        service.rotateApiKey(mockDeveloper.id, oldKey.id),
+      ).rejects.toThrow(/inactive/);
+    });
+
+    it('rejects rotation of an already-rotated key', async () => {
+      apiKeyRepo.findOne.mockResolvedValue({
+        ...oldKey,
+        rotatedToId: 'other',
+      } as unknown as ApiKey);
+      await expect(
+        service.rotateApiKey(mockDeveloper.id, oldKey.id),
+      ).rejects.toThrow(/already been rotated/);
+    });
+
+    it('throws NotFoundException if the key does not belong to the developer', async () => {
+      apiKeyRepo.findOne.mockResolvedValue(null);
+      await expect(
+        service.rotateApiKey(mockDeveloper.id, 'other-id'),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('validateApiKey', () => {
+    it('skips keys whose grace window has elapsed', async () => {
+      apiKeyRepo.find.mockResolvedValue([
+        {
+          id: 'k1',
+          keyPrefix: 'pfx00000',
+          isActive: true,
+          keyHash: 'unused',
+          expiresAt: new Date(Date.now() - 60_000),
+        } as ApiKey,
+      ]);
+      const result = await service.validateApiKey('pfx00000aaaaaa');
+      expect(result).toBeNull();
     });
   });
 });

@@ -21,6 +21,7 @@ import {
   GeneratedApiKeyResponseDto,
 } from './dto';
 import { Public } from '../../common/decorators';
+import { AuditAction } from '../audit/audit.decorator';
 
 @ApiTags('developers')
 @Controller('developers')
@@ -60,6 +61,7 @@ export class DeveloperController {
   }
 
   @Post(':id/api-keys')
+  @AuditAction({ action: 'developer.api_key.created', targetType: 'api_key' })
   @ApiOperation({ summary: 'Generate a new API key for developer' })
   @ApiResponse({ status: 201, type: GeneratedApiKeyResponseDto })
   @ApiResponse({ status: 404, description: 'Developer not found' })
@@ -82,6 +84,11 @@ export class DeveloperController {
 
   @Delete(':id/api-keys/:keyId')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @AuditAction({
+    action: 'developer.api_key.revoked',
+    targetType: 'api_key',
+    targetIdParam: 'keyId',
+  })
   @ApiOperation({ summary: 'Revoke an API key' })
   @ApiResponse({ status: 204, description: 'API key revoked' })
   @ApiResponse({ status: 404, description: 'API key not found' })
@@ -90,5 +97,25 @@ export class DeveloperController {
     @Param('keyId', ParseUUIDPipe) keyId: string,
   ): Promise<void> {
     return this.developerService.revokeApiKey(id, keyId);
+  }
+
+  @Post(':id/api-keys/:keyId/rotate')
+  @AuditAction({
+    action: 'developer.api_key.rotated',
+    targetType: 'api_key',
+    targetIdParam: 'keyId',
+  })
+  @ApiOperation({
+    summary:
+      'Rotate an API key. Returns the new key and the old key’s expiry timestamp.',
+  })
+  @ApiResponse({ status: 201, type: GeneratedApiKeyResponseDto })
+  @ApiResponse({ status: 400, description: 'Key already rotated or inactive' })
+  @ApiResponse({ status: 404, description: 'API key not found' })
+  async rotateApiKey(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('keyId', ParseUUIDPipe) keyId: string,
+  ) {
+    return this.developerService.rotateApiKey(id, keyId);
   }
 }

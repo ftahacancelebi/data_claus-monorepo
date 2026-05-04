@@ -155,7 +155,71 @@ export class DeveloperService {
       is_active: key.isActive,
       last_used_at: key.lastUsedAt ?? undefined,
       created_at: key.createdAt,
+      expires_at: key.expiresAt ?? undefined,
+      rotated_to_id: key.rotatedToId ?? undefined,
     }));
+  }
+
+  /**
+   * Rotate an API key. Creates a fresh key with the same name and
+   * application binding, and schedules the old key to expire after the
+   * grace period (default 7 days). During the overlap window both keys
+   * are valid so callers can deploy at their own pace.
+   */
+  async rotateApiKey(
+    developerId: string,
+    oldKeyId: string,
+    gracePeriodDays = 7,
+  ): Promise<{
+    newKey: GeneratedApiKeyResponseDto;
+    oldKey: { id: string; expiresAt: Date };
+  }> {
+    const oldKey = await this.apiKeyRepository.findOne({
+      where: { id: oldKeyId, developerId },
+    });
+    if (!oldKey) {
+      throw new NotFoundException('API key not found');
+    }
+    if (!oldKey.isActive) {
+      throw new BadRequestException('Cannot rotate an inactive key');
+    }
+    if (oldKey.rotatedToId) {
+      throw new BadRequestException('Key has already been rotated');
+    }
+
+    // Generate the replacement first so old-key updates are visible only on success.
+    const rawKey = crypto.randomBytes(32).toString('hex');
+    const keyPrefix = rawKey.substring(0, 8);
+    const keyHash = await bcrypt.hash(rawKey, 10);
+
+    const newKey = this.apiKeyRepository.create({
+      developerId,
+      applicationId: oldKey.applicationId,
+      name: `${oldKey.name} (rotated ${new Date().toISOString().slice(0, 10)})`,
+      keyHash,
+      keyPrefix,
+      isActive: true,
+    });
+    const savedNew = await this.apiKeyRepository.save(newKey);
+
+    const expiresAt = new Date(
+      Date.now() + gracePeriodDays * 24 * 60 * 60 * 1000,
+    );
+    oldKey.expiresAt = expiresAt;
+    oldKey.rotatedToId = savedNew.id;
+    await this.apiKeyRepository.save(oldKey);
+
+    return {
+      newKey: {
+        id: savedNew.id,
+        key_prefix: savedNew.keyPrefix,
+        name: savedNew.name,
+        is_active: savedNew.isActive,
+        created_at: savedNew.createdAt,
+        raw_key: rawKey,
+      },
+      oldKey: { id: oldKey.id, expiresAt },
+    };
   }
 
   async revokeApiKey(developerId: string, keyId: string): Promise<void> {
@@ -173,6 +237,7 @@ export class DeveloperService {
 
   async validateApiKey(rawKey: string): Promise<ApiKey | null> {
     const keyPrefix = rawKey.substring(0, 8);
+    const now = new Date();
 
     // Find potential matches by prefix
     const candidates = await this.apiKeyRepository.find({
@@ -180,9 +245,12 @@ export class DeveloperService {
     });
 
     for (const candidate of candidates) {
+      // Skip keys that have aged out of their rotation grace window.
+      if (candidate.expiresAt && candidate.expiresAt <= now) continue;
+
       if (await bcrypt.compare(rawKey, candidate.keyHash)) {
         // Update last used
-        candidate.lastUsedAt = new Date();
+        candidate.lastUsedAt = now;
         await this.apiKeyRepository.save(candidate);
         return candidate;
       }

@@ -67,4 +67,22 @@ export class CampaignController {
   ): Promise<CampaignResponseDto> {
     return this.campaignService.updateStatus(id, dto);
   }
+
+  @Post(':id/pause')
+  @ApiOperation({ summary: 'Pause an active campaign' })
+  @ApiResponse({ status: 200, type: CampaignResponseDto })
+  async pause(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<CampaignResponseDto> {
+    return this.campaignService.pause(id);
+  }
+
+  @Post(':id/resume')
+  @ApiOperation({ summary: 'Resume a paused campaign' })
+  @ApiResponse({ status: 200, type: CampaignResponseDto })
+  async resume(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<CampaignResponseDto> {
+    return this.campaignService.resume(id);
+  }
 }

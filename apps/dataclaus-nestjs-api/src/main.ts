@@ -2,15 +2,17 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { DataSource } from 'typeorm';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters';
 import {
   LoggingInterceptor,
   TransformInterceptor,
 } from './common/interceptors';
+import { ensureSystemWallets } from './database/seeds/system-wallet.seed';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 
@@ -51,6 +53,18 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+
+  // Seed singleton system wallets (idempotent, safe on every boot).
+  try {
+    const dataSource = app.get(DataSource);
+    await ensureSystemWallets(dataSource);
+  } catch (err) {
+    logger.error(
+      `System wallet seed failed: ${(err as Error).message}`,
+      (err as Error).stack,
+    );
+    // Continue boot — surface the issue but don't block dev environment.
+  }
 
   const port = configService.get<number>('app.port') || 3001;
   await app.listen(port);

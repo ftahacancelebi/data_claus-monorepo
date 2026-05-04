@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -6,13 +6,33 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { LedgerService } from './ledger.service';
+import {
+  LedgerInvariantService,
+  InvariantCheckResult,
+} from './ledger-invariant.service';
 import { LedgerTransactionResponseDto } from './dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles, Role } from '../../common/decorators';
 
 @ApiTags('transactions')
 @ApiBearerAuth()
 @Controller()
 export class LedgerController {
-  constructor(private readonly ledgerService: LedgerService) {}
+  constructor(
+    private readonly ledgerService: LedgerService,
+    private readonly ledgerInvariantService: LedgerInvariantService,
+  ) {}
+
+  @Get('admin/ledger/invariant')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({
+    summary: 'Verify the double-entry invariant (SUM(amount) === 0)',
+  })
+  async checkInvariant(): Promise<InvariantCheckResult> {
+    return this.ledgerInvariantService.verify();
+  }
 
   @Get('transactions')
   @ApiOperation({ summary: 'Get all transactions' })

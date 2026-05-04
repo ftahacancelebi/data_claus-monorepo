@@ -25,6 +25,20 @@ export class ApiKey extends BaseEntity {
   @Column({ name: 'last_used_at', type: 'timestamp', nullable: true })
   lastUsedAt: Date | null;
 
+  /**
+   * When set, the key stops being accepted after this timestamp.
+   * Set during rotation to give callers a 7-day overlap window.
+   */
+  @Column({ name: 'expires_at', type: 'timestamp', nullable: true })
+  expiresAt: Date | null;
+
+  /**
+   * Points to the key that supersedes this one (set on the OLD key when
+   * rotation occurs). Lets the dashboard show "rotated → keyId".
+   */
+  @Column({ name: 'rotated_to_id', type: 'uuid', nullable: true })
+  rotatedToId: string | null;
+
   @ManyToOne(() => Developer, (developer) => developer.apiKeys)
   @JoinColumn({ name: 'developer_id' })
   developer: Developer;

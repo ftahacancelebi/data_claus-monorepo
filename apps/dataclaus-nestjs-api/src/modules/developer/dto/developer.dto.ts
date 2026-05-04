@@ -105,6 +105,17 @@ export class ApiKeyResponseDto {
   @ApiProperty()
   @Expose({ name: 'created_at' })
   created_at: Date;
+
+  @ApiProperty({
+    required: false,
+    description: 'Set after rotation; key stops being accepted after this time',
+  })
+  @Expose({ name: 'expires_at' })
+  expires_at?: Date;
+
+  @ApiProperty({ required: false })
+  @Expose({ name: 'rotated_to_id' })
+  rotated_to_id?: string;
 }
 
 export class GeneratedApiKeyResponseDto extends ApiKeyResponseDto {

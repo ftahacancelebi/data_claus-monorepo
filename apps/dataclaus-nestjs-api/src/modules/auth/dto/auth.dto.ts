@@ -29,4 +29,6 @@ export class JwtPayload {
   sub: string;
   email: string;
   role: string;
+  /** Token type: omitted = access (legacy), 'access' or 'refresh'. */
+  type?: 'access' | 'refresh';
 }

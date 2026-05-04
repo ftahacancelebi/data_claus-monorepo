@@ -67,4 +67,13 @@ export class DataClausUser extends BaseEntity {
 
   @Column({ name: 'last_active_at', type: 'timestamp', nullable: true })
   lastActiveAt: Date | null;
+
+  // KVKK/GDPR: cooling-off scheduled deletion. When set, the account
+  // continues to function (user can cancel) until `delete_after`, after
+  // which a scheduled job hard-deletes the row. See DsarService.
+  @Column({ name: 'deletion_requested_at', type: 'timestamp', nullable: true })
+  deletionRequestedAt: Date | null;
+
+  @Column({ name: 'delete_after', type: 'timestamp', nullable: true })
+  deleteAfter: Date | null;
 }

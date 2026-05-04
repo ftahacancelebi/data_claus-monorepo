@@ -5,6 +5,7 @@ import {
   Body,
   Param,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,18 +15,27 @@ import {
 } from '@nestjs/swagger';
 import { WalletService } from './wallet.service';
 import {
+  WalletReleaseService,
+  ReleaseRunResult,
+} from './wallet-release.service';
+import {
   CreateWalletDto,
   CreditDebitDto,
   WalletResponseDto,
   RevenueSharesResponseDto,
 } from './dto';
-import { Public } from '../../common/decorators';
+import { Public, Roles, Role } from '../../common/decorators';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
 
 @ApiTags('wallets')
 @ApiBearerAuth()
 @Controller()
 export class WalletController {
-  constructor(private readonly walletService: WalletService) {}
+  constructor(
+    private readonly walletService: WalletService,
+    private readonly walletReleaseService: WalletReleaseService,
+  ) {}
 
   @Post('wallets')
   @ApiOperation({ summary: 'Create a new wallet' })
@@ -75,12 +85,27 @@ export class WalletController {
   }
 
   @Post('wallets/:id/release-pending')
-  @ApiOperation({ summary: 'Release pending balance to available balance' })
+  @ApiOperation({
+    summary:
+      'Release pending balance to available balance (writes paired ledger rows)',
+  })
   @ApiResponse({ status: 200, type: WalletResponseDto })
   async releasePending(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<WalletResponseDto> {
-    return this.walletService.releasePending(id);
+    await this.walletReleaseService.releaseForWalletId(id);
+    return this.walletService.findById(id);
+  }
+
+  @Post('admin/wallets/release-all-pending')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({
+    summary:
+      'Admin: trigger the periodic pending → available release for all eligible wallets',
+  })
+  async releaseAllPending(): Promise<ReleaseRunResult> {
+    return this.walletReleaseService.releaseAllEligible();
   }
 
   @Get('config/revenue-shares')

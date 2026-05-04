@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AdImpression } from './entities/ad-impression.entity';
 import { Application } from '../application/entities/application.entity';
+import { Wallet } from '../wallet/entities/wallet.entity';
 import {
   RecordImpressionDto,
   AdRatesResponseDto,
@@ -19,21 +21,27 @@ import {
   DEFAULT_USER_SHARE_PERCENT,
   MIN_USER_SHARE_PERCENT,
   MAX_USER_SHARE_PERCENT,
+  SYSTEM_WALLET_IDS,
+  TransactionType,
 } from '../../common/constants';
 
-import { WalletService } from '../wallet/wallet.service';
-import { LedgerService } from '../ledger/ledger.service';
-import { TransactionType, TransactionStatus } from '../../common/constants';
+import { FinancialTxService } from '../ledger/financial-tx.service';
+import { CampaignMatcherService } from '../campaign/campaign-matcher.service';
 
 @Injectable()
 export class AdsService {
+  private readonly logger = new Logger(AdsService.name);
+
   constructor(
     @InjectRepository(AdImpression)
     private readonly impressionRepository: Repository<AdImpression>,
     @InjectRepository(Application)
     private readonly applicationRepository: Repository<Application>,
-    private readonly walletService: WalletService,
-    private readonly ledgerService: LedgerService,
+    @InjectRepository(Wallet)
+    private readonly walletRepository: Repository<Wallet>,
+    private readonly financialTx: FinancialTxService,
+    private readonly campaignMatcher: CampaignMatcherService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   getAdRates(): AdRatesResponseDto {
@@ -51,147 +59,169 @@ export class AdsService {
     const application = await this.applicationRepository.findOne({
       where: { id: appId },
     });
-
     if (!application) {
       throw new NotFoundException('Application not found');
     }
-
-    const grossRevenue =
-      dto.gross_revenue || AdImpression.getRevenuePerImpression(dto.ad_type);
 
     const userSharePercent =
       application.userSharePercent > 0
         ? application.userSharePercent
         : DEFAULT_USER_SHARE_PERCENT;
 
-    const { userShare, devShare, platformFee } = this.calculateRevenueSplit(
-      grossRevenue,
-      userSharePercent,
-    );
+    const fallbackRevenue =
+      dto.gross_revenue || AdImpression.getRevenuePerImpression(dto.ad_type);
 
-    const impression = this.impressionRepository.create({
-      applicationId: appId,
-      userId: dto.user_id,
-      developerId: application.developerId,
-      adType: dto.ad_type,
-      adUnitId: dto.ad_unit_id || null,
-      grossRevenue,
-      userShare,
-      devShare,
-      platformFee,
-      sessionId: dto.session_id || null,
-      distributed: true,
-      distributedAt: new Date(),
+    // Resolve target wallets BEFORE the transaction so we fail fast.
+    const userWallet = await this.walletRepository.findOne({
+      where: { ownerId: dto.user_id },
+    });
+    const devWallet = await this.walletRepository.findOne({
+      where: { ownerId: application.developerId },
     });
 
-    await this.impressionRepository.save(impression);
+    // Single atomic transaction: campaign auction + impression row + paired
+    // ledger transfers. `distributed` flag is only set true on successful
+    // commit.
+    const persisted = await this.financialTx.runInTransaction(async (qr) => {
+      // 0. Campaign auction (Phase 6). If a campaign matches, its bid funds
+      //    the impression and the buyer wallet is debited atomically. If no
+      //    campaign matches, fall back to default eCPM (system AD_NETWORK
+      //    wallet absorbs the cost — capstone simulation behaviour).
+      const matched = await this.campaignMatcher.matchAndCharge(qr, {
+        applicationId: appId,
+        application,
+        userId: dto.user_id,
+        qualityScore:
+          typeof dto.quality_score === 'number' ? dto.quality_score : 1,
+      });
 
-    // Update Application Stats
-    try {
+      const grossRevenue = matched ? matched.bidAmount : fallbackRevenue;
+      const { userShare, devShare, platformFee } = this.calculateRevenueSplit(
+        grossRevenue,
+        userSharePercent,
+      );
+
+      const impression = qr.manager.create(AdImpression, {
+        applicationId: appId,
+        userId: dto.user_id,
+        developerId: application.developerId,
+        campaignId: matched?.campaignId ?? null,
+        adType: dto.ad_type,
+        adUnitId: dto.ad_unit_id || null,
+        grossRevenue,
+        userShare,
+        devShare,
+        platformFee,
+        sessionId: dto.session_id || null,
+        distributed: false,
+        distributedAt: null,
+      });
+      await qr.manager.save(impression);
+
+      // 1. User share (pending balance)
+      if (userShare > 0 && userWallet) {
+        await this.financialTx.transferAtomic(qr, {
+          sourceWalletId: SYSTEM_WALLET_IDS.AD_NETWORK,
+          destWalletId: userWallet.id,
+          amount: userShare,
+          currency: 'USD',
+          referenceId: impression.id,
+          type: TransactionType.AD_REVENUE,
+          target: 'pending',
+          metadata: { side: 'user_share', adType: dto.ad_type },
+        });
+      } else if (userShare > 0) {
+        this.logger.warn(
+          `No wallet for user ${dto.user_id}; user share skipped.`,
+        );
+      }
+
+      // 2. Developer share (pending balance)
+      if (devShare > 0 && devWallet) {
+        await this.financialTx.transferAtomic(qr, {
+          sourceWalletId: SYSTEM_WALLET_IDS.AD_NETWORK,
+          destWalletId: devWallet.id,
+          amount: devShare,
+          currency: 'USD',
+          referenceId: impression.id,
+          type: TransactionType.AD_REVENUE,
+          target: 'pending',
+          metadata: { side: 'dev_share', adType: dto.ad_type },
+        });
+      } else if (devShare > 0) {
+        this.logger.warn(
+          `No wallet for developer ${application.developerId}; dev share skipped.`,
+        );
+      }
+
+      // 3. Platform fee → PLATFORM wallet (available balance)
+      if (platformFee > 0) {
+        await this.financialTx.transferAtomic(qr, {
+          sourceWalletId: SYSTEM_WALLET_IDS.AD_NETWORK,
+          destWalletId: SYSTEM_WALLET_IDS.PLATFORM,
+          amount: platformFee,
+          currency: 'USD',
+          referenceId: impression.id,
+          type: TransactionType.FEE,
+          target: 'available',
+          metadata: { side: 'platform_fee', adType: dto.ad_type },
+        });
+      }
+
+      // 4. Mark impression distributed (commit-after pattern)
+      impression.distributed = true;
+      impression.distributedAt = new Date();
+      await qr.manager.save(impression);
+
+      // 5. Application stats
       application.totalEvents = Number(application.totalEvents) + 1;
       application.totalRevenue =
         Number(application.totalRevenue) + Number(grossRevenue);
       application.lastEventAt = new Date();
+      await qr.manager.save(application);
 
-      // Check if this is a new unique user for this application
-      const previousUserImpressions = await this.impressionRepository.count({
-        where: {
-          applicationId: appId,
-          userId: dto.user_id,
-        },
-      });
+      return impression;
+    });
 
-      // If this is their first impression (count is 1 because we just saved it), it's a new user
-      if (previousUserImpressions === 1) {
-        application.totalUsers = Number(application.totalUsers) + 1;
-        console.log(
-          `[Ads] New unique user for app ${appId}, total users: ${application.totalUsers}`,
-        );
-      }
+    // Async unique-user count update (best-effort, outside the tx).
+    void this.refreshUniqueUserCount(appId).catch((err) =>
+      this.logger.warn(
+        `Unique user count refresh failed: ${(err as Error).message}`,
+      ),
+    );
 
-      await this.applicationRepository.save(application);
-      console.log(
-        `[Ads] Updated app stats: events=${application.totalEvents}, revenue=${application.totalRevenue}, users=${application.totalUsers}`,
-      );
-    } catch (e) {
-      console.error('[Ads] Failed to update application stats:', e);
-    }
+    // Emit event for WebSocket / webhook bridges (Phase 4 / 3).
+    this.eventEmitter.emit('wallet.credited', {
+      impressionId: persisted.id,
+      applicationId: appId,
+      userId: dto.user_id,
+      developerId: application.developerId,
+      campaignId: persisted.campaignId,
+      userShare: Number(persisted.userShare),
+      devShare: Number(persisted.devShare),
+      platformFee: Number(persisted.platformFee),
+      grossRevenue: Number(persisted.grossRevenue),
+      adType: dto.ad_type,
+    });
 
-    // --- REVENUE DISTRIBUTION LOGIC ---
-    try {
-      // 1. Credit User Share
-      if (userShare > 0) {
-        const userWallets = await this.walletService.findByOwner(dto.user_id);
-        console.log(
-          `[Ads] Found ${userWallets?.length || 0} wallets for user ${dto.user_id}`,
-        );
+    return this.toImpressionResponse(persisted);
+  }
 
-        if (userWallets && userWallets.length > 0) {
-          // Assuming the first wallet is the primary one
-          const userWalletId = userWallets[0].id;
-          await this.walletService.credit(userWalletId, {
-            amount: userShare,
-          });
-
-          // Record Ledger
-          await this.ledgerService.recordTransaction({
-            sourceWalletId: '00000000-0000-0000-0000-000000000000', // System/Platform Wallet ID (Placeholder)
-            destWalletId: userWalletId,
-            amount: userShare,
-            currency: 'USD',
-            referenceId: impression.id,
-            type: TransactionType.AD_REVENUE,
-            status: TransactionStatus.COMPLETED,
-          });
-        } else {
-          console.warn(
-            `[Ads] No wallet found for user ${dto.user_id}, skipping share.`,
-          );
-        }
-      }
-
-      // 2. Credit Developer Share
-      if (devShare > 0) {
-        const devWallets = await this.walletService.findByOwner(
-          application.developerId,
-        );
-        console.log(
-          `[Ads] Found ${devWallets?.length || 0} wallets for developer ${application.developerId}`,
-        );
-
-        if (devWallets && devWallets.length > 0) {
-          const devWalletId = devWallets[0].id;
-          await this.walletService.credit(devWalletId, {
-            amount: devShare,
-          });
-
-          // Record Ledger
-          await this.ledgerService.recordTransaction({
-            sourceWalletId: '00000000-0000-0000-0000-000000000000', // System/Platform Wallet
-            destWalletId: devWalletId,
-            amount: devShare,
-            currency: 'USD',
-            referenceId: impression.id,
-            type: TransactionType.AD_REVENUE,
-            status: TransactionStatus.COMPLETED,
-          });
-        } else {
-          console.warn(
-            `[Ads] No wallet found for developer ${application.developerId}, skipping share.`,
-          );
-        }
-      }
-    } catch (error) {
-      console.error('Error distributing revenue:', error);
-      // Don't fail the request, just log it. We can have a background job retry later if 'distributed' is false.
-      // But for now we mark it distributed above, which is risky if this fails.
-      // Ideally, we should set distributed=true only if this block succeeds.
-      impression.distributed = false;
-      impression.distributedAt = null;
-      await this.impressionRepository.save(impression);
-    }
-
-    return this.toImpressionResponse(impression);
+  /**
+   * Best-effort recompute of `application.totalUsers` after an impression
+   * commit. Runs outside the tx to keep the hot path fast.
+   */
+  private async refreshUniqueUserCount(appId: string): Promise<void> {
+    const result = await this.impressionRepository
+      .createQueryBuilder('i')
+      .select('COUNT(DISTINCT i.user_id)', 'count')
+      .where('i.application_id = :appId', { appId })
+      .getRawOne();
+    const total = parseInt(result?.count ?? '0', 10);
+    await this.applicationRepository.update(
+      { id: appId },
+      { totalUsers: total },
+    );
   }
 
   async getAdConfig(appId: string): Promise<AdConfigResponseDto> {
@@ -324,6 +354,7 @@ export class AdsService {
       user_share: Number(impression.userShare),
       dev_share: Number(impression.devShare),
       platform_fee: Number(impression.platformFee),
+      campaign_id: impression.campaignId ?? null,
       created_at: impression.createdAt,
     };
   }

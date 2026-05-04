@@ -19,6 +19,11 @@ export class AdImpression extends BaseEntity {
   @Column({ name: 'developer_id', type: 'uuid' })
   developerId: string;
 
+  // Optional campaign that funded this impression (Phase 6 marketplace).
+  // Null indicates fallback eCPM (no matched campaign).
+  @Column({ name: 'campaign_id', type: 'uuid', nullable: true })
+  campaignId: string | null;
+
   // Ad Details
   @Column({ name: 'ad_type', type: 'enum', enum: AdType })
   adType: AdType;

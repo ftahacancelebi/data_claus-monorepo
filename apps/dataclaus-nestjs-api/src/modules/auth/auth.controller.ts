@@ -1,4 +1,13 @@
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  UseGuards,
+  Req,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -13,9 +22,18 @@ import {
   IsIn,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Request } from 'express';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService, RegisterDto } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { LoginDto, AuthResponseDto } from './dto';
+import {
+  LoginDto,
+  AuthResponseDto,
+  RequestOtpDto,
+  VerifyOtpDto,
+  RefreshTokenDto,
+  OtpRequestResponseDto,
+} from './dto';
 import { Public, CurrentUser, CurrentUserData } from '../../common/decorators';
 
 class RegisterBodyDto implements RegisterDto {
@@ -48,6 +66,7 @@ export class AuthController {
 
   @Post('login')
   @Public()
+  @Throttle({ medium: { limit: 10, ttl: 60_000 } }) // 10 logins/min per IP
   @ApiOperation({
     summary: 'Login with email and password (works for all roles)',
   })
@@ -59,6 +78,7 @@ export class AuthController {
 
   @Post('register')
   @Public()
+  @Throttle({ medium: { limit: 5, ttl: 60_000 } }) // 5 registrations/min per IP
   @ApiOperation({
     summary: 'Register a new account (specify role: developer, user, or buyer)',
   })
@@ -76,5 +96,60 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMe(@CurrentUser() user: CurrentUserData) {
     return this.authService.getMe(user.id);
+  }
+
+  // ---------------------------------------------------------------------------
+  // OTP-based end-user authentication
+  // ---------------------------------------------------------------------------
+
+  @Post('user/request-otp')
+  @Public()
+  @Throttle({ medium: { limit: 3, ttl: 60_000 } }) // 3 OTP requests/min per IP
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Request a one-time password for end-user login (email)',
+  })
+  @ApiResponse({ status: 200, type: OtpRequestResponseDto })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
+  async requestOtp(
+    @Body() dto: RequestOtpDto,
+    @Req() req: Request,
+  ): Promise<OtpRequestResponseDto> {
+    const ip =
+      (req.headers['x-forwarded-for'] as string | undefined)
+        ?.split(',')[0]
+        ?.trim() ??
+      req.socket?.remoteAddress ??
+      undefined;
+    const result = await this.authService.requestOtp(
+      dto.email,
+      dto.recaptchaToken,
+      ip,
+    );
+    return { status: result.status, expiresInSeconds: result.expiresInSeconds };
+  }
+
+  @Post('user/verify-otp')
+  @Public()
+  @Throttle({ medium: { limit: 10, ttl: 60_000 } }) // 10 verifies/min per IP
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Verify OTP and exchange for access + refresh tokens',
+  })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 401, description: 'Invalid or expired OTP' })
+  @ApiResponse({ status: 429, description: 'Attempt limit reached' })
+  async verifyOtp(@Body() dto: VerifyOtpDto) {
+    return this.authService.verifyOtp(dto.email, dto.code);
+  }
+
+  @Post('user/refresh')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Exchange a refresh token for a new access token' })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
+  async refresh(@Body() dto: RefreshTokenDto) {
+    return this.authService.refresh(dto.refreshToken);
   }
 }

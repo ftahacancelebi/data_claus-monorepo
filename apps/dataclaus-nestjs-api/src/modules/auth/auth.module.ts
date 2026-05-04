@@ -10,6 +10,9 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { DeveloperModule } from '../developer/developer.module';
 import { WalletModule } from '../wallet/wallet.module';
 import { DataClausUser } from '../dataclaus-user/entities/dataclaus-user.entity';
+import { OtpRequest } from './entities';
+import { EmailModule } from '../email/email.module';
+import { RecaptchaModule } from '../recaptcha/recaptcha.module';
 
 @Module({
   imports: [
@@ -25,9 +28,11 @@ import { DataClausUser } from '../dataclaus-user/entities/dataclaus-user.entity'
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([DataClausUser]),
+    TypeOrmModule.forFeature([DataClausUser, OtpRequest]),
     DeveloperModule,
     WalletModule,
+    EmailModule,
+    RecaptchaModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtAuthGuard],

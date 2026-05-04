@@ -19,6 +19,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Invalid token');
     }
 
+    // Refresh tokens may not be presented to protected routes.
+    if (payload.type === 'refresh') {
+      throw new UnauthorizedException('Refresh token cannot access this route');
+    }
+
     return {
       id: payload.sub,
       email: payload.email,
