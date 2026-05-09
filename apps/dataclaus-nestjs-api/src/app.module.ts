@@ -32,6 +32,7 @@ import { WebhookModule } from './modules/webhook/webhook.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuditInterceptor } from './modules/audit/audit.interceptor';
 import { DsarModule } from './modules/dsar/dsar.module';
+import { CryptoModule } from './common/crypto';
 
 // Entities
 import { Developer, ApiKey } from './modules/developer/entities';
@@ -109,6 +110,9 @@ import { AuditLog } from './modules/audit/entities/audit-log.entity';
       { name: 'short', ttl: 1_000, limit: 10 }, // 10 req/sec anti-burst
       { name: 'medium', ttl: 60_000, limit: 100 }, // 100 req/min default
     ]),
+
+    // Cross-cutting (global signing/HMAC service)
+    CryptoModule,
 
     // Feature Modules
     AuthModule,

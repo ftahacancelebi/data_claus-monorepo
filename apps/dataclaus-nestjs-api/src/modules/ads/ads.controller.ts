@@ -13,20 +13,27 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AdsService } from './ads.service';
+import { AdMediationService } from './ad-mediation.service';
 import {
   RecordImpressionDto,
   AdRatesResponseDto,
   AdRevenueSummaryDto,
   AdConfigResponseDto,
   ImpressionResponseDto,
+  RequestAdSlotDto,
+  SignedAdSlotDto,
+  SealImpressionDto,
 } from './dto';
-import { Public } from '../../common/decorators';
+import { Public, Roles, Role } from '../../common/decorators';
 
 @ApiTags('ads')
 @ApiBearerAuth()
 @Controller()
 export class AdsController {
-  constructor(private readonly adsService: AdsService) {}
+  constructor(
+    private readonly adsService: AdsService,
+    private readonly mediation: AdMediationService,
+  ) {}
 
   @Get('ads/rates')
   @Public()
@@ -36,8 +43,54 @@ export class AdsController {
     return this.adsService.getAdRates();
   }
 
+  /**
+   * SDK FLOW STEP 1.
+   *
+   * The SDK calls this BEFORE rendering an ad. The server resolves the
+   * ad-unit ID (so it never lives in client config), runs eligibility checks,
+   * and returns a short-lived signed slot token. The SDK then asks the
+   * platform ad SDK (AdMob etc.) to render `ad_unit_id`. When the impression
+   * fires, the SDK calls `/seal` with the slot token.
+   */
+  @Post('applications/:appId/ads/slot')
+  @ApiOperation({ summary: 'Request a signed ad slot' })
+  @ApiResponse({ status: 201, type: SignedAdSlotDto })
+  async requestAdSlot(
+    @Param('appId', ParseUUIDPipe) appId: string,
+    @Body() dto: RequestAdSlotDto,
+  ): Promise<SignedAdSlotDto> {
+    return this.mediation.requestSlot(appId, dto);
+  }
+
+  /**
+   * SDK FLOW STEP 2.
+   *
+   * The SDK calls this AFTER the platform ad SDK confirms the impression
+   * fired. The slot token is verified (signature, expiry, replay) and the
+   * ledger is updated atomically. Client-reported revenue is treated as a
+   * cross-check signal only — see `AdMediationService.reconcileRevenue`.
+   */
+  @Post('applications/:appId/ads/seal')
+  @ApiOperation({ summary: 'Seal an impression against a slot token' })
+  @ApiResponse({ status: 201, type: ImpressionResponseDto })
+  async sealImpression(
+    @Param('appId', ParseUUIDPipe) appId: string,
+    @Body() dto: SealImpressionDto,
+  ): Promise<ImpressionResponseDto> {
+    return this.adsService.sealImpression(appId, dto);
+  }
+
+  /**
+   * @deprecated Public clients must use the slot/seal flow above. This route
+   * is restricted to admins for tooling/backfill scenarios. Trusts
+   * `gross_revenue` from the caller — never expose to untrusted clients.
+   */
   @Post('applications/:appId/ads/impression')
-  @ApiOperation({ summary: 'Record an ad impression' })
+  @Roles(Role.ADMIN)
+  @ApiOperation({
+    summary: 'Record an ad impression (admin/backfill only — DEPRECATED)',
+    deprecated: true,
+  })
   @ApiResponse({ status: 201, type: ImpressionResponseDto })
   async recordImpression(
     @Param('appId', ParseUUIDPipe) appId: string,

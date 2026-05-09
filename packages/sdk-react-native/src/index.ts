@@ -445,12 +445,25 @@ export {
   type AdConfig,
   type AdType,
   type AdSize,
+  type AdSlot,
   type AdImpression,
   type AdReward,
+  type SealOptions,
   type BannerAdProps,
   type UseInterstitialResult,
+  type UseInterstitialOptions,
   type UseRewardedResult,
+  type UseRewardedOptions,
 } from './ads';
+
+// Platform Attestation
+export {
+  setAttestationProvider,
+  produceAttestation,
+  generateChallenge,
+  type AttestationProvider,
+  type AttestationPlatform,
+} from './attestation';
 
 // Auth exports (DataClaus authentication)
 export {

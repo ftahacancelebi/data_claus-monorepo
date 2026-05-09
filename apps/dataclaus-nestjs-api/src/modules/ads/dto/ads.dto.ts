@@ -5,11 +5,23 @@ import {
   IsNumber,
   IsOptional,
   IsPositive,
+  IsNotEmpty,
+  Min,
+  Max,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { AdType } from '../../../common/constants';
 
+/**
+ * Internal-only DTO. Public SDK callers MUST use the slot/seal flow
+ * (RequestAdSlotDto + SealImpressionDto). This shape is kept for admin
+ * tooling and the legacy controller path during the migration window.
+ *
+ * `gross_revenue` from a public client is IGNORED in production code paths —
+ * see `ads.controller.ts` and `ads.service.ts`. Revenue is resolved
+ * server-side from the campaign auction or ad-network reporting.
+ */
 export class RecordImpressionDto {
   @ApiProperty({ example: 'user-uuid' })
   @IsUUID()
@@ -27,7 +39,11 @@ export class RecordImpressionDto {
   @Expose({ name: 'ad_unit_id' })
   ad_unit_id?: string;
 
-  @ApiPropertyOptional({ example: 0.015 })
+  @ApiPropertyOptional({
+    example: 0.015,
+    description:
+      'INTERNAL ONLY. Ignored on public endpoints — server resolves revenue.',
+  })
   @IsOptional()
   @IsNumber()
   @IsPositive()
@@ -48,6 +64,115 @@ export class RecordImpressionDto {
   @IsNumber()
   @Expose({ name: 'quality_score' })
   quality_score?: number;
+}
+
+/**
+ * Public SDK calls this first, BEFORE rendering any ad. Server replies with a
+ * short-lived signed slot token. The token binds: appId, userId, adType,
+ * server-resolved adUnitId, and a unique nonce. SDK MUST present this token
+ * back when sealing an impression.
+ */
+export class RequestAdSlotDto {
+  @ApiProperty({ enum: AdType, example: AdType.REWARDED })
+  @IsEnum(AdType)
+  @Expose({ name: 'ad_type' })
+  ad_type: AdType;
+
+  @ApiProperty({ example: 'user-uuid' })
+  @IsUUID()
+  @Expose({ name: 'user_id' })
+  user_id: string;
+
+  @ApiPropertyOptional({ example: 'session-uuid' })
+  @IsOptional()
+  @IsUUID()
+  @Expose({ name: 'session_id' })
+  session_id?: string;
+
+  /**
+   * Optional client-asserted quality score. Server treats this as a HINT
+   * only — the authoritative quality score comes from server-side fraud
+   * detection. Used for campaign targeting tie-breaks.
+   */
+  @ApiPropertyOptional({ example: 0.85 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  @Expose({ name: 'quality_score_hint' })
+  quality_score_hint?: number;
+
+  /**
+   * Platform attestation token (Apple App Attest / Play Integrity). Required
+   * in production builds, optional in dev/test mode.
+   */
+  @ApiPropertyOptional({ description: 'Platform attestation envelope (base64)' })
+  @IsOptional()
+  @IsString()
+  @Expose({ name: 'attestation' })
+  attestation?: string;
+}
+
+export class SignedAdSlotDto {
+  @ApiProperty({ description: 'Opaque signed token — opaque to the SDK' })
+  @Expose({ name: 'slot_token' })
+  slot_token: string;
+
+  @ApiProperty({ description: 'Server-resolved ad unit identifier' })
+  @Expose({ name: 'ad_unit_id' })
+  ad_unit_id: string;
+
+  @ApiProperty({ enum: AdType })
+  @Expose({ name: 'ad_type' })
+  ad_type: AdType;
+
+  @ApiProperty({ description: 'Slot expires at (ISO timestamp)' })
+  @Expose({ name: 'expires_at' })
+  expires_at: string;
+
+  @ApiProperty({
+    description:
+      'Server-side projected gross revenue for UI display. NOT trusted by ledger — final revenue resolved at seal time.',
+  })
+  @Expose({ name: 'projected_revenue' })
+  projected_revenue: number;
+}
+
+/**
+ * SDK calls this AFTER the platform ad SDK reports the ad rendered/viewed.
+ * The slot_token is required and replay-protected (one-shot).
+ */
+export class SealImpressionDto {
+  @ApiProperty({ description: 'Slot token issued by /ads/slot' })
+  @IsString()
+  @IsNotEmpty()
+  @Expose({ name: 'slot_token' })
+  slot_token: string;
+
+  /**
+   * Optional ad-network reported revenue (e.g. AdMob paid event). Server
+   * uses this only as a CROSS-CHECK against its own reporting reconciliation
+   * — never as the sole source of truth.
+   */
+  @ApiPropertyOptional({
+    example: 0.015,
+    description:
+      'Ad-network reported revenue (cross-check signal, not authoritative)',
+  })
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Expose({ name: 'reported_revenue' })
+  reported_revenue?: number;
+
+  /**
+   * For rewarded ads: did the user complete the full view? Server validates
+   * this against ad-network reporting before crediting reward share.
+   */
+  @ApiPropertyOptional({ description: 'Rewarded ad full view flag' })
+  @IsOptional()
+  @Expose({ name: 'completed' })
+  completed?: boolean;
 }
 
 export class AdRatesResponseDto {

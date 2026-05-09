@@ -1,4 +1,4 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import {
   AdType,
@@ -8,6 +8,10 @@ import {
 } from '../../../common/constants';
 
 @Entity('ad_impressions')
+@Index('uq_ad_impressions_nonce', ['slotNonce'], {
+  unique: true,
+  where: 'slot_nonce IS NOT NULL',
+})
 export class AdImpression extends BaseEntity {
   // Relationships
   @Column({ name: 'application_id', type: 'uuid' })
@@ -74,6 +78,29 @@ export class AdImpression extends BaseEntity {
 
   @Column({ type: 'varchar', length: 10, default: 'USD' })
   currency: string;
+
+  /**
+   * Server-issued slot nonce that was sealed into this impression. The unique
+   * partial index above prevents replays — the same slot token cannot be
+   * sealed twice.
+   */
+  @Column({ name: 'slot_nonce', type: 'varchar', length: 64, nullable: true })
+  slotNonce: string | null;
+
+  /**
+   * When the impression was sealed (i.e. slot token was redeemed). Distinct
+   * from `createdAt` (which equals seal time today, but kept for clarity).
+   */
+  @Column({ name: 'sealed_at', type: 'timestamp', nullable: true })
+  sealedAt: Date | null;
+
+  /**
+   * Set true when ad-network reporting later confirms the revenue. Until then
+   * `grossRevenue` reflects the campaign auction bid (or fallback eCPM). For
+   * the demo, this stays false — production would reconcile via AdMob API.
+   */
+  @Column({ name: 'revenue_confirmed', type: 'boolean', default: false })
+  revenueConfirmed: boolean;
 
   // Static methods matching Go implementation
   static getEcpmByAdType(adType: AdType): number {

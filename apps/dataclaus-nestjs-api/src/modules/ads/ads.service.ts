@@ -11,6 +11,7 @@ import {
   AdRevenueSummaryDto,
   AdConfigResponseDto,
   ImpressionResponseDto,
+  SealImpressionDto,
 } from './dto';
 import {
   AdType,
@@ -27,6 +28,8 @@ import {
 
 import { FinancialTxService } from '../ledger/financial-tx.service';
 import { CampaignMatcherService } from '../campaign/campaign-matcher.service';
+import { AdMediationService } from './ad-mediation.service';
+import { ConflictException } from '@nestjs/common';
 
 @Injectable()
 export class AdsService {
@@ -41,6 +44,7 @@ export class AdsService {
     private readonly walletRepository: Repository<Wallet>,
     private readonly financialTx: FinancialTxService,
     private readonly campaignMatcher: CampaignMatcherService,
+    private readonly mediation: AdMediationService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -52,6 +56,14 @@ export class AdsService {
     };
   }
 
+  /**
+   * INTERNAL/ADMIN PATH ONLY.
+   *
+   * Public SDK callers MUST use the slot/seal flow (`sealImpression`). This
+   * method trusts `dto.gross_revenue` and is intended for admin tooling,
+   * server-to-server reconciliation, and the migration window. Do NOT expose
+   * this on a public, unauthenticated route.
+   */
   async recordImpression(
     appId: string,
     dto: RecordImpressionDto,
@@ -202,6 +214,175 @@ export class AdsService {
       platformFee: Number(persisted.platformFee),
       grossRevenue: Number(persisted.grossRevenue),
       adType: dto.ad_type,
+    });
+
+    return this.toImpressionResponse(persisted);
+  }
+
+  /**
+   * Public SDK path. Seals an impression against a previously-issued slot
+   * token. The slot token carries: appId, userId, adType, server-resolved
+   * adUnitId, and a unique nonce.
+   *
+   * Defence layers:
+   *  1. HMAC signature verification (rejects tampered tokens)
+   *  2. Expiry check (5 min default)
+   *  3. In-memory nonce ledger (rejects intra-instance replays)
+   *  4. DB unique partial index on `slot_nonce` (rejects cross-instance and
+   *     post-restart replays)
+   *  5. App-id binding (rejects token use against a different app)
+   *  6. Server-resolved revenue (client-reported value is a hint only — see
+   *     `AdMediationService.reconcileRevenue`)
+   */
+  async sealImpression(
+    appId: string,
+    dto: SealImpressionDto,
+  ): Promise<ImpressionResponseDto> {
+    const { payload, nonce } = this.mediation.verifySlot(appId, dto.slot_token);
+
+    const application = await this.applicationRepository.findOne({
+      where: { id: appId },
+    });
+    if (!application) {
+      throw new NotFoundException('Application not found');
+    }
+
+    const existing = await this.impressionRepository.findOne({
+      where: { slotNonce: nonce },
+    });
+    if (existing) {
+      throw new ConflictException('Slot already sealed');
+    }
+
+    const { revenue: grossRevenue, suspicious } = this.mediation.reconcileRevenue(
+      payload,
+      dto,
+    );
+
+    const userSharePercent =
+      application.userSharePercent > 0
+        ? application.userSharePercent
+        : DEFAULT_USER_SHARE_PERCENT;
+
+    const userWallet = await this.walletRepository.findOne({
+      where: { ownerId: payload.userId },
+    });
+    const devWallet = await this.walletRepository.findOne({
+      where: { ownerId: application.developerId },
+    });
+
+    const persisted = await this.financialTx.runInTransaction(async (qr) => {
+      const matched = await this.campaignMatcher.matchAndCharge(qr, {
+        applicationId: appId,
+        application,
+        userId: payload.userId,
+        qualityScore: payload.qualityScoreHint,
+      });
+
+      const finalGross = matched ? matched.bidAmount : grossRevenue;
+      const { userShare, devShare, platformFee } = this.calculateRevenueSplit(
+        finalGross,
+        userSharePercent,
+      );
+
+      const impression = qr.manager.create(AdImpression, {
+        applicationId: appId,
+        userId: payload.userId,
+        developerId: application.developerId,
+        campaignId: matched?.campaignId ?? null,
+        adType: payload.adType,
+        adUnitId: payload.adUnitId,
+        grossRevenue: finalGross,
+        userShare,
+        devShare,
+        platformFee,
+        sessionId: payload.sessionId,
+        slotNonce: nonce,
+        sealedAt: new Date(),
+        revenueConfirmed: false,
+        distributed: false,
+        distributedAt: null,
+      });
+      await qr.manager.save(impression);
+
+      if (userShare > 0 && userWallet) {
+        await this.financialTx.transferAtomic(qr, {
+          sourceWalletId: SYSTEM_WALLET_IDS.AD_NETWORK,
+          destWalletId: userWallet.id,
+          amount: userShare,
+          currency: 'USD',
+          referenceId: impression.id,
+          type: TransactionType.AD_REVENUE,
+          target: 'pending',
+          metadata: { side: 'user_share', adType: payload.adType, suspicious },
+        });
+      } else if (userShare > 0) {
+        this.logger.warn(
+          `No wallet for user ${payload.userId}; user share skipped.`,
+        );
+      }
+
+      if (devShare > 0 && devWallet) {
+        await this.financialTx.transferAtomic(qr, {
+          sourceWalletId: SYSTEM_WALLET_IDS.AD_NETWORK,
+          destWalletId: devWallet.id,
+          amount: devShare,
+          currency: 'USD',
+          referenceId: impression.id,
+          type: TransactionType.AD_REVENUE,
+          target: 'pending',
+          metadata: { side: 'dev_share', adType: payload.adType, suspicious },
+        });
+      } else if (devShare > 0) {
+        this.logger.warn(
+          `No wallet for developer ${application.developerId}; dev share skipped.`,
+        );
+      }
+
+      if (platformFee > 0) {
+        await this.financialTx.transferAtomic(qr, {
+          sourceWalletId: SYSTEM_WALLET_IDS.AD_NETWORK,
+          destWalletId: SYSTEM_WALLET_IDS.PLATFORM,
+          amount: platformFee,
+          currency: 'USD',
+          referenceId: impression.id,
+          type: TransactionType.FEE,
+          target: 'available',
+          metadata: { side: 'platform_fee', adType: payload.adType },
+        });
+      }
+
+      impression.distributed = true;
+      impression.distributedAt = new Date();
+      await qr.manager.save(impression);
+
+      application.totalEvents = Number(application.totalEvents) + 1;
+      application.totalRevenue =
+        Number(application.totalRevenue) + Number(finalGross);
+      application.lastEventAt = new Date();
+      await qr.manager.save(application);
+
+      return impression;
+    });
+
+    void this.refreshUniqueUserCount(appId).catch((err) =>
+      this.logger.warn(
+        `Unique user count refresh failed: ${(err as Error).message}`,
+      ),
+    );
+
+    this.eventEmitter.emit('wallet.credited', {
+      impressionId: persisted.id,
+      applicationId: appId,
+      userId: payload.userId,
+      developerId: application.developerId,
+      campaignId: persisted.campaignId,
+      userShare: Number(persisted.userShare),
+      devShare: Number(persisted.devShare),
+      platformFee: Number(persisted.platformFee),
+      grossRevenue: Number(persisted.grossRevenue),
+      adType: payload.adType,
+      suspicious,
     });
 
     return this.toImpressionResponse(persisted);

@@ -1,23 +1,32 @@
 /**
  * DataClaus Ad Revenue Module
  *
- * Provides components and utilities for displaying ads through DataClaus.
- * Revenue is automatically tracked and distributed according to the
- * app's revenue share configuration.
+ * Two-step impression flow (slot/seal). The previous "client tells the
+ * server how much it earned" pattern was bypass-bait — anyone could fork
+ * the SDK and post `revenue: 0`. The new flow:
  *
- * Architecture:
- * 1. AdView component requests ad config from DataClaus API
- * 2. Displays ad using platform-specific ad SDK (Google AdMob)
- * 3. On impression/click, reports revenue to DataClaus
- * 4. DataClaus splits revenue: User share → Dev share → Platform fee
+ *   1. Server issues a signed slot token bound to (appId, userId, adType,
+ *      adUnitId, nonce). Ad-unit IDs never live in client config, so they
+ *      cannot be skimmed from a decompiled SDK and pointed at a different
+ *      AdMob account.
+ *   2. SDK renders the ad using the platform ad SDK (AdMob etc.).
+ *   3. SDK seals the impression by handing the slot token back. Server
+ *      verifies the signature, rejects replays via a DB unique index on the
+ *      nonce, and resolves the authoritative revenue server-side.
  *
- * IMPORTANT: Ad revenue flows through DataClaus's AdMob account to ensure
- * fair revenue distribution. Developers integrate the AdView component
- * and receive their share of the revenue automatically.
+ * Client-reported revenue is treated as a CROSS-CHECK signal only. Forging
+ * it does nothing — the ledger uses the server's reconciled value.
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Platform, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  Dimensions,
+} from 'react-native';
+import { generateChallenge, produceAttestation } from './attestation';
 
 // ============================================================
 // Types
@@ -25,41 +34,55 @@ import { View, Text, StyleSheet, ActivityIndicator, Platform, Dimensions } from 
 
 export type AdType = 'banner' | 'interstitial' | 'rewarded' | 'native';
 
-export type AdSize = 
-  | 'banner'           // 320x50
-  | 'largeBanner'      // 320x100
-  | 'mediumRectangle'  // 300x250
-  | 'fullBanner'       // 468x60
-  | 'leaderboard'      // 728x90
-  | 'adaptive';        // Responsive
+export type AdSize =
+  | 'banner'
+  | 'largeBanner'
+  | 'mediumRectangle'
+  | 'fullBanner'
+  | 'leaderboard'
+  | 'adaptive';
 
 export interface AdConfig {
   /** DataClaus API URL */
   apiUrl: string;
   /** Application ID from DataClaus dashboard */
   applicationId: string;
-  /** User token from identity linking */
+  /** User ID from identity linking (the dataclausUserId, not the external one) */
+  userId: string;
+  /** Short-lived bearer token from identity linking */
   userToken: string;
-  /** Enable test mode (uses test ads) */
+  /** Optional session ID for analytics */
+  sessionId?: string;
+  /** Use platform test ad units (no real revenue) */
   testMode?: boolean;
-  /** Enable debug logging */
+  /** Enable verbose logging */
   debug?: boolean;
 }
 
-export interface AdUnitConfig {
-  banner?: string;
-  interstitial?: string;
-  rewarded?: string;
-  native?: string;
+export interface AdSlot {
+  slotToken: string;
+  adUnitId: string;
+  adType: AdType;
+  expiresAt: string;
+  /** UI display only — NOT used to credit the ledger */
+  projectedRevenue: number;
 }
 
 export interface AdImpression {
   impressionId: string;
   adType: AdType;
   adUnitId: string;
+  /** Server-reconciled value */
   revenue: number;
   currency: string;
   timestamp: string;
+}
+
+export interface SealOptions {
+  /** Ad-network reported revenue (e.g. AdMob paid event). Cross-check only. */
+  reportedRevenue?: number;
+  /** For rewarded ads: did the user complete the full view? */
+  completed?: boolean;
 }
 
 export interface AdReward {
@@ -67,25 +90,19 @@ export interface AdReward {
   amount: number;
 }
 
-export interface AdLoadResult {
-  success: boolean;
-  adUnitId?: string;
-  error?: string;
-}
-
 // ============================================================
-// Ad Manager Class
+// Ad Manager
 // ============================================================
 
 export class AdManager {
   private config: Required<AdConfig>;
-  private adUnits: AdUnitConfig | null = null;
-  private isEnabled: boolean = false;
+  private isEnabled: boolean = true;
 
   constructor(config: AdConfig) {
     this.config = {
       ...config,
-      testMode: config.testMode ?? true, // Default to test mode for safety
+      sessionId: config.sessionId ?? '',
+      testMode: config.testMode ?? __DEV__,
       debug: config.debug ?? false,
     };
   }
@@ -96,123 +113,124 @@ export class AdManager {
     }
   }
 
-  /**
-   * Initialize the ad manager by fetching ad configuration.
-   */
-  async initialize(): Promise<void> {
-    this.log('Initializing ad manager...');
-
-    try {
-      const response = await fetch(
-        `${this.config.apiUrl}/applications/${this.config.applicationId}/ads/config`,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.config.userToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch ad config');
-      }
-
-      const data = await response.json();
-      this.adUnits = data.ad_unit_ids || {};
-      this.isEnabled = data.enabled ?? false;
-
-      if (this.config.testMode) {
-        // Use test ad unit IDs
-        this.adUnits = {
-          banner: Platform.select({
-            ios: 'ca-app-pub-3940256099942544/2934735716',
-            android: 'ca-app-pub-3940256099942544/6300978111',
-          }),
-          interstitial: Platform.select({
-            ios: 'ca-app-pub-3940256099942544/4411468910',
-            android: 'ca-app-pub-3940256099942544/1033173712',
-          }),
-          rewarded: Platform.select({
-            ios: 'ca-app-pub-3940256099942544/1712485313',
-            android: 'ca-app-pub-3940256099942544/5224354917',
-          }),
-        };
-        this.log('Using test ad units');
-      }
-
-      this.log('Ad manager initialized:', this.adUnits);
-    } catch (error) {
-      this.log('Failed to initialize:', error);
-      this.isEnabled = false;
-    }
-  }
-
-  /**
-   * Check if ads are enabled for this app.
-   */
   isAdsEnabled(): boolean {
     return this.isEnabled;
   }
 
   /**
-   * Get ad unit ID for a specific ad type.
+   * STEP 1. Request a signed ad slot from the server.
+   *
+   * The returned `adUnitId` is what the host app passes to the platform ad
+   * SDK (AdMob/Unity Ads/etc.). The `slotToken` is opaque — keep it,
+   * present it back at seal time.
    */
-  getAdUnitId(type: AdType): string | undefined {
-    return this.adUnits?.[type];
+  async requestSlot(
+    adType: AdType,
+    qualityScoreHint?: number,
+  ): Promise<AdSlot> {
+    const challenge = generateChallenge();
+    const attestation = await produceAttestation(challenge);
+
+    const body: Record<string, unknown> = {
+      ad_type: adType,
+      user_id: this.config.userId,
+    };
+    if (this.config.sessionId) body.session_id = this.config.sessionId;
+    if (typeof qualityScoreHint === 'number') {
+      body.quality_score_hint = qualityScoreHint;
+    }
+    if (attestation) body.attestation = attestation;
+
+    const response = await fetch(
+      `${this.config.apiUrl}/applications/${this.config.applicationId}/ads/slot`,
+      {
+        method: 'POST',
+        headers: this.authHeaders(),
+        body: JSON.stringify(body),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Slot request failed: HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    return {
+      slotToken: data.slot_token,
+      adUnitId: data.ad_unit_id,
+      adType: data.ad_type,
+      expiresAt: data.expires_at,
+      projectedRevenue: data.projected_revenue,
+    };
   }
 
   /**
-   * Record an ad impression and track revenue.
+   * STEP 2. Seal an impression. Call this AFTER the platform ad SDK
+   * confirms the ad rendered (banner) or completed (rewarded).
    */
-  async recordImpression(
-    adType: AdType,
-    revenue: number,
-    currency: string = 'USD'
+  async sealImpression(
+    slot: AdSlot,
+    options?: SealOptions,
   ): Promise<AdImpression | null> {
-    const adUnitId = this.getAdUnitId(adType);
-    if (!adUnitId) {
-      this.log('No ad unit ID for type:', adType);
-      return null;
+    const body: Record<string, unknown> = { slot_token: slot.slotToken };
+    if (typeof options?.reportedRevenue === 'number') {
+      body.reported_revenue = options.reportedRevenue;
     }
-
-    this.log('Recording impression:', { adType, revenue, currency });
+    if (typeof options?.completed === 'boolean') {
+      body.completed = options.completed;
+    }
 
     try {
       const response = await fetch(
-        `${this.config.apiUrl}/applications/${this.config.applicationId}/ads/impression`,
+        `${this.config.apiUrl}/applications/${this.config.applicationId}/ads/seal`,
         {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.config.userToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            user_token: this.config.userToken,
-            ad_type: adType,
-            ad_unit_id: adUnitId,
-            revenue,
-            currency,
-          }),
-        }
+          headers: this.authHeaders(),
+          body: JSON.stringify(body),
+        },
       );
 
       if (!response.ok) {
-        throw new Error('Failed to record impression');
+        this.log(`Seal failed: HTTP ${response.status}`);
+        return null;
       }
 
       const data = await response.json();
       return {
-        impressionId: data.impression_id,
-        adType,
-        adUnitId,
-        revenue,
-        currency,
-        timestamp: new Date().toISOString(),
+        impressionId: data.id,
+        adType: slot.adType,
+        adUnitId: slot.adUnitId,
+        revenue: Number(data.gross_revenue ?? 0),
+        currency: 'USD',
+        timestamp: new Date(data.created_at ?? Date.now()).toISOString(),
       };
-    } catch (error) {
-      this.log('Failed to record impression:', error);
+    } catch (err) {
+      this.log('Seal error:', err);
       return null;
     }
+  }
+
+  /**
+   * Convenience: run a full ad cycle. The caller supplies a `render`
+   * function that drives the platform ad SDK and returns the (optional)
+   * ad-network-reported revenue.
+   */
+  async runCycle(
+    adType: AdType,
+    render: (
+      slot: AdSlot,
+    ) => Promise<{ reportedRevenue?: number; completed?: boolean } | void>,
+  ): Promise<AdImpression | null> {
+    const slot = await this.requestSlot(adType);
+    const result = (await render(slot)) ?? {};
+    return this.sealImpression(slot, result);
+  }
+
+  private authHeaders(): Record<string, string> {
+    return {
+      Authorization: `Bearer ${this.config.userToken}`,
+      'Content-Type': 'application/json',
+    };
   }
 }
 
@@ -237,69 +255,39 @@ export interface AdProviderProps {
   children: React.ReactNode;
 }
 
-/**
- * AdProvider component - wraps your app to enable ads.
- *
- * Usage:
- * ```tsx
- * <AdProvider config={{
- *   apiUrl: 'https://api.dataclaus.io',
- *   applicationId: 'your-app-id',
- *   userToken: linkedUser.userToken,
- *   testMode: __DEV__,
- * }}>
- *   <YourApp />
- * </AdProvider>
- * ```
- */
 export function AdProvider({ config, children }: AdProviderProps) {
   const managerRef = useRef<AdManager | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(false);
+
+  if (!managerRef.current) {
+    managerRef.current = new AdManager(config);
+  }
 
   useEffect(() => {
-    const manager = new AdManager(config);
-    managerRef.current = manager;
-
-    manager.initialize().then(() => {
-      setIsInitialized(true);
-      setIsEnabled(manager.isAdsEnabled());
-    });
-  }, [config.apiUrl, config.applicationId, config.userToken]);
+    managerRef.current = new AdManager(config);
+    setIsInitialized(true);
+  }, [config.apiUrl, config.applicationId, config.userId, config.userToken]);
 
   return (
-    <AdContext.Provider value={{ manager: managerRef.current, isInitialized, isEnabled }}>
+    <AdContext.Provider
+      value={{
+        manager: managerRef.current,
+        isInitialized,
+        isEnabled: managerRef.current?.isAdsEnabled() ?? false,
+      }}
+    >
       {children}
     </AdContext.Provider>
   );
 }
 
-/**
- * Hook to access ad manager.
- */
 export function useAds() {
-  const context = React.useContext(AdContext);
-  return context;
+  return React.useContext(AdContext);
 }
 
 // ============================================================
 // Banner Ad Component
 // ============================================================
-
-export interface BannerAdProps {
-  /** Ad size */
-  size?: AdSize;
-  /** Called when ad loads successfully */
-  onAdLoaded?: () => void;
-  /** Called when ad fails to load */
-  onAdError?: (error: string) => void;
-  /** Called when ad is clicked */
-  onAdClicked?: () => void;
-  /** Called when revenue is generated */
-  onPaidEvent?: (impression: AdImpression) => void;
-  /** Custom styles */
-  style?: object;
-}
 
 const AD_SIZES: Record<AdSize, { width: number; height: number }> = {
   banner: { width: 320, height: 50 },
@@ -310,90 +298,89 @@ const AD_SIZES: Record<AdSize, { width: number; height: number }> = {
   adaptive: { width: Dimensions.get('window').width, height: 60 },
 };
 
-/**
- * BannerAd component - displays a banner advertisement.
- *
- * Revenue from this ad is automatically tracked and distributed according
- * to your app's revenue share configuration.
- *
- * Usage:
- * ```tsx
- * <BannerAd
- *   size="banner"
- *   onPaidEvent={(event) => console.log(`Earned: $${event.revenue}`)}
- * />
- * ```
- */
+export interface BannerAdProps {
+  size?: AdSize;
+  onAdLoaded?: () => void;
+  onAdError?: (error: string) => void;
+  onPaidEvent?: (impression: AdImpression) => void;
+  /**
+   * Host-app hook that drives the platform ad SDK with the resolved
+   * `adUnitId`. Returns the revenue the platform reports (e.g. AdMob
+   * `onPaidEvent` value). If omitted, the SDK seals without a reported
+   * revenue and the server uses its projection.
+   */
+  renderPlatformAd?: (slot: AdSlot) => Promise<{ reportedRevenue?: number }>;
+  style?: object;
+}
+
 export function BannerAd({
   size = 'banner',
   onAdLoaded,
   onAdError,
-  onAdClicked,
   onPaidEvent,
+  renderPlatformAd,
   style,
 }: BannerAdProps) {
   const { manager, isInitialized, isEnabled } = useAds();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showPlaceholder, setShowPlaceholder] = useState(true);
 
   const adSize = AD_SIZES[size];
-  const adUnitId = manager?.getAdUnitId('banner');
 
   useEffect(() => {
-    if (!isInitialized) return;
-
-    if (!isEnabled || !adUnitId) {
-      setError('Ads not enabled');
+    if (!isInitialized || !manager) return;
+    if (!isEnabled) {
+      setError('Ads disabled');
       setIsLoading(false);
-      onAdError?.('Ads not enabled for this application');
+      onAdError?.('Ads disabled');
       return;
     }
 
-    // Simulate ad loading (in production, this connects to AdMob)
-    const loadAd = async () => {
+    let cancelled = false;
+    const cycle = async () => {
       try {
-        // In production, use react-native-google-mobile-ads
-        // await BannerAd.requestAd(adUnitId, size);
-
-        // Simulate successful load
-        await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
-        
+        const impression = await manager.runCycle('banner', async (slot) => {
+          if (renderPlatformAd) {
+            return await renderPlatformAd(slot);
+          }
+          // No platform integration provided: just simulate a render.
+          await new Promise<void>((resolve) => setTimeout(() => resolve(), 400));
+          return {};
+        });
+        if (cancelled) return;
         setIsLoading(false);
-        setShowPlaceholder(false);
         onAdLoaded?.();
-
-        // Simulate ad impression revenue (in production, AdMob reports this)
-        // Average banner CPM is around $0.50-$2.00
-        const estimatedRevenue = 0.001; // $1 CPM = $0.001 per impression
-        const impression = await manager?.recordImpression('banner', estimatedRevenue);
-        if (impression) {
-          onPaidEvent?.(impression);
-        }
+        if (impression) onPaidEvent?.(impression);
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to load ad';
-        setError(message);
+        if (cancelled) return;
+        const msg = err instanceof Error ? err.message : 'Banner load failed';
+        setError(msg);
         setIsLoading(false);
-        onAdError?.(message);
+        onAdError?.(msg);
       }
     };
+    void cycle();
 
-    loadAd();
-  }, [isInitialized, isEnabled, adUnitId]);
+    return () => {
+      cancelled = true;
+    };
+  }, [isInitialized, isEnabled, manager, renderPlatformAd]);
 
-  if (!isEnabled || error) {
-    // Don't show anything if ads are disabled or errored
-    return null;
-  }
+  if (error || !isEnabled) return null;
 
   return (
-    <View style={[styles.container, { width: adSize.width, height: adSize.height }, style]}>
-      {isLoading && (
+    <View
+      style={[
+        styles.container,
+        { width: adSize.width, height: adSize.height },
+        style,
+      ]}
+    >
+      {isLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="small" color="#6366f1" />
         </View>
-      )}
-      {showPlaceholder && !isLoading && (
+      ) : (
         <View style={styles.placeholder}>
           <Text style={styles.placeholderText}>Advertisement</Text>
           <Text style={styles.poweredBy}>Powered by DataClaus</Text>
@@ -404,184 +391,138 @@ export function BannerAd({
 }
 
 // ============================================================
-// Interstitial Ad Hook
+// Interstitial Hook
 // ============================================================
 
 export interface UseInterstitialResult {
-  /** Whether ad is loaded and ready */
   isLoaded: boolean;
-  /** Whether ad is currently loading */
   isLoading: boolean;
-  /** Load the ad */
   load: () => Promise<void>;
-  /** Show the ad */
   show: () => Promise<boolean>;
-  /** Error message if any */
   error: string | null;
 }
 
-/**
- * Hook for interstitial (full-screen) ads.
- *
- * Usage:
- * ```tsx
- * const { isLoaded, load, show } = useInterstitialAd();
- *
- * // Load ad on component mount
- * useEffect(() => { load(); }, []);
- *
- * // Show ad at appropriate time
- * const handleLevelComplete = async () => {
- *   if (isLoaded) await show();
- * };
- * ```
- */
+export interface UseInterstitialOptions {
+  onPaidEvent?: (impression: AdImpression) => void;
+  /** Host-app integration — see BannerAdProps.renderPlatformAd */
+  renderPlatformAd?: (slot: AdSlot) => Promise<{ reportedRevenue?: number }>;
+}
+
 export function useInterstitialAd(
-  onPaidEvent?: (impression: AdImpression) => void
+  options?: UseInterstitialOptions,
 ): UseInterstitialResult {
   const { manager, isInitialized, isEnabled } = useAds();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const slotRef = useRef<AdSlot | null>(null);
 
   const load = useCallback(async () => {
     if (!isInitialized || !isEnabled || !manager) {
       setError('Ads not available');
       return;
     }
-
     setIsLoading(true);
     setError(null);
-
     try {
-      // In production, use react-native-google-mobile-ads
-      // await InterstitialAd.load(adUnitId);
-      await new Promise<void>(resolve => setTimeout(() => resolve(), 1000));
+      const slot = await manager.requestSlot('interstitial');
+      slotRef.current = slot;
       setIsLoaded(true);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load ad';
-      setError(message);
+      setError(err instanceof Error ? err.message : 'Load failed');
     } finally {
       setIsLoading(false);
     }
   }, [isInitialized, isEnabled, manager]);
 
   const show = useCallback(async (): Promise<boolean> => {
-    if (!isLoaded || !manager) {
-      return false;
-    }
-
+    const slot = slotRef.current;
+    if (!slot || !manager) return false;
     try {
-      // In production, use react-native-google-mobile-ads
-      // await interstitial.show();
-
-      // Record impression (interstitials have higher CPM, ~$1-5)
-      const estimatedRevenue = 0.003; // ~$3 CPM
-      const impression = await manager.recordImpression('interstitial', estimatedRevenue);
-      if (impression) {
-        onPaidEvent?.(impression);
+      let result: { reportedRevenue?: number } = {};
+      if (options?.renderPlatformAd) {
+        result = await options.renderPlatformAd(slot);
       }
-
+      const impression = await manager.sealImpression(slot, result);
+      slotRef.current = null;
       setIsLoaded(false);
-      return true;
+      if (impression) options?.onPaidEvent?.(impression);
+      return impression !== null;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to show ad';
-      setError(message);
+      setError(err instanceof Error ? err.message : 'Show failed');
       return false;
     }
-  }, [isLoaded, manager, onPaidEvent]);
+  }, [manager, options]);
 
   return { isLoaded, isLoading, load, show, error };
 }
 
 // ============================================================
-// Rewarded Ad Hook
+// Rewarded Hook
 // ============================================================
 
 export interface UseRewardedResult extends UseInterstitialResult {
-  /** The reward received from watching the ad */
   reward: AdReward | null;
 }
 
-/**
- * Hook for rewarded ads (user watches ad, gets reward).
- *
- * Usage:
- * ```tsx
- * const { isLoaded, load, show, reward } = useRewardedAd({
- *   onRewarded: (reward) => {
- *     giveUserCoins(reward.amount);
- *   }
- * });
- *
- * // Button to watch ad
- * <Button
- *   title="Watch Ad for 50 Coins"
- *   onPress={show}
- *   disabled={!isLoaded}
- * />
- * ```
- */
-export function useRewardedAd(options?: {
+export interface UseRewardedOptions extends UseInterstitialOptions {
   onRewarded?: (reward: AdReward) => void;
-  onPaidEvent?: (impression: AdImpression) => void;
-}): UseRewardedResult {
+  /** Reward shape your app gives users on a completed view */
+  reward?: AdReward;
+}
+
+export function useRewardedAd(options?: UseRewardedOptions): UseRewardedResult {
   const { manager, isInitialized, isEnabled } = useAds();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reward, setReward] = useState<AdReward | null>(null);
+  const slotRef = useRef<AdSlot | null>(null);
 
   const load = useCallback(async () => {
     if (!isInitialized || !isEnabled || !manager) {
       setError('Ads not available');
       return;
     }
-
     setIsLoading(true);
     setError(null);
     setReward(null);
-
     try {
-      await new Promise<void>(resolve => setTimeout(() => resolve(), 1000));
+      slotRef.current = await manager.requestSlot('rewarded');
       setIsLoaded(true);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load ad';
-      setError(message);
+      setError(err instanceof Error ? err.message : 'Load failed');
     } finally {
       setIsLoading(false);
     }
   }, [isInitialized, isEnabled, manager]);
 
   const show = useCallback(async (): Promise<boolean> => {
-    if (!isLoaded || !manager) {
-      return false;
-    }
-
+    const slot = slotRef.current;
+    if (!slot || !manager) return false;
     try {
-      // Simulate rewarded ad view
-      // In production, this would show the actual ad
-
-      // Rewarded ads have highest CPM (~$5-20)
-      const estimatedRevenue = 0.01; // ~$10 CPM (higher for completed views)
-      const impression = await manager.recordImpression('rewarded', estimatedRevenue);
+      let renderResult: { reportedRevenue?: number; completed?: boolean } = {};
+      if (options?.renderPlatformAd) {
+        renderResult = await options.renderPlatformAd(slot);
+      }
+      const impression = await manager.sealImpression(slot, {
+        ...renderResult,
+        completed: renderResult.completed ?? true,
+      });
+      slotRef.current = null;
+      setIsLoaded(false);
       if (impression) {
         options?.onPaidEvent?.(impression);
+        const grantedReward = options?.reward ?? { type: 'coins', amount: 50 };
+        setReward(grantedReward);
+        options?.onRewarded?.(grantedReward);
       }
-
-      // Give reward
-      const adReward: AdReward = { type: 'coins', amount: 50 };
-      setReward(adReward);
-      options?.onRewarded?.(adReward);
-
-      setIsLoaded(false);
-      return true;
+      return impression !== null;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to show ad';
-      setError(message);
+      setError(err instanceof Error ? err.message : 'Show failed');
       return false;
     }
-  }, [isLoaded, manager, options]);
+  }, [manager, options]);
 
   return { isLoaded, isLoading, load, show, error, reward };
 }
@@ -607,7 +548,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
   },
   placeholderText: {
     fontSize: 12,
