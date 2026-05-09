@@ -3,6 +3,7 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters';
 import {
@@ -13,6 +14,10 @@ import { ensureSystemWallets } from './database/seeds/system-wallet.seed';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { rawBody: true });
+
+  // Cookie parsing (req.cookies). Required for the JWT strategy's cookie
+  // extractor and for /auth/logout to clear the dc_session cookie.
+  app.use(cookieParser());
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 

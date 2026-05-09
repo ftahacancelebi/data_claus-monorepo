@@ -5,6 +5,7 @@ import {
   Body,
   UseGuards,
   Req,
+  Res,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -22,7 +23,7 @@ import {
   IsIn,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Request } from 'express';
+import type { Request, Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService, RegisterDto } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -35,6 +36,33 @@ import {
   OtpRequestResponseDto,
 } from './dto';
 import { Public, CurrentUser, CurrentUserData } from '../../common/decorators';
+
+/**
+ * httpOnly session cookie that mirrors the access token returned in the body.
+ * The body field stays for SDKs / mobile clients that store the token
+ * themselves; the cookie unlocks server-side route gating in the web app.
+ */
+const SESSION_COOKIE_NAME = 'dc_session';
+const SESSION_COOKIE_MAX_AGE_MS = 15 * 60 * 1000; // matches access token TTL
+
+function setSessionCookie(res: Response, token: string) {
+  res.cookie(SESSION_COOKIE_NAME, token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: SESSION_COOKIE_MAX_AGE_MS,
+    path: '/',
+  });
+}
+
+function clearSessionCookie(res: Response) {
+  res.clearCookie(SESSION_COOKIE_NAME, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+  });
+}
 
 class RegisterBodyDto implements RegisterDto {
   @ApiProperty({ example: 'user@example.com' })
@@ -72,8 +100,13 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, type: AuthResponseDto })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Body() dto: LoginDto): Promise<AuthResponseDto> {
-    return this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
+    const result = await this.authService.login(dto);
+    setSessionCookie(res, result.accessToken);
+    return result;
   }
 
   @Post('register')
@@ -84,8 +117,23 @@ export class AuthController {
   })
   @ApiResponse({ status: 201, type: AuthResponseDto })
   @ApiResponse({ status: 409, description: 'Email already registered' })
-  async register(@Body() dto: RegisterBodyDto): Promise<AuthResponseDto> {
-    return this.authService.register(dto);
+  async register(
+    @Body() dto: RegisterBodyDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
+    const result = await this.authService.register(dto);
+    setSessionCookie(res, result.accessToken);
+    return result;
+  }
+
+  @Post('logout')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Clear the session cookie' })
+  @ApiResponse({ status: 200 })
+  async logout(@Res({ passthrough: true }) res: Response) {
+    clearSessionCookie(res);
+    return { status: 'ok' };
   }
 
   @Get('me')
@@ -139,8 +187,13 @@ export class AuthController {
   @ApiResponse({ status: 200 })
   @ApiResponse({ status: 401, description: 'Invalid or expired OTP' })
   @ApiResponse({ status: 429, description: 'Attempt limit reached' })
-  async verifyOtp(@Body() dto: VerifyOtpDto) {
-    return this.authService.verifyOtp(dto.email, dto.code);
+  async verifyOtp(
+    @Body() dto: VerifyOtpDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.verifyOtp(dto.email, dto.code);
+    setSessionCookie(res, result.accessToken);
+    return result;
   }
 
   @Post('user/refresh')
@@ -149,7 +202,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Exchange a refresh token for a new access token' })
   @ApiResponse({ status: 200 })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
-  async refresh(@Body() dto: RefreshTokenDto) {
-    return this.authService.refresh(dto.refreshToken);
+  async refresh(
+    @Body() dto: RefreshTokenDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.refresh(dto.refreshToken);
+    setSessionCookie(res, result.accessToken);
+    return result;
   }
 }

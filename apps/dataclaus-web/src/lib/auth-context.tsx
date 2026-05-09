@@ -9,7 +9,13 @@ import {
   useCallback,
 } from 'react';
 import type { AuthUser, UserRole } from './types';
-import { createUser, registerDeveloper, createWallet, loginUser } from './api';
+import {
+  createUser,
+  registerDeveloper,
+  createWallet,
+  loginUser,
+  apiLogout,
+} from './api';
 
 /**
  * Auth lifecycle states.
@@ -63,6 +69,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
+    // Local cleanup runs immediately so the UI flips to 'guest' even if the
+    // backend round-trip is slow or fails.
     setUser(null);
     setStatus('guest');
     if (typeof window !== 'undefined') {
@@ -70,6 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('dataclaus_token');
       localStorage.removeItem('dataclaus_user_access_token');
     }
+    // Best-effort cookie clear on the backend. Errors are swallowed inside
+    // apiLogout so a cookie left behind doesn't block the logout UX.
+    void apiLogout();
   }, []);
 
   const register = async (

@@ -92,12 +92,24 @@ qc.invalidateQueries({ queryKey: queryKeys.ledger.all });  // safety net
 
 This is THE fix for "API güncellenir, state güncellenmez". The ticker, the hero card, the by-app card, and the withdraw page all read the same cache key — one socket event updates all of them in the same render cycle.
 
+### Cookie auth + server-side middleware (now wired, additive)
+
+The backend (`apps/dataclaus-nestjs-api`) now sets a `dc_session` httpOnly cookie on `/auth/login`, `/auth/register`, `/auth/user/verify-otp`, and `/auth/user/refresh`. The cookie is `httpOnly`, `sameSite: 'lax'`, `secure` in production, and lives 15 minutes (matches access-token TTL). `/auth/logout` clears it.
+
+The Nest JWT strategy reads the token from the cookie first, then falls back to the `Authorization: Bearer …` header — so old SDKs / mobile clients keep working unchanged.
+
+The Next.js `src/middleware.ts` reads the same cookie and gates `/dashboard/*` and `/u/*` server-side. Unauthed direct-URL hits get redirected to `/?next=<original-path>` BEFORE any client tree renders. The login page (`safeNext()` guard against open-redirect) honors `?next=` after successful auth.
+
+`lib/api.ts` `request()` now sends `credentials: 'include'`, so the cookie is forwarded on every same-origin call. `auth-context.logout()` calls `apiLogout()` (POST `/auth/logout`) before clearing localStorage.
+
+**Coexistence status:** the access token still travels in localStorage AND the cookie. This is intentional during the rollout — the cookie path is non-breaking and unlocks server-side gating, but localStorage remains the primary token store on the frontend until we migrate every Bearer call. **Do not assume cookie-only**; the JWT extractor reads either source.
+
 ### Outstanding gaps (in priority order)
 
-1. **httpOnly cookie + server-side middleware** — tokens still in `localStorage` (XSS-readable). Refresh token flow exists for OTP path only. Backend coordination needed; ~half day.
-2. **Convert remaining ~10 lower-traffic pages** to TanStack Query: admin/{transactions,health,reports,analytics}, my-apps/[id], my-apps/logs, data-products, apps, faq, jury, legal/data-rights. Mechanical, ~1-2 hrs.
-3. **Schema coverage**: extend `src/lib/schemas.ts` to cover ad-tracking, webhook secrets, transaction admin endpoints. Mechanical.
-4. **`loading.tsx` per segment** — currently `RequireAuth` shows a generic skeleton; segment-specific skeletons would feel faster.
+1. **Retire localStorage tokens** — once we're confident the cookie path is healthy, remove `localStorage.setItem('dataclaus_token', …)` calls in `auth-context` and stop reading the token in `lib/api.ts:request()`. The Authorization header gets dropped; the cookie does the work. Closes the XSS exposure that lets a malicious script exfiltrate the token.
+2. **Refresh token flow on the password path** — currently only the OTP login mints a refresh token. Add refresh issuance to `/auth/login` so the access token can be silently rotated when it nears expiry, instead of forcing the user to re-login every 15 minutes.
+3. **Schema coverage** — extend `src/lib/schemas.ts` to cover ad-tracking, webhook secrets, and remaining transaction admin endpoints.
+4. **Lower-traffic page conversions** — `dashboard/admin/{reports,analytics}` (currently 100% mock data), `dashboard/apps`, `dashboard/faq`, `dashboard/my-apps/logs`, `jury`. Mechanical when those pages get real backends.
 
 ### When in doubt
 

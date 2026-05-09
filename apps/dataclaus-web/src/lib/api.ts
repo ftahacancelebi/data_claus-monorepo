@@ -101,6 +101,11 @@ async function request<T>(
   const res = await fetch(`${API_BASE}${endpoint}`, {
     ...fetchOptions,
     headers,
+    // Include the dc_session cookie so the backend's JwtStrategy cookie
+    // extractor can authenticate when the Bearer header is absent (e.g.,
+    // after we eventually retire localStorage tokens). Same-origin in dev
+    // via the Next.js /api → backend rewrite, so no CORS surprise.
+    credentials: 'include',
   });
 
   if (!res.ok) {
@@ -147,6 +152,16 @@ export const createUser = (data: {
 
 export const getUser = (id: string) =>
   request<{ id: string; email: string; name: string }>(`/users/${id}`);
+
+/**
+ * Tells the backend to clear the dc_session cookie. Idempotent and safe to
+ * call even when the user's session is already invalid — the endpoint just
+ * resets the cookie regardless. Called from auth-context.logout().
+ */
+export const apiLogout = () =>
+  request<{ status: string }>('/auth/logout', { method: 'POST' }).catch(
+    () => ({ status: 'error' }), // swallow — local cleanup runs anyway
+  );
 
 // Login returns NestJS format with accessToken and user object
 export const loginUser = async (email: string, password: string): Promise<{
