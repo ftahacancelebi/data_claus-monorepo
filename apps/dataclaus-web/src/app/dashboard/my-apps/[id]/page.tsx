@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/lib/auth-context';
-import { 
+import {
   ArrowLeft,
   Activity,
   Users,
@@ -30,9 +30,13 @@ import {
   Percent,
   Coins
 } from 'phosphor-react';
-import { getApplication, getApplicationStats, getWalletsByOwner, getWalletTransactions } from '@/lib/api';
+import {
+  useApplication,
+  useApplicationStats,
+  useWalletsByOwner,
+  useWalletTransactions,
+} from '@/lib/api-hooks';
 import { DeveloperRevenueFlow } from '@/components/apps/developer-revenue-flow';
-import { Transaction } from '@/lib/types';
 
 export default function AppDetailPage() {
   const { user } = useAuth();
@@ -40,79 +44,66 @@ export default function AppDetailPage() {
   const router = useRouter();
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
-  
-  const [app, setApp] = useState<any>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const appId = params.id as string;
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!appId || !user) return;
-      
-      setLoading(true);
-      try {
-        const appData = await getApplication(appId);
-        const statsData = await getApplicationStats(appId);
-        
-        setApp({
-          ...appData,
-          apiKey: appData.api_key_prefix ? `${appData.api_key_prefix}••••••••` : 'No API Key', // We don't have full key here
-          platform: 'DataClaus SDK', // hardcoded for now
-          stats: {
-             totalEvents: statsData.total_events,
-             activeUsers: statsData.total_users,
-             avgLatency: 24, // Mock
-             qualityScore: statsData.avg_quality,
-             revenue: statsData.total_revenue,
-             todayEvents: statsData.events_today
-          },
-          // Mocking chart data for now as API doesn't provide time-series yet
-          trafficData: [
-            { time: '00:00', events: 0 },
-            { time: '06:00', events: 0 },
-            { time: '12:00', events: 0 },
-            { time: '18:00', events: 0 },
-            { time: '23:59', events: 0 },
-          ],
-          weeklyData: [
-            { day: 'Mon', events: 0, users: 0 },
-            { day: 'Tue', events: 0, users: 0 },
-            { day: 'Wed', events: 0, users: 0 },
-            { day: 'Thu', events: 0, users: 0 },
-            { day: 'Fri', events: 0, users: 0 },
-            { day: 'Sat', events: 0, users: 0 },
-            { day: 'Sun', events: 0, users: 0 },
-          ],
-          services: [
-            { id: 'recaptcha', name: 'reCAPTCHA v3', description: 'Bot protection and human verification', enabled: true, icon: ShieldCheck },
-            { id: 'quality', name: 'Quality Scoring', description: 'AI-powered data quality assessment', enabled: true, icon: ChartBar },
-            { id: 'realtime', name: 'Real-time Analytics', description: 'Live dashboard and metrics', enabled: true, icon: Activity },
-          ]
-        });
+  const appQuery = useApplication(appId);
+  const statsQuery = useApplicationStats(appId);
+  const walletsQuery = useWalletsByOwner(user?.id);
+  const primaryWalletId = walletsQuery.data?.[0]?.id;
+  const txQuery = useWalletTransactions(primaryWalletId, { limit: 10, offset: 0 });
 
-        // Fetch developer wallet transactions
-        try {
-          const wallets = await getWalletsByOwner(user.id);
-          if (wallets && wallets.length > 0) {
-            const txns = await getWalletTransactions(wallets[0].id, 10, 0);
-            setTransactions(txns || []);
-          }
-        } catch (txErr) {
-          console.log('Could not fetch transactions:', txErr);
-        }
-      } catch (err) {
-        console.error('Failed to load app:', err);
-        setError('Failed to load application data.');
-      } finally {
-        setLoading(false);
-      }
-    }
+  const transactions = txQuery.data ?? [];
+  const loading = appQuery.isLoading || statsQuery.isLoading;
+  const error =
+    appQuery.error?.message ??
+    statsQuery.error?.message ??
+    (!appQuery.data && !appQuery.isLoading ? 'Application not found' : null);
 
-    fetchData();
-  }, [appId, user]);
+  // Augment server data with hardcoded UI metadata (chart placeholders, services
+  // config, masked API-key display). The API doesn't return time-series yet, so
+  // chart data is zeroed; replace when /applications/:id/timeseries lands.
+  const app = useMemo(() => {
+    if (!appQuery.data || !statsQuery.data) return null;
+    const appData = appQuery.data;
+    const statsData = statsQuery.data;
+    return {
+      ...appData,
+      apiKey: appData.api_key_prefix
+        ? `${appData.api_key_prefix}••••••••`
+        : 'No API Key',
+      platform: 'DataClaus SDK',
+      stats: {
+        totalEvents: statsData.total_events,
+        activeUsers: statsData.total_users,
+        avgLatency: 24,
+        qualityScore: statsData.avg_quality,
+        revenue: statsData.total_revenue,
+        todayEvents: statsData.events_today,
+      },
+      trafficData: [
+        { time: '00:00', events: 0 },
+        { time: '06:00', events: 0 },
+        { time: '12:00', events: 0 },
+        { time: '18:00', events: 0 },
+        { time: '23:59', events: 0 },
+      ],
+      weeklyData: [
+        { day: 'Mon', events: 0, users: 0 },
+        { day: 'Tue', events: 0, users: 0 },
+        { day: 'Wed', events: 0, users: 0 },
+        { day: 'Thu', events: 0, users: 0 },
+        { day: 'Fri', events: 0, users: 0 },
+        { day: 'Sat', events: 0, users: 0 },
+        { day: 'Sun', events: 0, users: 0 },
+      ],
+      services: [
+        { id: 'recaptcha', name: 'reCAPTCHA v3', description: 'Bot protection and human verification', enabled: true, icon: ShieldCheck },
+        { id: 'quality', name: 'Quality Scoring', description: 'AI-powered data quality assessment', enabled: true, icon: ChartBar },
+        { id: 'realtime', name: 'Real-time Analytics', description: 'Live dashboard and metrics', enabled: true, icon: Activity },
+      ],
+    };
+  }, [appQuery.data, statsQuery.data]);
 
   if (!user) return null;
   if (loading) {

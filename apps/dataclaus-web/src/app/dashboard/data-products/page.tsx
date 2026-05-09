@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -11,12 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/auth-context';
-import {
-  getWalletsByOwner,
-  getDashboard,
-  type DashboardStats,
-} from '@/lib/api';
-import type { Wallet } from '@/lib/types';
+import { useDashboardStats, useWalletsByOwner } from '@/lib/api-hooks';
 import { formatMoney, REVENUE_SHARES } from '@/lib/types';
 import { Database, DollarSign, Users, Info } from 'lucide-react';
 import Link from 'next/link';
@@ -24,26 +18,12 @@ import Link from 'next/link';
 export default function DataProductsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [wallets, setWallets] = useState<Wallet[]>([]);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
-      try {
-        const [walletsData, statsData] = await Promise.all([
-          getWalletsByOwner(user.id).catch(() => []),
-          getDashboard().catch(() => null),
-        ]);
-        setWallets(walletsData);
-        setStats(statsData);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [user]);
+  const walletsQuery = useWalletsByOwner(user?.id);
+  const statsQuery = useDashboardStats();
+  const wallets = walletsQuery.data ?? [];
+  const stats = statsQuery.data ?? null;
+  const loading = walletsQuery.isLoading || statsQuery.isLoading;
 
   if (!user) return null;
 

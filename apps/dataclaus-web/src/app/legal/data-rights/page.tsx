@@ -1,29 +1,45 @@
 'use client';
 
 import { useState } from 'react';
+import {
+  useCancelAccountDeletion,
+  useRequestAccountDeletion,
+} from '@/lib/api-hooks';
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-
-function getToken(): string | null {
+/**
+ * Reads the auth token using the same keys as `lib/api.ts` and
+ * `auth-context.tsx`. The legacy `'accessToken'` key here was a bug —
+ * it was never set, so this page silently 401'd.
+ */
+function readToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('accessToken');
+  return (
+    window.localStorage.getItem('dataclaus_token') ||
+    window.localStorage.getItem('dataclaus_user_access_token')
+  );
 }
 
 export default function DataRightsPage() {
   const [status, setStatus] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  // Account deletion goes through the React Query mutation hooks so the
+  // status invalidates the same way it does in /u/account.
+  const requestDeleteMutation = useRequestAccountDeletion();
+  const cancelDeleteMutation = useCancelAccountDeletion();
 
   const exportData = async () => {
-    setBusy(true);
     setStatus(null);
+    setExporting(true);
     try {
-      const token = getToken();
+      const token = readToken();
       if (!token) {
         setStatus('Oturum açmanız gerekiyor.');
         return;
       }
-      const res = await fetch(`${API_BASE}/me/data-export`, {
+      // Goes through the Next.js rewrite (/api → backend) so cookies and
+      // CORS work the same way they do for the rest of the app.
+      const res = await fetch('/api/me/data-export', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
@@ -38,8 +54,10 @@ export default function DataRightsPage() {
       a.click();
       URL.revokeObjectURL(url);
       setStatus('Dışa aktarma tamamlandı.');
+    } catch (err) {
+      setStatus(`Hata: ${err instanceof Error ? err.message : 'Bilinmeyen hata'}`);
     } finally {
-      setBusy(false);
+      setExporting(false);
     }
   };
 
@@ -50,55 +68,28 @@ export default function DataRightsPage() {
       )
     )
       return;
-    setBusy(true);
     setStatus(null);
     try {
-      const token = getToken();
-      if (!token) {
-        setStatus('Oturum açmanız gerekiyor.');
-        return;
-      }
-      const res = await fetch(`${API_BASE}/me/account/delete-request`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) {
-        setStatus(`Hata: HTTP ${res.status}`);
-        return;
-      }
-      const json = await res.json();
-      setStatus(
-        `Silme zamanlandı. Geri alma süresi: ${new Date(
-          json.deleteAfter,
-        ).toLocaleString('tr-TR')}`,
-      );
-    } finally {
-      setBusy(false);
+      await requestDeleteMutation.mutateAsync();
+      setStatus('Silme talebi alındı. 30 gün içinde geri alabilirsiniz.');
+    } catch (err) {
+      setStatus(`Hata: ${err instanceof Error ? err.message : 'Bilinmeyen hata'}`);
     }
   };
 
   const cancelDeletion = async () => {
-    setBusy(true);
     setStatus(null);
     try {
-      const token = getToken();
-      if (!token) {
-        setStatus('Oturum açmanız gerekiyor.');
-        return;
-      }
-      const res = await fetch(`${API_BASE}/me/account/delete-request`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) {
-        setStatus(`Hata: HTTP ${res.status}`);
-        return;
-      }
+      await cancelDeleteMutation.mutateAsync();
       setStatus('Silme talebi iptal edildi.');
-    } finally {
-      setBusy(false);
+    } catch (err) {
+      setStatus(`Hata: ${err instanceof Error ? err.message : 'Bilinmeyen hata'}`);
     }
   };
+
+  const requestPending = requestDeleteMutation.isPending;
+  const cancelPending = cancelDeleteMutation.isPending;
+  const anyBusy = exporting || requestPending || cancelPending;
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-16 text-slate-200">
@@ -117,10 +108,10 @@ export default function DataRightsPage() {
           </p>
           <button
             onClick={exportData}
-            disabled={busy}
+            disabled={anyBusy}
             className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
           >
-            JSON Olarak İndir
+            {exporting ? 'İndiriliyor…' : 'JSON Olarak İndir'}
           </button>
         </section>
 
@@ -133,17 +124,17 @@ export default function DataRightsPage() {
           <div className="flex gap-3">
             <button
               onClick={requestDeletion}
-              disabled={busy}
+              disabled={anyBusy}
               className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-500 disabled:opacity-50"
             >
-              Silme Talebi Gönder
+              {requestPending ? 'Talep gönderiliyor…' : 'Silme Talebi Gönder'}
             </button>
             <button
               onClick={cancelDeletion}
-              disabled={busy}
+              disabled={anyBusy}
               className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium hover:bg-slate-800 disabled:opacity-50"
             >
-              Bekleyen Talebi İptal Et
+              {cancelPending ? 'İptal ediliyor…' : 'Bekleyen Talebi İptal Et'}
             </button>
           </div>
         </section>
