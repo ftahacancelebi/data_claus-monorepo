@@ -76,6 +76,23 @@ Key invariant: `SUM(amount) WHERE status='completed' = 0` over the
 `ledger_transactions` table at all times. Verified by a cron and exposed
 via the `/admin/health/full` endpoint.
 
+### Anti-bypass impression flow
+
+The mobile SDK never tells the server how much an ad is worth. Every ad
+goes through a two-step **slot/seal** cycle:
+
+1. `POST /ads/slot` — server issues a HMAC-signed token bound to
+   (appId, userId, adType, nonce). 5-minute TTL.
+2. `POST /ads/seal` — SDK presents the token after the impression fires.
+   Server verifies signature + nonce + per-app binding, then atomically
+   debits the ad-network wallet and credits the user/dev/platform splits.
+   Replays are blocked by a unique partial index on `slot_nonce`.
+
+Forking the SDK to forge revenue has no effect — revenue is resolved
+server-side from the campaign auction or the ad-network reporting API.
+See [`docs/architecture.md`](docs/architecture.md) and
+[`memory-bank/defensibility.md`](memory-bank/defensibility.md).
+
 ---
 
 ## Repo layout
@@ -114,8 +131,9 @@ The project is broken into 7 phases. Detailed plans live in
 | 3 | Auth & Security (OTP, reCAPTCHA, throttling, webhooks) | ✅ |
 | 4 | Realtime / WebSocket | ✅ |
 | 5 | User Portal (earnings, withdraw, KVKK) | ✅ |
-| 6 | Marketplace & Buyers | partial |
+| 6 | Marketplace & Buyers | partial — buyer portal UI out of scope, economics simulated via `campaign-matcher` |
 | 7 | **Demo polish & capstone delivery** | this branch |
+| 8 | Anti-bypass slot/seal hardening | ✅ commit `6b1e42d` |
 
 See [`memory-bank/implementation/00-master-plan.md`](memory-bank/implementation/00-master-plan.md)
 for the full roadmap.
@@ -129,6 +147,7 @@ for the full roadmap.
 | `demo:seed`    | Predictable demo data (3 devs, 5 users, 2 buyers, 3 campaigns, 100 impressions). Idempotent. |
 | `demo:replay`  | Generates one ad impression every 5s so dashboards animate during a live demo. |
 | `demo:reset`   | Truncates demo tables and reseeds. Refuses to run when `NODE_ENV=production`. |
+| `smoke:slot-seal` | End-to-end check of the bypass-resistant ad cycle. Run before the jury demo. |
 | `dev:api`      | NestJS API in watch mode. |
 | `dev:web`      | Next.js dashboard in dev mode. |
 | `dev:tiktok-be` | TikTok demo backend in watch mode. |

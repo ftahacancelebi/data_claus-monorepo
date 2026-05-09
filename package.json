@@ -9,6 +9,7 @@
     "demo:seed": "ts-node --transpile-only --project scripts/tsconfig.json scripts/demo-seed.ts",
     "demo:replay": "ts-node --transpile-only --project scripts/tsconfig.json scripts/demo-replay.ts",
     "demo:reset": "ts-node --transpile-only --project scripts/tsconfig.json scripts/demo-reset.ts",
+    "smoke:slot-seal": "ts-node --transpile-only --project scripts/tsconfig.json scripts/smoke-test-slot-seal.ts",
     "dev:api": "cd apps/dataclaus-nestjs-api && pnpm run start:dev",
     "dev:web": "cd apps/dataclaus-web && npm run dev",
     "dev:tiktok-be": "cd apps/tiktok-backend && npm run start:dev",

@@ -154,3 +154,38 @@ docs/
   - Fixed logic where revenue was calculated but never distributed to users/developers.
 - **Security Decisions:** 
   - Confirmed that Developers do not need a separate API Key for runtime application requests. The `Application ID` + `User Token` is sufficient for attribution.
+
+---
+
+## [2026-05-09] Anti-Bypass Slot/Seal Hardening (commit 6b1e42d → next)
+
+### Why
+SDK-trusted revenue (`recordImpression(adType, revenue)`) is forkable.
+A jury-quality answer to "what stops a developer from skipping the user's
+share?" must be **architectural**, not "trust the client".
+
+### What changed
+- `common/crypto/SigningService` — HMAC-SHA256 + nonce ledger + canonical JSON.
+- `modules/ads/AdMediationService` — slot allocation + revenue reconciliation.
+- `/ads/slot` + `/ads/seal` endpoints; `/ads/impression` now `@Roles(ADMIN)` only.
+- `AdImpression.slotNonce` (unique partial idx), `sealedAt`, `revenueConfirmed`.
+- SDK `requestSlot/sealImpression` cycle, `attestation.ts` provider hook,
+  SHA-256 fingerprint (was zero-security `((hash<<5)-hash)+char`).
+- `tiktok-backend /ads/impression` now internally runs slot+seal — mobile
+  callers see one round-trip but get full anti-bypass guarantees.
+
+### What's defensible now
+- Replay: HMAC + in-memory nonce + DB unique partial idx (3 layers).
+- Tampering: signature verification + canonical JSON.
+- Revenue forging: server-side reconciliation, ±50% tolerance band, clamp + flag.
+- Cross-app token reuse: app-id binding inside the slot payload.
+- Forked SDK: ad-unit IDs are server-resolved, not in client config.
+
+### Smoke test
+`pnpm run smoke:slot-seal` exercises the happy path + replay + tamper +
+out-of-tolerance scenarios. Run BEFORE the jury demo.
+
+### Out of scope (intentional)
+- Real Apple App Attest / Play Integrity backend (stub provider only).
+- Buyer portal UI (economics simulated via `campaign-matcher`).
+- Production observability (Sentry DSN env exists, wiring deferred).

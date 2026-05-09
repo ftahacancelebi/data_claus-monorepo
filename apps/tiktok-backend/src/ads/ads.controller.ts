@@ -49,8 +49,13 @@ export class AdsController {
   }
 
   /**
-   * Record an ad impression - calls the real Go API
-   * Impressions are persisted to PostgreSQL
+   * Record an ad impression. Internally runs the bypass-resistant
+   * slot/seal flow against the DataClaus API:
+   *   1. POST /ads/slot   → server-issued signed token
+   *   2. POST /ads/seal   → atomic ledger transfer
+   *
+   * Mobile callers see a single round-trip; the proxy hides the two-step
+   * crypto handshake.
    */
   @Post('impression')
   @UseGuards(AuthGuard)
@@ -61,17 +66,10 @@ export class AdsController {
     const userId = req.user.id;
     const adType = dto.adType;
 
-    console.log(
-      '[ADS] Debug - Authenticated User:',
-      JSON.stringify(req.user, null, 2),
-    );
-    console.log('[ADS] Debug - Token:', req.token ? 'Present' : 'Missing');
-    console.log('[ADS] Debug - User ID:', userId);
-
     try {
-      // Call the DataClaus API to record impression
-      const response = await fetch(
-        `${this.goApiUrl}/applications/${this.appId}/ads/impression`,
+      // STEP 1 — request a signed slot
+      const slotResponse = await fetch(
+        `${this.goApiUrl}/applications/${this.appId}/ads/slot`,
         {
           method: 'POST',
           headers: {
@@ -79,48 +77,71 @@ export class AdsController {
             Authorization: `Bearer ${req.token}`,
           },
           body: JSON.stringify({
-            user_id: userId,
             ad_type: adType,
-            gross_revenue: dto.grossRevenue,
-            // Not sending camelCase properties anymore to avoid 'property should not exist' error
+            user_id: userId,
           }),
         },
       );
 
-      if (!response.ok) {
-        const error = await response
+      if (!slotResponse.ok) {
+        const err = await slotResponse
           .json()
-          .catch(() => ({ error: 'Unknown error' }));
-        console.error('[ADS] Go API error:', error);
-
-        // If application not found, we need to create one first
-        if (error.error === 'Application not found') {
+          .catch(() => ({ error: 'Slot request failed' }));
+        console.error('[ADS] Slot request error:', err);
+        if (err.error === 'Application not found') {
           throw new InternalServerErrorException(
-            'Demo application not configured. Please create an application in the Go API first.',
+            'Demo application not configured. Create an application in the DataClaus API first.',
           );
         }
-
         throw new InternalServerErrorException(
-          error.error || 'Failed to record impression',
+          err.error || 'Failed to obtain ad slot',
         );
       }
 
-      const result = await response.json();
+      const slot = await slotResponse.json();
+
+      // STEP 2 — seal the impression
+      const sealResponse = await fetch(
+        `${this.goApiUrl}/applications/${this.appId}/ads/seal`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${req.token}`,
+          },
+          body: JSON.stringify({
+            slot_token: slot.slot_token,
+            reported_revenue: dto.grossRevenue,
+          }),
+        },
+      );
+
+      if (!sealResponse.ok) {
+        const err = await sealResponse
+          .json()
+          .catch(() => ({ error: 'Seal failed' }));
+        console.error('[ADS] Seal error:', err);
+        throw new InternalServerErrorException(
+          err.error || 'Failed to seal impression',
+        );
+      }
+
+      const result = await sealResponse.json();
       console.log(
-        `[ADS] Impression recorded response:`,
+        `[ADS] Impression sealed (${adType}):`,
         JSON.stringify(result, null, 2),
       );
 
       return {
         success: true,
-        impressionId: result.id || result.impression_id,
+        impressionId: result.id,
         adType,
         grossRevenue: result.gross_revenue,
         userShare: result.user_share,
         devShare: result.dev_share,
         platformFee: result.platform_fee,
         userNewTotal: result.user_new_total,
-        distributed: result.distributed,
+        distributed: true,
       };
     } catch (error) {
       console.error('[ADS] Failed to record impression:', error);
@@ -129,6 +150,61 @@ export class AdsController {
         'Failed to connect to DataClaus API',
       );
     }
+  }
+
+  /**
+   * Public passthrough for SDK clients that want to drive the slot/seal
+   * cycle directly. Mobile has not been migrated yet — keep this for
+   * forward-looking integrations.
+   */
+  @Post('slot')
+  @UseGuards(AuthGuard)
+  async requestSlot(
+    @Body() dto: RecordImpressionDto,
+    @Request() req: { user: { id: string }; token: string },
+  ) {
+    const response = await fetch(
+      `${this.goApiUrl}/applications/${this.appId}/ads/slot`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${req.token}`,
+        },
+        body: JSON.stringify({ ad_type: dto.adType, user_id: req.user.id }),
+      },
+    );
+    if (!response.ok) {
+      throw new InternalServerErrorException('Slot request failed');
+    }
+    return response.json();
+  }
+
+  @Post('seal')
+  @UseGuards(AuthGuard)
+  async sealImpression(
+    @Body() body: { slotToken: string; reportedRevenue?: number; completed?: boolean },
+    @Request() req: { token: string },
+  ) {
+    const response = await fetch(
+      `${this.goApiUrl}/applications/${this.appId}/ads/seal`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${req.token}`,
+        },
+        body: JSON.stringify({
+          slot_token: body.slotToken,
+          reported_revenue: body.reportedRevenue,
+          completed: body.completed,
+        }),
+      },
+    );
+    if (!response.ok) {
+      throw new InternalServerErrorException('Seal failed');
+    }
+    return response.json();
   }
 
   /**
