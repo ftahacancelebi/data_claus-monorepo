@@ -298,3 +298,114 @@ export const HealthSummarySchema = z.object({
   checkedAt: z.string(),
   checks: z.array(HealthCheckSchema),
 });
+
+// =============================================================================
+// DEVELOPER + REVENUE CONFIG
+// =============================================================================
+
+export const DeveloperResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  user_share_percent: z.coerce.number(),
+  dev_share_percent: z.coerce.number(),
+});
+
+export const RevenueShareConfigSchema = z.object({
+  user_share_percent: z.coerce.number(),
+  developer_share_percent: z.coerce.number(),
+  platform_fee_percent: z.coerce.number(),
+  min_payout_threshold: z.coerce.number(),
+});
+
+// =============================================================================
+// APPLICATION STATS
+// =============================================================================
+
+export const ApplicationStatsSchema = z.object({
+  application_id: z.string(),
+  total_events: z.coerce.number(),
+  total_users: z.coerce.number(),
+  total_revenue: z.coerce.number(),
+  avg_quality: z.coerce.number(),
+  events_today: z.coerce.number(),
+  events_week: z.coerce.number(),
+  events_month: z.coerce.number(),
+});
+
+// =============================================================================
+// LEDGER INVARIANT
+// =============================================================================
+
+export const LedgerInvariantStatusSchema = z.object({
+  ok: z.boolean(),
+  net: z.coerce.number(),
+  totalRows: z.coerce.number(),
+  orphans: z.coerce.number(),
+  checkedAt: z.string(),
+});
+
+// =============================================================================
+// USER IDENTITY LINKING
+// =============================================================================
+
+export const DataClausUserSchema = z.object({
+  id: z.string(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  wallet_id: z.string(),
+  quality_score: z.coerce.number(),
+  total_earned: z.coerce.number(),
+  created_at: z.string(),
+});
+
+export const LinkUserResponseSchema = z.object({
+  dataclaus_user_id: z.string(),
+  user_token: z.string(),
+  is_new_user: z.boolean(),
+  wallet_id: z.string(),
+});
+
+export const UserEarningsResponseSchema = z.object({
+  total_earned: z.coerce.number(),
+  pending_balance: z.coerce.number(),
+  available_balance: z.coerce.number(),
+  quality_score: z.coerce.number(),
+});
+
+// =============================================================================
+// AD REVENUE TRACKING
+// =============================================================================
+
+export const AdTypeSchema = z.enum(['banner', 'interstitial', 'rewarded', 'native']);
+
+export const AdConfigSchema = z.object({
+  ad_unit_ids: z.object({
+    banner: z.string().optional(),
+    interstitial: z.string().optional(),
+    rewarded: z.string().optional(),
+    native: z.string().optional(),
+  }),
+  enabled: z.boolean(),
+  test_mode: z.boolean(),
+});
+
+export const AdRevenueSummarySchema = z.object({
+  total_impressions: z.coerce.number(),
+  total_revenue: z.coerce.number(),
+  revenue_by_type: z.record(AdTypeSchema, z.coerce.number()),
+  today_revenue: z.coerce.number(),
+});
+
+// =============================================================================
+// WEBHOOK SECRETS
+// =============================================================================
+
+export const WebhookSecretSchema = z.object({
+  id: z.string(),
+  developer_id: z.string(),
+  secret_prefix: z.string(),
+  created_at: z.string(),
+  last_used_at: z.string().optional(),
+});
+export const WebhookSecretListSchema = z.array(WebhookSecretSchema);

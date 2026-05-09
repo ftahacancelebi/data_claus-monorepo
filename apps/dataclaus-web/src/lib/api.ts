@@ -7,27 +7,38 @@ import type {
   ApiKey,
 } from './types';
 import {
+  AdConfigSchema,
   AdminPlatformStatsSchema,
   AdminUserListSchema,
+  AdRevenueSummarySchema,
   ApiKeyListSchema,
   ApiKeySchema,
   ApplicationListSchema,
   ApplicationSchema,
+  ApplicationStatsSchema,
   CampaignListSchema,
   CampaignSchema,
   DashboardStatsSchema,
+  DataClausUserSchema,
+  DeveloperResponseSchema,
   EarningsByAppListSchema,
   EarningsSummarySchema,
   HealthSummarySchema,
+  LedgerInvariantStatusSchema,
   LedgerPageSchema,
   LedgerTransactionListSchema,
+  LinkUserResponseSchema,
+  LoginResponseSchema,
   PayoutRecordListSchema,
   PayoutRecordSchema,
   QualityHistoryListSchema,
+  RevenueShareConfigSchema,
+  UserEarningsResponseSchema,
   UserSessionListSchema,
   WalletListSchema,
   WalletSchema,
-  LoginResponseSchema,
+  WebhookSecretListSchema,
+  WebhookSecretSchema,
 } from './schemas';
 
 const API_BASE = '/api';
@@ -206,16 +217,19 @@ export interface DeveloperResponse {
 }
 
 export const getDeveloper = (id: string) =>
-  request<DeveloperResponse>(`/developers/${id}`);
+  request(`/developers/${id}`, {
+    schema: DeveloperResponseSchema,
+  }) as Promise<DeveloperResponse>;
 
 export const updateDeveloperUserShare = (
   id: string,
   userSharePercent: number
 ) =>
-  request<DeveloperResponse>(`/developers/${id}/user-share`, {
+  request(`/developers/${id}/user-share`, {
     method: 'PUT',
     body: JSON.stringify({ user_share_percent: userSharePercent }),
-  });
+    schema: DeveloperResponseSchema,
+  }) as Promise<DeveloperResponse>;
 
 export const generateApiKey = (developerId: string, name: string) =>
   request(`/developers/${developerId}/api-keys`, {
@@ -365,7 +379,9 @@ export interface RevenueShareConfig {
 }
 
 export const getRevenueShares = () =>
-  request<RevenueShareConfig>('/config/revenue-shares');
+  request('/config/revenue-shares', {
+    schema: RevenueShareConfigSchema,
+  }) as Promise<RevenueShareConfig>;
 
 // Release pending balance
 export const releasePendingBalance = (walletId: string) =>
@@ -429,7 +445,9 @@ export interface LedgerInvariantStatus {
 }
 
 export const checkLedgerInvariant = () =>
-  request<LedgerInvariantStatus>('/admin/ledger/invariant');
+  request('/admin/ledger/invariant', {
+    schema: LedgerInvariantStatusSchema,
+  }) as Promise<LedgerInvariantStatus>;
 
 // Applications
 export interface Application {
@@ -489,7 +507,9 @@ export const getApplication = (id: string) =>
   }) as Promise<Application>;
 
 export const getApplicationStats = (id: string) =>
-  request<ApplicationStats>(`/applications/${id}/stats`);
+  request(`/applications/${id}/stats`, {
+    schema: ApplicationStatsSchema,
+  }) as Promise<ApplicationStats>;
 
 export const updateApplication = (
   id: string,
@@ -558,21 +578,26 @@ export interface LinkUserResponse {
 }
 
 export const linkUser = (applicationId: string, data: LinkUserRequest) =>
-  request<LinkUserResponse>(`/applications/${applicationId}/users/link`, {
+  request(`/applications/${applicationId}/users/link`, {
     method: 'POST',
     body: JSON.stringify(data),
-  });
+    schema: LinkUserResponseSchema,
+  }) as Promise<LinkUserResponse>;
 
 export const getUserByExternalId = (applicationId: string, externalUserId: string) =>
-  request<DataClausUser>(`/applications/${applicationId}/users/external/${externalUserId}`);
+  request(`/applications/${applicationId}/users/external/${externalUserId}`, {
+    schema: DataClausUserSchema,
+  }) as Promise<DataClausUser>;
 
 export const getUserEarnings = (userId: string) =>
-  request<{
+  request(`/users/${userId}/earnings`, {
+    schema: UserEarningsResponseSchema,
+  }) as Promise<{
     total_earned: number;
     pending_balance: number;
     available_balance: number;
     quality_score: number;
-  }>(`/users/${userId}/earnings`);
+  }>;
 
 // ============================================================
 // AD REVENUE TRACKING
@@ -604,7 +629,9 @@ export interface AdConfig {
 }
 
 export const getAdConfig = (applicationId: string) =>
-  request<AdConfig>(`/applications/${applicationId}/ads/config`);
+  request(`/applications/${applicationId}/ads/config`, {
+    schema: AdConfigSchema,
+  }) as Promise<AdConfig>;
 
 export const recordAdImpression = (
   applicationId: string,
@@ -625,12 +652,14 @@ export const recordAdImpression = (
   );
 
 export const getAdRevenueSummary = (applicationId: string) =>
-  request<{
+  request(`/applications/${applicationId}/ads/summary`, {
+    schema: AdRevenueSummarySchema,
+  }) as Promise<{
     total_impressions: number;
     total_revenue: number;
     revenue_by_type: Record<AdType, number>;
     today_revenue: number;
-  }>(`/applications/${applicationId}/ads/summary`);
+  }>;
 
 // ============================================================
 // WEBHOOK SECRETS
@@ -651,7 +680,9 @@ export const generateWebhookSecret = (developerId: string) =>
   });
 
 export const getWebhookSecrets = (developerId: string) =>
-  request<WebhookSecret[]>(`/developers/${developerId}/webhook-secrets`);
+  request(`/developers/${developerId}/webhook-secrets`, {
+    schema: WebhookSecretListSchema,
+  }) as Promise<WebhookSecret[]>;
 
 export const revokeWebhookSecret = (developerId: string, secretId: string) =>
   request<{ status: string }>(`/developers/${developerId}/webhook-secrets/${secretId}`, {
