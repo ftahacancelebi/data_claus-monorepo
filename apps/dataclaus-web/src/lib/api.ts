@@ -7,6 +7,8 @@ import type {
   ApiKey,
 } from './types';
 import {
+  AdminPlatformStatsSchema,
+  AdminUserListSchema,
   ApiKeyListSchema,
   ApiKeySchema,
   ApplicationListSchema,
@@ -16,7 +18,9 @@ import {
   DashboardStatsSchema,
   EarningsByAppListSchema,
   EarningsSummarySchema,
+  HealthSummarySchema,
   LedgerPageSchema,
+  LedgerTransactionListSchema,
   PayoutRecordListSchema,
   PayoutRecordSchema,
   QualityHistoryListSchema,
@@ -761,4 +765,77 @@ export interface WebhookPayload {
   data: Record<string, unknown>;
   signature: string; // HMAC-SHA256 signature using webhook secret
 }
+
+// ============================================================
+// ADMIN  (admin role only — gated server-side; client-side too via RequireRole)
+// ============================================================
+
+export interface AdminPlatformStats {
+  totalUsers: number;
+  totalDevelopers: number;
+  totalApplications: number;
+  totalImpressions: number;
+  totalRevenue: number;
+  platformFees: number;
+  totalTransactions: number;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  displayName: string | null;
+  walletId: string | null;
+  qualityScore: number;
+  totalEarned: number;
+  pendingBalance: number;
+  createdAt: string;
+}
+
+export interface LedgerTransaction {
+  id: string;
+  source_wallet_id: string;
+  dest_wallet_id: string;
+  amount: number;
+  currency: string;
+  reference_id?: string;
+  type: string;
+  status: string;
+  created_at: string;
+}
+
+export type HealthStatus = 'green' | 'yellow' | 'red';
+
+export interface HealthCheck {
+  name: string;
+  status: HealthStatus;
+  detail: string;
+  metric?: number | string | null;
+}
+
+export interface HealthSummary {
+  status: HealthStatus;
+  checkedAt: string;
+  checks: HealthCheck[];
+}
+
+export const getAdminStats = () =>
+  request('/admin/stats', {
+    schema: AdminPlatformStatsSchema,
+  }) as Promise<AdminPlatformStats>;
+
+export const getAdminUsers = () =>
+  request('/admin/users', {
+    schema: AdminUserListSchema,
+  }) as Promise<AdminUser[]>;
+
+export const getLedgerEntries = () =>
+  request('/ledger', {
+    schema: LedgerTransactionListSchema,
+  }) as Promise<LedgerTransaction[]>;
+
+export const getAdminHealth = () =>
+  request('/admin/health/full', {
+    schema: HealthSummarySchema,
+    cache: 'no-store',
+  }) as Promise<HealthSummary>;
 

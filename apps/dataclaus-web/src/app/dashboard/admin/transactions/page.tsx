@@ -1,62 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-
-interface LedgerTransaction {
-  id: string;
-  source_wallet_id: string;
-  dest_wallet_id: string;
-  amount: number;
-  currency: string;
-  reference_id?: string;
-  type: string;
-  status: string;
-  created_at: string;
-}
+import { useState } from 'react';
+import { useLedgerEntries } from '@/lib/api-hooks';
+import { ApiError } from '@/lib/api';
 
 export default function AdminTransactionsPage() {
-  const [transactions, setTransactions] = useState<LedgerTransaction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   const [filter, setFilter] = useState<string>('all');
 
-  useEffect(() => {
-    loadTransactions();
-  }, []);
+  const ledgerQuery = useLedgerEntries();
+  const transactions = ledgerQuery.data ?? [];
+  const isLoading = ledgerQuery.isLoading;
+  const error = ledgerQuery.error
+    ? ledgerQuery.error instanceof ApiError && ledgerQuery.error.status === 401
+      ? 'Your session may have expired. Try refreshing or signing in again.'
+      : ledgerQuery.error instanceof ApiError && ledgerQuery.error.status === 403
+      ? 'You do not have permission to view transactions.'
+      : ledgerQuery.error.message
+    : '';
 
-  const loadTransactions = async () => {
-    setError('');
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem('dataclaus_token');
-      const response = await fetch('/api/ledger', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          setError('Your session may have expired. Try refreshing or signing in again.');
-          return;
-        }
-        if (response.status === 403) {
-          setError('You do not have permission to view transactions.');
-          return;
-        }
-        const body = await response.json().catch(() => null);
-        setError(
-          body?.message || body?.error || `Failed to load transactions (${response.status})`
-        );
-        return;
-      }
-
-      const data = await response.json();
-      setTransactions(data.data || data || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Network error loading transactions');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const loadTransactions = () => ledgerQuery.refetch();
 
   const filteredTransactions = filter === 'all' 
     ? transactions 

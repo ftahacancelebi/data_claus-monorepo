@@ -68,4 +68,11 @@ export const queryKeys = {
   dashboard: {
     stats: () => ['dashboard', 'stats'] as const,
   },
+  admin: {
+    all: ['admin'] as const,
+    stats: () => [...queryKeys.admin.all, 'stats'] as const,
+    users: () => [...queryKeys.admin.all, 'users'] as const,
+    health: () => [...queryKeys.admin.all, 'health'] as const,
+    ledger: () => [...queryKeys.admin.all, 'ledger'] as const,
+  },
 } as const;

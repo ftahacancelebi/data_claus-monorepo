@@ -244,3 +244,57 @@ export const DashboardStatsSchema = z.object({
   total_payouts: z.coerce.number(),
   active_campaigns: z.coerce.number(),
 });
+
+// =============================================================================
+// ADMIN
+// =============================================================================
+
+export const AdminPlatformStatsSchema = z.object({
+  totalUsers: z.coerce.number(),
+  totalDevelopers: z.coerce.number(),
+  totalApplications: z.coerce.number(),
+  totalImpressions: z.coerce.number(),
+  totalRevenue: z.coerce.number(),
+  platformFees: z.coerce.number(),
+  totalTransactions: z.coerce.number(),
+});
+
+export const AdminUserSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  displayName: z.string().nullable(),
+  walletId: z.string().nullable(),
+  qualityScore: z.coerce.number(),
+  totalEarned: z.coerce.number(),
+  pendingBalance: z.coerce.number(),
+  createdAt: z.string(),
+});
+export const AdminUserListSchema = z.array(AdminUserSchema);
+
+export const LedgerTransactionSchema = z.object({
+  id: z.string(),
+  source_wallet_id: z.string(),
+  dest_wallet_id: z.string(),
+  amount: z.coerce.number(),
+  currency: z.string(),
+  reference_id: z.string().optional(),
+  type: z.string(),
+  status: z.string(),
+  created_at: z.string(),
+});
+export const LedgerTransactionListSchema = z.array(LedgerTransactionSchema);
+
+export const HealthStatusSchema = z.enum(['green', 'yellow', 'red']);
+
+export const HealthCheckSchema = z.object({
+  name: z.string(),
+  status: HealthStatusSchema,
+  detail: z.string(),
+  metric: z.union([z.coerce.number(), z.string(), z.null()]).optional(),
+});
+
+export const HealthSummarySchema = z.object({
+  status: HealthStatusSchema,
+  checkedAt: z.string(),
+  checks: z.array(HealthCheckSchema),
+});

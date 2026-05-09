@@ -1,60 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-
-interface PlatformStats {
-  totalUsers: number;
-  totalDevelopers: number;
-  totalApplications: number;
-  totalImpressions: number;
-  totalRevenue: number;
-  platformFees: number;
-  totalTransactions: number;
-}
+import { useAdminStats } from '@/lib/api-hooks';
+import { ApiError } from '@/lib/api';
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState<PlatformStats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const statsQuery = useAdminStats();
+  const stats = statsQuery.data ?? null;
+  const isLoading = statsQuery.isLoading;
 
-  useEffect(() => {
-    loadStats();
-  }, []);
+  // Map ApiError status codes to user-facing messages — matches the soft
+  // 401 handling used elsewhere (no auto-logout).
+  const error = statsQuery.error
+    ? statsQuery.error instanceof ApiError && statsQuery.error.status === 401
+      ? 'Your session may have expired. Try refreshing or signing in again.'
+      : statsQuery.error instanceof ApiError && statsQuery.error.status === 403
+      ? 'You do not have permission to view admin stats.'
+      : statsQuery.error.message
+    : '';
 
-  const loadStats = async () => {
-    setError('');
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem('dataclaus_token');
-      const response = await fetch('/api/admin/stats', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          setError('Your session may have expired. Try refreshing or signing in again.');
-          return;
-        }
-        if (response.status === 403) {
-          setError('You do not have permission to view admin stats.');
-          return;
-        }
-        const body = await response.json().catch(() => null);
-        setError(
-          body?.message || body?.error || `Failed to load stats (${response.status})`
-        );
-        return;
-      }
-
-      const data = await response.json();
-      setStats(data.data || data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Network error loading stats');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const loadStats = () => statsQuery.refetch();
 
   const StatCard = ({ title, value, icon, color, href }: { title: string; value: string | number; icon: React.ReactNode; color: string; href?: string }) => {
     const content = (

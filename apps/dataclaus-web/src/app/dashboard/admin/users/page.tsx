@@ -1,61 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-
-interface DataClausUser {
-  id: string;
-  email: string;
-  displayName: string | null;
-  walletId: string | null;
-  qualityScore: number;
-  totalEarned: number;
-  pendingBalance: number;
-  createdAt: string;
-}
+import { useState } from 'react';
+import { useAdminUsers } from '@/lib/api-hooks';
+import { ApiError } from '@/lib/api';
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<DataClausUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    setError('');
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem('dataclaus_token');
-      const response = await fetch('/api/admin/users', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          setError('Your session may have expired. Try refreshing or signing in again.');
-          return;
-        }
-        if (response.status === 403) {
-          setError('You do not have permission to view users.');
-          return;
-        }
-        const body = await response.json().catch(() => null);
-        setError(
-          body?.message || body?.error || `Failed to load users (${response.status})`
-        );
-        return;
-      }
-
-      const data = await response.json();
-      setUsers(data.data || data || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Network error loading users');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const usersQuery = useAdminUsers();
+  const users = usersQuery.data ?? [];
+  const isLoading = usersQuery.isLoading;
+  const error = usersQuery.error
+    ? usersQuery.error instanceof ApiError && usersQuery.error.status === 401
+      ? 'Your session may have expired. Try refreshing or signing in again.'
+      : usersQuery.error instanceof ApiError && usersQuery.error.status === 403
+      ? 'You do not have permission to view users.'
+      : usersQuery.error.message
+    : '';
 
   const filteredUsers = users.filter(user => 
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||

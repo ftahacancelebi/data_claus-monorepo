@@ -63,6 +63,11 @@ import {
   getRevenueShares,
   // dashboard
   getDashboard,
+  // admin
+  getAdminStats,
+  getAdminUsers,
+  getLedgerEntries,
+  getAdminHealth,
   // types
   type EarningsByApp,
   type QualityHistoryPoint,
@@ -72,6 +77,10 @@ import {
   type Application,
   type ApplicationStats,
   type DashboardStats,
+  type AdminPlatformStats,
+  type AdminUser,
+  type LedgerTransaction,
+  type HealthSummary,
 } from './api';
 import { queryKeys } from './query-keys';
 import type { ApiKey, Campaign, Wallet, Transaction } from './types';
@@ -502,6 +511,57 @@ export function useDashboardStats(
   return useQuery({
     queryKey: queryKeys.dashboard.stats(),
     queryFn: getDashboard,
+    ...options,
+  });
+}
+
+// =============================================================================
+// ADMIN  (gated by RequireRole role="admin" at the route layer)
+// =============================================================================
+
+export function useAdminStats(
+  options?: Omit<UseQueryOptions<AdminPlatformStats>, 'queryKey' | 'queryFn'>
+) {
+  return useQuery({
+    queryKey: queryKeys.admin.stats(),
+    queryFn: getAdminStats,
+    ...options,
+  });
+}
+
+export function useAdminUsers(
+  options?: Omit<UseQueryOptions<AdminUser[]>, 'queryKey' | 'queryFn'>
+) {
+  return useQuery({
+    queryKey: queryKeys.admin.users(),
+    queryFn: getAdminUsers,
+    ...options,
+  });
+}
+
+export function useLedgerEntries(
+  options?: Omit<UseQueryOptions<LedgerTransaction[]>, 'queryKey' | 'queryFn'>
+) {
+  return useQuery({
+    queryKey: queryKeys.admin.ledger(),
+    queryFn: getLedgerEntries,
+    ...options,
+  });
+}
+
+/**
+ * Health summary polled every 2s while the page is mounted. The 2s cadence
+ * matches the previous manual setInterval; React Query handles cleanup
+ * automatically and pauses when the tab is hidden.
+ */
+export function useAdminHealth(
+  options?: Omit<UseQueryOptions<HealthSummary>, 'queryKey' | 'queryFn'>
+) {
+  return useQuery({
+    queryKey: queryKeys.admin.health(),
+    queryFn: getAdminHealth,
+    refetchInterval: 2_000,
+    refetchIntervalInBackground: false,
     ...options,
   });
 }

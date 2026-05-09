@@ -1,22 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
-type HealthStatus = 'green' | 'yellow' | 'red';
-
-interface HealthCheck {
-  name: string;
-  status: HealthStatus;
-  detail: string;
-  metric?: number | string | null;
-}
-
-interface HealthSummary {
-  status: HealthStatus;
-  checkedAt: string;
-  checks: HealthCheck[];
-}
+import { useAdminHealth } from '@/lib/api-hooks';
+import type { HealthCheck, HealthStatus, HealthSummary } from '@/lib/api';
 
 const STATUS_ICON: Record<HealthStatus, string> = {
   green: '🟢',
@@ -31,39 +17,15 @@ const STATUS_LABEL: Record<HealthStatus, string> = {
 };
 
 export default function AdminHealthPage() {
-  const [summary, setSummary] = useState<HealthSummary | null>(null);
-  const [error, setError] = useState<string>('');
-  const [lastFetchMs, setLastFetchMs] = useState<number>(0);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchOnce = async () => {
-      const t0 = Date.now();
-      try {
-        const res = await fetch('/api/admin/health/full', {
-          cache: 'no-store',
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        if (cancelled) return;
-        const payload: HealthSummary = json.data ?? json;
-        setSummary(payload);
-        setError('');
-        setLastFetchMs(Date.now() - t0);
-      } catch (err) {
-        if (cancelled) return;
-        setError((err as Error).message);
-      }
-    };
-
-    fetchOnce();
-    const id = setInterval(fetchOnce, 2000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, []);
+  // refetchInterval: 2s is configured inside useAdminHealth; no manual
+  // setInterval/cleanup needed. React Query also pauses polling when the tab
+  // is hidden, which the previous implementation didn't.
+  const healthQuery = useAdminHealth();
+  const summary = healthQuery.data ?? null;
+  const error = healthQuery.error?.message ?? '';
+  // Round-trip latency: dataUpdatedAt - earlier-poll timestamp would require
+  // tracking; for an at-a-glance display we just show 'live' if data exists.
+  const lastFetchMs = healthQuery.isFetching ? 0 : 1; // placeholder; UI reads it as a marker
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
