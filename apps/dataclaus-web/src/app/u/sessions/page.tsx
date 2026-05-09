@@ -1,58 +1,49 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SessionCard } from '@/components/user/SessionCard';
 import {
-  getMySessions,
-  revokeAllMySessions,
-  revokeMySession,
-  type UserSession,
-} from '@/lib/api';
+  useMySessions,
+  useRevokeAllSessions,
+  useRevokeSession,
+} from '@/lib/api-hooks';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function SessionsPage() {
   const { logout } = useAuth();
   const router = useRouter();
-  const [sessions, setSessions] = useState<UserSession[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const data = await getMySessions();
-      setSessions(data);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const sessionsQuery = useMySessions();
+  const revokeMutation = useRevokeSession();
+  const revokeAllMutation = useRevokeAllSessions();
 
-  useEffect(() => {
-    load();
-  }, []);
+  const sessions = sessionsQuery.data ?? [];
+  const loading = sessionsQuery.isLoading;
+  // Surface either the load error or the most recent mutation error.
+  const [mutationError, setMutationError] = useState<string | null>(null);
+  const error = mutationError ?? sessionsQuery.error?.message ?? null;
 
   const handleRevoke = async (id: string) => {
+    setMutationError(null);
     try {
-      await revokeMySession(id);
-      await load();
+      await revokeMutation.mutateAsync(id);
     } catch (err) {
-      setError((err as Error).message);
+      setMutationError((err as Error).message);
     }
   };
 
   const handleLogoutAll = async () => {
     if (!confirm('Tüm cihazlardan çıkış yap?')) return;
+    setMutationError(null);
     try {
-      await revokeAllMySessions();
+      await revokeAllMutation.mutateAsync();
       logout();
       router.push('/');
     } catch (err) {
-      setError((err as Error).message);
+      setMutationError((err as Error).message);
     }
   };
 

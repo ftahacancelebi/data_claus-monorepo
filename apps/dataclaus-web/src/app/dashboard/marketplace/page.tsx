@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/auth-context';
-import { getDashboard, type DashboardStats } from '@/lib/api';
+import { useDashboardStats } from '@/lib/api-hooks';
 import { formatMoney, REVENUE_SHARES } from '@/lib/types';
 import { Search, Database, Users, BarChart3, Info } from 'lucide-react';
 import Link from 'next/link';
@@ -21,21 +21,11 @@ import Link from 'next/link';
 export default function MarketplacePage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getDashboard().catch(() => null);
-        setStats(data);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const statsQuery = useDashboardStats();
+  const stats = statsQuery.data ?? null;
+  const loading = statsQuery.isLoading;
 
   if (!user) return null;
 

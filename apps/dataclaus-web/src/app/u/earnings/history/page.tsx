@@ -1,48 +1,39 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { LedgerTable } from '@/components/user/LedgerTable';
 import { Button } from '@/components/ui/button';
-import { getMyLedger, type LedgerEntry } from '@/lib/api';
+import { useMyLedger } from '@/lib/api-hooks';
 
 const PAGE_SIZE = 50;
 
+interface LedgerFilters {
+  type?: string;
+  from?: string;
+  to?: string;
+  applicationId?: string;
+}
+
 export default function EarningsHistoryPage() {
-  const [rows, setRows] = useState<LedgerEntry[]>([]);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [filters, setFilters] = useState<{
-    type?: string;
-    from?: string;
-    to?: string;
-    applicationId?: string;
-  }>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<LedgerFilters>({});
 
-  const load = useCallback(
-    async (next: number, f: typeof filters) => {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await getMyLedger({ ...f, page: next, pageSize: PAGE_SIZE });
-        setRows(res.items);
-        setTotal(res.total);
-        setPage(res.page);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [],
-  );
+  // queryKey includes both page and filters, so changing either triggers a
+  // separate request and the previous one is kept warm in the cache.
+  const ledgerQuery = useMyLedger({ ...filters, page, pageSize: PAGE_SIZE });
 
-  useEffect(() => {
-    load(1, filters);
-  }, [load, filters]);
+  const rows = ledgerQuery.data?.items ?? [];
+  const total = ledgerQuery.data?.total ?? 0;
+  const loading = ledgerQuery.isLoading || ledgerQuery.isFetching;
+  const error = ledgerQuery.error?.message ?? null;
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  // Reset page when filters change so we don't end up on a now-empty page.
+  const handleFilter = (next: LedgerFilters) => {
+    setFilters(next);
+    setPage(1);
+  };
 
   return (
     <div className="space-y-6 max-w-6xl">
@@ -59,7 +50,7 @@ export default function EarningsHistoryPage() {
         </div>
       )}
 
-      <LedgerTable rows={rows} onFilter={setFilters} />
+      <LedgerTable rows={rows} onFilter={handleFilter} />
 
       <div className="flex items-center justify-between">
         <span className="text-xs text-slate-500">
@@ -70,7 +61,7 @@ export default function EarningsHistoryPage() {
             size="sm"
             variant="outline"
             disabled={loading || page <= 1}
-            onClick={() => load(page - 1, filters)}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
             Önceki
           </Button>
@@ -78,7 +69,7 @@ export default function EarningsHistoryPage() {
             size="sm"
             variant="outline"
             disabled={loading || page >= totalPages}
-            onClick={() => load(page + 1, filters)}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
           >
             Sonraki
           </Button>

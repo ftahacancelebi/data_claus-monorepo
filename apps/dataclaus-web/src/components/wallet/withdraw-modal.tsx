@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { requestPayout, PayoutMethod, PayoutRecord } from '@/lib/api';
+import { useRequestPayout } from '@/lib/api-hooks';
+import type { PayoutMethod, PayoutRecord } from '@/lib/api';
 
 interface WithdrawModalProps {
   open: boolean;
@@ -29,11 +30,13 @@ export function WithdrawModal({
   const [amount, setAmount] = useState<string>('');
   const [method, setMethod] = useState<PayoutMethod>('bank_simulation');
   const [destination, setDestination] = useState<string>('');
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [completedPayout, setCompletedPayout] = useState<PayoutRecord | null>(
     null,
   );
+
+  const payoutMutation = useRequestPayout();
+  const submitting = payoutMutation.isPending;
 
   const parsedAmount = Number(amount);
   const isAmountValid =
@@ -52,20 +55,19 @@ export function WithdrawModal({
       return;
     }
 
-    setSubmitting(true);
     setError(null);
     try {
-      const payout = await requestPayout({
+      const payout = await payoutMutation.mutateAsync({
         amount: parsedAmount,
         method,
         destination: destination.trim() || undefined,
       });
       setCompletedPayout(payout);
       onSuccess?.(payout);
+      // Cache invalidation already handled by useRequestPayout.onSuccess —
+      // no manual refetch needed here or in the parent page.
     } catch (err) {
       setError((err as Error).message ?? 'Withdraw request failed');
-    } finally {
-      setSubmitting(false);
     }
   };
 

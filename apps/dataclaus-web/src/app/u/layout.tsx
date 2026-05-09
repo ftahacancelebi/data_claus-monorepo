@@ -1,43 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
+import { RequireRole } from '@/lib/route-guards';
 import { UserSidebar } from '@/components/user/UserSidebar';
 import { UserOnboardingTour } from '@/components/user/UserOnboardingTour';
 
-export default function UserLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const { user, isLoading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (!user) {
-      router.push('/');
-      return;
-    }
-    if (user.role !== 'user') {
-      router.push('/dashboard');
-    }
-  }, [user, isLoading, router]);
-
-  if (isLoading || !user || user.role !== 'user') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          <p className="text-sm text-slate-500 font-medium">
-            Loading your earnings…
-          </p>
-        </div>
-      </div>
-    );
-  }
-
+function UserShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-slate-50 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
@@ -52,5 +19,22 @@ export default function UserLayout({
       </main>
       <UserOnboardingTour />
     </div>
+  );
+}
+
+export default function UserLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <RequireRole
+      role="user"
+      redirectTo="/dashboard"
+      unauthRedirectTo="/"
+      loadingLabel="Loading your earnings…"
+    >
+      <UserShell>{children}</UserShell>
+    </RequireRole>
   );
 }

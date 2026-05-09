@@ -8,9 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/lib/auth-context';
 import {
-  cancelAccountDeletion,
-  requestAccountDeletion,
-} from '@/lib/api';
+  useCancelAccountDeletion,
+  useRequestAccountDeletion,
+} from '@/lib/api-hooks';
 import { ShieldCheck, Download, Trash } from 'phosphor-react';
 
 export default function AccountPage() {
@@ -19,11 +19,14 @@ export default function AccountPage() {
     'idle' | 'requested' | 'cancelled'
   >('idle');
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const requestDeleteMutation = useRequestAccountDeletion();
+  const cancelDeleteMutation = useCancelAccountDeletion();
 
   const downloadExport = async () => {
     setError(null);
-    setBusy(true);
+    setExporting(true);
     try {
       const token =
         typeof window !== 'undefined'
@@ -44,7 +47,7 @@ export default function AccountPage() {
     } catch (err) {
       setError((err as Error).message);
     } finally {
-      setBusy(false);
+      setExporting(false);
     }
   };
 
@@ -55,8 +58,9 @@ export default function AccountPage() {
       )
     )
       return;
+    setError(null);
     try {
-      await requestAccountDeletion();
+      await requestDeleteMutation.mutateAsync();
       setDeletionStatus('requested');
     } catch (err) {
       setError((err as Error).message);
@@ -64,8 +68,9 @@ export default function AccountPage() {
   };
 
   const cancelDelete = async () => {
+    setError(null);
     try {
-      await cancelAccountDeletion();
+      await cancelDeleteMutation.mutateAsync();
       setDeletionStatus('cancelled');
     } catch (err) {
       setError((err as Error).message);
@@ -125,22 +130,34 @@ export default function AccountPage() {
               size="sm"
               variant="outline"
               onClick={downloadExport}
-              disabled={busy}
+              disabled={exporting}
             >
-              <Download size={14} className="mr-1" /> Verilerimi indir
+              <Download size={14} className="mr-1" />
+              {exporting ? 'İndiriliyor…' : 'Verilerimi indir'}
             </Button>
             {deletionStatus === 'requested' ? (
-              <Button size="sm" variant="outline" onClick={cancelDelete}>
-                Silme talebini iptal et
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={cancelDelete}
+                disabled={cancelDeleteMutation.isPending}
+              >
+                {cancelDeleteMutation.isPending
+                  ? 'İptal ediliyor…'
+                  : 'Silme talebini iptal et'}
               </Button>
             ) : (
               <Button
                 size="sm"
                 variant="outline"
                 onClick={requestDelete}
-                className="text-rose-600 border-rose-200 hover:bg-rose-50"
+                disabled={requestDeleteMutation.isPending}
+                className="text-rose-600 border-rose-200 hover:bg-rose-50 disabled:opacity-50"
               >
-                <Trash size={14} className="mr-1" /> Hesabımı sil
+                <Trash size={14} className="mr-1" />
+                {requestDeleteMutation.isPending
+                  ? 'Talep gönderiliyor…'
+                  : 'Hesabımı sil'}
               </Button>
             )}
           </div>

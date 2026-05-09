@@ -6,13 +6,27 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useCallback,
 } from 'react';
 import type { AuthUser, UserRole } from './types';
 import { createUser, registerDeveloper, createWallet, loginUser } from './api';
 
+/**
+ * Auth lifecycle states.
+ * - 'unknown': we haven't checked localStorage yet (first paint after hydration).
+ *   Treat as "neither authed nor guest" — render a skeleton, do not redirect.
+ * - 'authed': we have a user.
+ * - 'guest': we hydrated and there is no user.
+ *
+ * Why this matters: code that treats 'unknown' as 'guest' kicks logged-in users
+ * back to /login on every hard refresh.
+ */
+export type AuthStatus = 'unknown' | 'authed' | 'guest';
+
 interface AuthContextType {
   user: AuthUser | null;
-  login: (email: string, password: string) => Promise<void>;
+  status: AuthStatus;
+  login: (email: string, password: string) => Promise<AuthUser>;
   register: (
     name: string,
     email: string,
@@ -20,6 +34,7 @@ interface AuthContextType {
     role: UserRole
   ) => Promise<void>;
   logout: () => void;
+  /** @deprecated use `status === 'unknown'` instead. Kept for backwards compatibility. */
   isLoading: boolean;
 }
 
@@ -27,7 +42,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [status, setStatus] = useState<AuthStatus>('unknown');
 
   useEffect(() => {
     const stored = localStorage.getItem('dataclaus_user');
@@ -36,12 +51,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (stored && token) {
       try {
         setUser(JSON.parse(stored));
+        setStatus('authed');
       } catch {
         localStorage.removeItem('dataclaus_user');
         localStorage.removeItem('dataclaus_token');
+        setStatus('guest');
       }
+    } else {
+      setStatus('guest');
     }
-    setIsLoading(false);
+  }, []);
+
+  const logout = useCallback(() => {
+    setUser(null);
+    setStatus('guest');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('dataclaus_user');
+      localStorage.removeItem('dataclaus_token');
+      localStorage.removeItem('dataclaus_user_access_token');
+    }
   }, []);
 
   const register = async (
@@ -53,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (role === 'developer') {
       // Register as developer
       await registerDeveloper({ name, email, password });
-      
+
       // Auto-login to get the real token
       await login(email, password);
       return;
@@ -96,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
 
       setUser(authUser);
+      setStatus('authed');
       localStorage.setItem('dataclaus_user', JSON.stringify(authUser));
       localStorage.setItem('dataclaus_token', userData.accessToken);
       return;
@@ -117,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<AuthUser> => {
     // Call the backend login endpoint
     const response = await loginUser(email, password);
 
@@ -129,18 +158,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     setUser(authUser);
+    setStatus('authed');
     localStorage.setItem('dataclaus_user', JSON.stringify(authUser));
     localStorage.setItem('dataclaus_token', response.token);
+    return authUser;
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('dataclaus_user');
-    localStorage.removeItem('dataclaus_token');
-  };
+  const isLoading = status === 'unknown';
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{ user, status, login, register, logout, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );

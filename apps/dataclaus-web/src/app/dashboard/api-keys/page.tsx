@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Card,
@@ -24,8 +24,11 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/auth-context';
-import { generateApiKey, listApiKeys, revokeApiKey } from '@/lib/api';
-import type { ApiKey } from '@/lib/types';
+import {
+  useApiKeys,
+  useGenerateApiKey,
+  useRevokeApiKey,
+} from '@/lib/api-hooks';
 import { 
     Key, 
     Plus, 
@@ -41,27 +44,17 @@ import {
 export default function ApiKeysPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [newKeyName, setNewKeyName] = useState('');
   const [newRawKey, setNewRawKey] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
 
-  const fetchKeys = async () => {
-    if (!user) return;
-    try {
-      const keys = await listApiKeys(user.id);
-      setApiKeys(keys);
-    } catch {
-      // No keys yet
-    } finally {
-      setLoading(false);
-    }
-  };
+  const apiKeysQuery = useApiKeys(user?.id);
+  const apiKeys = apiKeysQuery.data ?? [];
+  const loading = apiKeysQuery.isLoading;
+  const fetchError = apiKeysQuery.error?.message ?? null;
 
-  useEffect(() => {
-    fetchKeys();
-  }, [user]);
+  const generateMutation = useGenerateApiKey(user?.id);
+  const revokeMutation = useRevokeApiKey(user?.id);
+  const generating = generateMutation.isPending;
 
   if (!user) return null;
 
@@ -74,29 +67,27 @@ export default function ApiKeysPage() {
       });
       return;
     }
-    setGenerating(true);
     try {
-      const result = await generateApiKey(user.id, newKeyName);
+      const result = await generateMutation.mutateAsync(newKeyName);
       setNewRawKey(result.raw_key);
       setNewKeyName('');
-      fetchKeys();
       toast({
         title: 'Success',
-        description: "API Key generated successfully.",
+        description: 'API Key generated successfully.',
       });
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Failed to generate key';
       toast({ title: 'Error', description: message, variant: 'destructive' });
-    } finally {
-      setGenerating(false);
     }
   };
 
   const handleRevoke = async (keyId: string) => {
+    if (!window.confirm('Revoke this API key? Any apps using it will stop working immediately.')) {
+      return;
+    }
     try {
-      await revokeApiKey(user.id, keyId);
-      fetchKeys();
+      await revokeMutation.mutateAsync(keyId);
       toast({ title: 'API Key revoked' });
     } catch (error: unknown) {
       const message =
@@ -237,6 +228,15 @@ export default function ApiKeysPage() {
         <CardContent className="p-0">
           {loading ? (
              <div className="p-8 text-center text-slate-400">Loading credentials...</div>
+          ) : fetchError ? (
+             <div className="p-12 text-center flex flex-col items-center gap-3">
+                 <div className="h-12 w-12 bg-red-50 rounded-full flex items-center justify-center text-red-500">
+                     <Warning size={24} weight="duotone" />
+                 </div>
+                 <p className="text-slate-700 font-medium">Couldn&apos;t load API keys</p>
+                 <p className="text-sm text-slate-500 max-w-md mx-auto">{fetchError}</p>
+                 <Button size="sm" variant="outline" onClick={() => apiKeysQuery.refetch()}>Retry</Button>
+             </div>
           ) : apiKeys.length === 0 ? (
              <div className="p-12 text-center flex flex-col items-center gap-3">
                  <div className="h-12 w-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
@@ -282,11 +282,12 @@ export default function ApiKeysPage() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+                          disabled={revokeMutation.isPending}
+                          className="text-slate-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-50"
                           onClick={() => handleRevoke(key.id)}
                         >
                           <Trash size={16} weight="duotone" className="mr-2" />
-                          Revoke
+                          {revokeMutation.isPending ? 'Revoking…' : 'Revoke'}
                         </Button>
                       )}
                     </TableCell>

@@ -24,24 +24,34 @@ export default function AdminUsersPage() {
   }, []);
 
   const loadUsers = async () => {
+    setError('');
+    setIsLoading(true);
     try {
       const token = localStorage.getItem('dataclaus_token');
       const response = await fetch('/api/admin/users', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (!response.ok) {
-        setUsers([]);
+        if (response.status === 401) {
+          setError('Your session may have expired. Try refreshing or signing in again.');
+          return;
+        }
+        if (response.status === 403) {
+          setError('You do not have permission to view users.');
+          return;
+        }
+        const body = await response.json().catch(() => null);
+        setError(
+          body?.message || body?.error || `Failed to load users (${response.status})`
+        );
         return;
       }
 
       const data = await response.json();
       setUsers(data.data || data || []);
     } catch (err) {
-      setError('Failed to load users');
-      setUsers([]);
+      setError(err instanceof Error ? err.message : 'Network error loading users');
     } finally {
       setIsLoading(false);
     }

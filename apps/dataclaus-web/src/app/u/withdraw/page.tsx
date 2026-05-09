@@ -1,15 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { WithdrawModal } from '@/components/wallet/withdraw-modal';
-import {
-  getMyEarningsSummary,
-  listMyPayouts,
-  type PayoutRecord,
-} from '@/lib/api';
+import { useEarningsSummary, useMyPayouts } from '@/lib/api-hooks';
 import { formatMoney } from '@/lib/types';
 import { Wallet, Receipt } from 'phosphor-react';
 
@@ -17,33 +13,15 @@ const MIN_WITHDRAW = 0.01;
 
 export default function WithdrawPage() {
   const [open, setOpen] = useState(false);
-  const [balance, setBalance] = useState(0);
-  const [pending, setPending] = useState(0);
-  const [currency, setCurrency] = useState('USD');
-  const [history, setHistory] = useState<PayoutRecord[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const [s, p] = await Promise.all([
-        getMyEarningsSummary().catch(() => null),
-        listMyPayouts().catch(() => [] as PayoutRecord[]),
-      ]);
-      if (s) {
-        setBalance(Number(s.balance));
-        setPending(Number(s.pendingBalance));
-        setCurrency(s.currency);
-      }
-      setHistory(p);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const summaryQuery = useEarningsSummary();
+  const payoutsQuery = useMyPayouts();
 
-  useEffect(() => {
-    load();
-  }, []);
+  const balance = Number(summaryQuery.data?.balance ?? 0);
+  const pending = Number(summaryQuery.data?.pendingBalance ?? 0);
+  const currency = summaryQuery.data?.currency ?? 'USD';
+  const history = payoutsQuery.data ?? [];
+  const loading = summaryQuery.isLoading || payoutsQuery.isLoading;
 
   const canWithdraw = balance >= MIN_WITHDRAW;
 
@@ -150,13 +128,11 @@ export default function WithdrawPage() {
 
       <WithdrawModal
         open={open}
-        onClose={() => {
-          setOpen(false);
-          load();
-        }}
+        onClose={() => setOpen(false)}
         availableBalance={balance}
         currency={currency}
-        onSuccess={() => load()}
+        // No manual refetch — useRequestPayout's onSuccess invalidates the
+        // earnings + payouts query keys, so this page re-renders automatically.
       />
     </div>
   );

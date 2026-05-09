@@ -23,41 +23,34 @@ export default function AdminDashboardPage() {
   }, []);
 
   const loadStats = async () => {
+    setError('');
+    setIsLoading(true);
     try {
       const token = localStorage.getItem('dataclaus_token');
       const response = await fetch('/api/admin/stats', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (!response.ok) {
-        // Use mock data if endpoint not available
-        setStats({
-          totalUsers: 0,
-          totalDevelopers: 0,
-          totalApplications: 0,
-          totalImpressions: 0,
-          totalRevenue: 0,
-          platformFees: 0,
-          totalTransactions: 0,
-        });
+        if (response.status === 401) {
+          setError('Your session may have expired. Try refreshing or signing in again.');
+          return;
+        }
+        if (response.status === 403) {
+          setError('You do not have permission to view admin stats.');
+          return;
+        }
+        const body = await response.json().catch(() => null);
+        setError(
+          body?.message || body?.error || `Failed to load stats (${response.status})`
+        );
         return;
       }
 
       const data = await response.json();
       setStats(data.data || data);
     } catch (err) {
-      // Use mock data on error
-      setStats({
-        totalUsers: 0,
-        totalDevelopers: 0,
-        totalApplications: 0,
-        totalImpressions: 0,
-        totalRevenue: 0,
-        platformFees: 0,
-        totalTransactions: 0,
-      });
+      setError(err instanceof Error ? err.message : 'Network error loading stats');
     } finally {
       setIsLoading(false);
     }
@@ -85,6 +78,31 @@ export default function AdminDashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <p className="text-slate-400">Platform overview and management</p>
+        </div>
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6">
+          <p className="text-red-300 font-medium mb-2">
+            Couldn&apos;t load platform stats
+          </p>
+          <p className="text-sm text-red-200/80 mb-4">
+            {error || 'No data returned from the server.'}
+          </p>
+          <button
+            onClick={loadStats}
+            className="inline-flex items-center px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm transition-all"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }

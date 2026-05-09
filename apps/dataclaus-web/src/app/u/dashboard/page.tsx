@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,61 +9,31 @@ import { LiveTicker } from '@/components/user/LiveTicker';
 import { QualityScoreBadge } from '@/components/user/QualityScoreBadge';
 import { AppEarningsCard } from '@/components/user/AppEarningsCard';
 import {
-  getMyEarningsByApp,
-  getMyEarningsSummary,
-  getMyQualityHistory,
-  type EarningsByApp,
-  type QualityHistoryPoint,
-} from '@/lib/api';
+  useEarningsByApp,
+  useEarningsSummary,
+  useQualityHistory,
+} from '@/lib/api-hooks';
 import { CaretRight, AppWindow } from 'phosphor-react';
-
-interface Summary {
-  balance: number;
-  pendingBalance: number;
-  totalEarned: number;
-  currency: string;
-}
 
 export default function UserDashboardPage() {
   const { user } = useAuth();
-  const [summary, setSummary] = useState<Summary | null>(null);
-  const [apps, setApps] = useState<EarningsByApp[]>([]);
-  const [history, setHistory] = useState<QualityHistoryPoint[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    (async () => {
-      try {
-        setLoading(true);
-        const [s, a, h] = await Promise.all([
-          getMyEarningsSummary().catch(() => null),
-          getMyEarningsByApp().catch(() => []),
-          getMyQualityHistory(7).catch(() => []),
-        ]);
-        if (!active) return;
-        if (s) {
-          setSummary({
-            balance: Number(s.balance),
-            pendingBalance: Number(s.pendingBalance),
-            totalEarned: Number(s.totalEarned),
-            currency: s.currency,
-          });
-        }
-        setApps(a);
-        setHistory(h);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user]);
+  // Server state — lives in the React Query cache. Other components reading the
+  // same keys (LiveTicker, /u/withdraw) automatically see updates.
+  const summaryQuery = useEarningsSummary();
+  const appsQuery = useEarningsByApp();
+  const historyQuery = useQualityHistory(7);
+
+  const summary = summaryQuery.data;
+  const apps = appsQuery.data ?? [];
+  const history = historyQuery.data ?? [];
+
+  const loading =
+    summaryQuery.isLoading || appsQuery.isLoading || historyQuery.isLoading;
+  // Prefer the most informative error if multiple queries failed.
+  const error =
+    (summaryQuery.error || appsQuery.error || historyQuery.error)?.message ??
+    null;
 
   const last7Days = history.map((h) => ({ date: h.date, earnings: h.earnings }));
   const totalQuality =
@@ -90,9 +59,9 @@ export default function UserDashboardPage() {
       )}
 
       <EarningsHeroCard
-        totalEarned={summary?.totalEarned ?? 0}
-        availableBalance={summary?.balance ?? 0}
-        pendingBalance={summary?.pendingBalance ?? 0}
+        totalEarned={Number(summary?.totalEarned ?? 0)}
+        availableBalance={Number(summary?.balance ?? 0)}
+        pendingBalance={Number(summary?.pendingBalance ?? 0)}
         currency={summary?.currency ?? 'USD'}
         last7Days={last7Days}
       />

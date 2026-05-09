@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   AreaChart,
@@ -21,11 +22,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/lib/auth-context';
-import { 
-  Wallet as WalletIcon, 
-  ArrowUp, 
-  ArrowDown, 
-  Clock, 
+import {
+  Wallet as WalletIcon,
+  ArrowUp,
+  ArrowDown,
+  Clock,
   TrendUp,
   CircleNotch,
   Warning,
@@ -34,14 +35,13 @@ import {
   Receipt
 } from 'phosphor-react';
 import {
-  getWalletsByOwner,
-  getWalletTransactions,
-  releasePendingBalance,
-  getRevenueShares,
-  listMyPayouts,
-  RevenueShareConfig,
-  PayoutRecord
-} from '@/lib/api';
+  useWalletsByOwner,
+  useWalletTransactions,
+  useRevenueShares,
+  useMyPayouts,
+  useReleasePendingBalance,
+} from '@/lib/api-hooks';
+import { queryKeys } from '@/lib/query-keys';
 import { Wallet, Transaction, formatMoney } from '@/lib/types';
 import { WithdrawModal } from '@/components/wallet/withdraw-modal';
 import { useRealtime, type WalletCreditedEvent } from '@/lib/realtime';
@@ -99,77 +99,60 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function WalletPage() {
   const { user } = useAuth();
-  
-  // Real API state
-  const [wallets, setWallets] = useState<Wallet[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [revenueConfig, setRevenueConfig] = useState<RevenueShareConfig | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [releasing, setReleasing] = useState(false);
-  const [payouts, setPayouts] = useState<PayoutRecord[]>([]);
+  const qc = useQueryClient();
   const [withdrawOpen, setWithdrawOpen] = useState(false);
 
-  const refreshWallets = async (userId: string) => {
-    const userWallets = await getWalletsByOwner(userId);
-    setWallets(userWallets || []);
-    return userWallets;
-  };
+  // Server state — all reads through React Query.
+  const walletsQuery = useWalletsByOwner(user?.id);
+  const wallets = walletsQuery.data ?? [];
+  const primaryWallet = wallets.find((w) => w.type === 'developer') || wallets[0];
 
-  const refreshPayouts = async () => {
-    try {
-      const list = await listMyPayouts();
-      setPayouts(list || []);
-    } catch (err) {
-      console.warn('Failed to fetch payouts:', err);
-    }
-  };
+  const transactionsQuery = useWalletTransactions(primaryWallet?.id, {
+    limit: 10,
+    offset: 0,
+  });
+  const transactions = transactionsQuery.data ?? [];
 
-  // Fetch wallet data from backend
-  useEffect(() => {
-    async function fetchData() {
-      if (!user?.id) return;
+  const revenueQuery = useRevenueShares();
+  const revenueConfig = revenueQuery.data ?? null;
 
-      setLoading(true);
-      setError(null);
+  const payoutsQuery = useMyPayouts();
+  const payouts = payoutsQuery.data ?? [];
 
-      try {
-        const userWallets = await refreshWallets(user.id);
+  const releaseMutation = useReleasePendingBalance();
+  const releasing = releaseMutation.isPending;
 
-        if (userWallets && userWallets.length > 0) {
-          const txns = await getWalletTransactions(userWallets[0].id, 10, 0);
-          setTransactions(txns || []);
-        }
+  const loading =
+    walletsQuery.isLoading ||
+    revenueQuery.isLoading ||
+    payoutsQuery.isLoading;
+  const error =
+    walletsQuery.error || transactionsQuery.error
+      ? 'Backend not connected. Start the Go API to see real data.'
+      : null;
 
-        const config = await getRevenueShares();
-        setRevenueConfig(config);
-
-        await refreshPayouts();
-      } catch (err) {
-        console.error('Failed to fetch wallet data:', err);
-        setError('Backend not connected. Start the Go API to see real data.');
-        setWallets([]);
-        setTransactions([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, [user?.id]);
-
-  // Phase 4 — Realtime: live wallet credit updates.
+  // Realtime: socket event → patch wallets cache. Other panels reading the
+  // same wallets key (and the developer dashboard summary) update for free.
   const { on } = useRealtime();
   useEffect(() => {
+    if (!user?.id) return;
     const off = on<WalletCreditedEvent>('wallet:credited', (event) => {
       const credit = event.userShare ?? event.devShare ?? event.grossRevenue;
       if (typeof credit !== 'number' || credit <= 0) return;
 
-      setWallets((prev) => {
-        if (!prev.length) return prev;
-        const next = [...prev];
-        next[0] = { ...next[0], balance: next[0].balance + credit };
-        return next;
+      qc.setQueryData<Wallet[] | undefined>(
+        queryKeys.wallets.byOwner(user.id),
+        (prev) => {
+          if (!prev?.length) return prev;
+          const next = [...prev];
+          next[0] = { ...next[0], balance: next[0].balance + credit };
+          return next;
+        },
+      );
+      // Recent transactions list is now stale; let it refetch on focus
+      // (avoid optimistic insertion since we don't have the full Transaction shape).
+      qc.invalidateQueries({
+        queryKey: [...queryKeys.wallets.byOwner(user.id), 'transactions'],
       });
 
       toast({
@@ -180,28 +163,26 @@ export default function WalletPage() {
     return () => {
       off();
     };
-  }, [on]);
+  }, [on, qc, user?.id]);
 
   if (!user) return null;
 
-  // Calculate totals from wallets
-  const primaryWallet = wallets.find(w => w.type === 'developer') || wallets[0];
+  // Derived values
   const totalBalance = wallets.reduce((sum, w) => sum + w.balance, 0);
   const totalPending = wallets.reduce((sum, w) => sum + w.pending_balance, 0);
 
   const handleReleasePending = async () => {
     if (!primaryWallet) return;
-    
-    setReleasing(true);
     try {
-      await releasePendingBalance(primaryWallet.id);
-      // Refresh wallet data
-      const userWallets = await getWalletsByOwner(user.id);
-      setWallets(userWallets || []);
+      await releaseMutation.mutateAsync(primaryWallet.id);
+      // Cache invalidation handled by useReleasePendingBalance.onSuccess.
     } catch (err) {
-      console.error('Failed to release pending balance:', err);
-    } finally {
-      setReleasing(false);
+      // surface as a toast; cache will already be in pre-mutation state
+      toast({
+        title: 'Couldn’t release pending balance',
+        description: err instanceof Error ? err.message : 'Try again',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -569,12 +550,8 @@ export default function WalletPage() {
         onClose={() => setWithdrawOpen(false)}
         availableBalance={totalBalance}
         currency={primaryWallet?.currency || 'USD'}
-        onSuccess={async () => {
-          if (user?.id) {
-            await refreshWallets(user.id);
-          }
-          await refreshPayouts();
-        }}
+        // useRequestPayout.onSuccess invalidates earnings + payouts; this page
+        // re-renders automatically when the user returns from the modal.
       />
     </div>
   );

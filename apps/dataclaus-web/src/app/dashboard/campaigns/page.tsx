@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -23,13 +23,12 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import {
-  createCampaign,
-  getCampaignsByBuyer,
-  updateCampaignStatus,
-  getWalletsByOwner,
-  creditWallet,
-} from '@/lib/api';
-import type { Campaign, Wallet } from '@/lib/types';
+  useCampaignsByBuyer,
+  useCreateCampaign,
+  useUpdateCampaignStatus,
+  useWalletsByOwner,
+  useCreditWallet,
+} from '@/lib/api-hooks';
 import { formatMoney, REVENUE_SHARES } from '@/lib/types';
 import {
   Plus,
@@ -43,8 +42,6 @@ import {
 export default function CampaignsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [wallets, setWallets] = useState<Wallet[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [showFundForm, setShowFundForm] = useState(false);
   const [form, setForm] = useState({
@@ -56,25 +53,19 @@ export default function CampaignsPage() {
     app_categories: '',
   });
   const [fundAmount, setFundAmount] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [statusBusy, setStatusBusy] = useState<string | null>(null);
 
-  const fetchData = async () => {
-    if (!user) return;
-    try {
-      const [campaignsData, walletsData] = await Promise.all([
-        getCampaignsByBuyer(user.id).catch(() => []),
-        getWalletsByOwner(user.id).catch(() => []),
-      ]);
-      setCampaigns(campaignsData);
-      setWallets(walletsData);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const campaignsQuery = useCampaignsByBuyer(user?.id);
+  const walletsQuery = useWalletsByOwner(user?.id);
+  const createCampaignMutation = useCreateCampaign();
+  const fundWalletMutation = useCreditWallet();
+  const updateStatusMutation = useUpdateCampaignStatus();
 
-  useEffect(() => {
-    fetchData();
-  }, [user]);
+  const campaigns = campaignsQuery.data ?? [];
+  const wallets = walletsQuery.data ?? [];
+  const loading = campaignsQuery.isLoading || walletsQuery.isLoading;
+  const submittingCampaign = createCampaignMutation.isPending;
+  const submittingFund = fundWalletMutation.isPending;
 
   if (!user) return null;
 
@@ -111,8 +102,9 @@ export default function CampaignsPage() {
       .map((c) => c.trim())
       .filter(Boolean);
 
+    if (submittingCampaign) return;
     try {
-      await createCampaign({
+      await createCampaignMutation.mutateAsync({
         buyer_id: user.id,
         name: form.name,
         description: form.description || undefined,
@@ -133,7 +125,6 @@ export default function CampaignsPage() {
         app_categories: '',
       });
       setShowForm(false);
-      fetchData();
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Failed to create campaign';
@@ -163,12 +154,12 @@ export default function CampaignsPage() {
       return;
     }
 
+    if (submittingFund) return;
     try {
-      await creditWallet(wallets[0].id, amount);
+      await fundWalletMutation.mutateAsync({ id: wallets[0].id, amount });
       toast({ title: 'Wallet funded successfully' });
       setFundAmount('');
       setShowFundForm(false);
-      fetchData();
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Failed to fund wallet';
@@ -177,14 +168,17 @@ export default function CampaignsPage() {
   };
 
   const handleStatusChange = async (id: string, status: string) => {
+    if (statusBusy) return;
+    setStatusBusy(id);
     try {
-      await updateCampaignStatus(id, status);
+      await updateStatusMutation.mutateAsync({ id, status });
       toast({ title: `Campaign ${status}` });
-      fetchData();
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Failed to update status';
       toast({ title: 'Error', description: message, variant: 'destructive' });
+    } finally {
+      setStatusBusy(null);
     }
   };
 
@@ -289,11 +283,14 @@ export default function CampaignsPage() {
                   required
                 />
               </div>
-              <Button type="submit">Fund Wallet</Button>
+              <Button type="submit" disabled={submittingFund}>
+                {submittingFund ? 'Funding…' : 'Fund Wallet'}
+              </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setShowFundForm(false)}
+                disabled={submittingFund}
               >
                 Cancel
               </Button>
@@ -387,11 +384,14 @@ export default function CampaignsPage() {
                 />
               </div>
               <div className="md:col-span-2 flex gap-2">
-                <Button type="submit">Create Campaign</Button>
+                <Button type="submit" disabled={submittingCampaign}>
+                  {submittingCampaign ? 'Creating…' : 'Create Campaign'}
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setShowForm(false)}
+                  disabled={submittingCampaign}
                 >
                   Cancel
                 </Button>
@@ -468,24 +468,26 @@ export default function CampaignsPage() {
                         <Button
                           size="sm"
                           variant="outline"
+                          disabled={statusBusy === campaign.id}
                           onClick={() =>
                             handleStatusChange(campaign.id, 'paused')
                           }
                         >
                           <Pause className="h-4 w-4 mr-1" />
-                          Pause
+                          {statusBusy === campaign.id ? '…' : 'Pause'}
                         </Button>
                       )}
                       {campaign.status === 'paused' && (
                         <Button
                           size="sm"
                           variant="outline"
+                          disabled={statusBusy === campaign.id}
                           onClick={() =>
                             handleStatusChange(campaign.id, 'active')
                           }
                         >
                           <Play className="h-4 w-4 mr-1" />
-                          Resume
+                          {statusBusy === campaign.id ? '…' : 'Resume'}
                         </Button>
                       )}
                     </TableCell>

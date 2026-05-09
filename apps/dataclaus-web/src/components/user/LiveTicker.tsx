@@ -1,10 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRealtime, type WalletCreditedEvent } from '@/lib/realtime';
 import { Card, CardContent } from '@/components/ui/card';
 import { Lightning } from 'phosphor-react';
 import { formatMoney } from '@/lib/types';
+import { queryKeys } from '@/lib/query-keys';
+import type { EarningsSummary } from '@/lib/api-hooks';
+import type { EarningsByApp } from '@/lib/api';
 
 interface TickerEntry {
   id: string;
@@ -15,6 +19,7 @@ interface TickerEntry {
 
 export function LiveTicker({ userId }: { userId: string }) {
   const { on, status } = useRealtime();
+  const qc = useQueryClient();
   const [events, setEvents] = useState<TickerEntry[]>([]);
 
   useEffect(() => {
@@ -22,6 +27,8 @@ export function LiveTicker({ userId }: { userId: string }) {
       if (payload.userId !== userId) return;
       const amount = Number(payload.userShare ?? payload.grossRevenue ?? 0);
       if (!amount) return;
+
+      // 1) Local ticker UI (independent of cache).
       setEvents((prev) =>
         [
           {
@@ -33,8 +40,57 @@ export function LiveTicker({ userId }: { userId: string }) {
           ...prev,
         ].slice(0, 5),
       );
+
+      // 2) Patch the earnings summary in the React Query cache so that
+      //    EarningsHeroCard, /u/withdraw, and any other panel reading
+      //    this key updates in the same render cycle.
+      //    This is THE fix for "API güncellenir, state güncellenmez".
+      qc.setQueryData<EarningsSummary | undefined>(
+        queryKeys.earnings.summary(),
+        (prev) =>
+          prev
+            ? {
+                ...prev,
+                balance: Number(prev.balance) + amount,
+                totalEarned: Number(prev.totalEarned) + amount,
+              }
+            : prev,
+      );
+
+      // 3) Patch by-app earnings if we know which app fired the event.
+      const appId = payload.applicationId;
+      if (appId) {
+        qc.setQueryData<EarningsByApp[] | undefined>(
+          queryKeys.earnings.byApp(),
+          (prev) =>
+            prev
+              ? prev.map((row) =>
+                  row.applicationId === appId
+                    ? {
+                        ...row,
+                        totalEarned: Number(row.totalEarned) + amount,
+                        last7Days: Number(row.last7Days) + amount,
+                        impressionCount: row.impressionCount + 1,
+                      }
+                    : row,
+                )
+              : prev,
+        );
+      }
+
+      // 4) Mark ledger stale — the new entry will appear on next visit
+      //    or on the next focus refetch. We don't patch the ledger inline
+      //    because pagination makes optimistic insertion error-prone.
+      qc.invalidateQueries({ queryKey: queryKeys.ledger.all });
     });
-  }, [on, userId]);
+  }, [on, userId, qc]);
+
+  // On reconnect, server may have buffered events we missed; resync earnings.
+  useEffect(() => {
+    if (status === 'connected') {
+      qc.invalidateQueries({ queryKey: queryKeys.earnings.all });
+    }
+  }, [status, qc]);
 
   return (
     <Card className="border-slate-100">

@@ -25,24 +25,34 @@ export default function AdminTransactionsPage() {
   }, []);
 
   const loadTransactions = async () => {
+    setError('');
+    setIsLoading(true);
     try {
       const token = localStorage.getItem('dataclaus_token');
       const response = await fetch('/api/ledger', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (!response.ok) {
-        setTransactions([]);
+        if (response.status === 401) {
+          setError('Your session may have expired. Try refreshing or signing in again.');
+          return;
+        }
+        if (response.status === 403) {
+          setError('You do not have permission to view transactions.');
+          return;
+        }
+        const body = await response.json().catch(() => null);
+        setError(
+          body?.message || body?.error || `Failed to load transactions (${response.status})`
+        );
         return;
       }
 
       const data = await response.json();
       setTransactions(data.data || data || []);
     } catch (err) {
-      setError('Failed to load transactions');
-      setTransactions([]);
+      setError(err instanceof Error ? err.message : 'Network error loading transactions');
     } finally {
       setIsLoading(false);
     }
@@ -80,6 +90,27 @@ export default function AdminTransactionsPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (error && transactions.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Transactions</h1>
+          <p className="text-slate-400">All ledger entries and financial transactions</p>
+        </div>
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6">
+          <p className="text-red-300 font-medium mb-2">Couldn&apos;t load transactions</p>
+          <p className="text-sm text-red-200/80 mb-4">{error}</p>
+          <button
+            onClick={loadTransactions}
+            className="inline-flex items-center px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm transition-all"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }

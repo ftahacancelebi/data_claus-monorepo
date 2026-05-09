@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   ResponsiveContainer,
@@ -12,18 +11,12 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { QualityScoreBadge } from '@/components/user/QualityScoreBadge';
-import { getMyQualityHistory, type QualityHistoryPoint } from '@/lib/api';
+import { useQualityHistory } from '@/lib/api-hooks';
 
 export default function QualityHistoryPage() {
-  const [history, setHistory] = useState<QualityHistoryPoint[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getMyQualityHistory(30)
-      .then(setHistory)
-      .catch(() => setHistory([]))
-      .finally(() => setLoading(false));
-  }, []);
+  const historyQuery = useQualityHistory(30);
+  const history = historyQuery.data ?? [];
+  const loading = historyQuery.isLoading;
 
   const avgQuality =
     history.length > 0

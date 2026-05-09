@@ -1,3 +1,4 @@
+import type { z } from 'zod';
 import type {
   Wallet,
   Transaction,
@@ -5,6 +6,25 @@ import type {
   ScoredEvent,
   ApiKey,
 } from './types';
+import {
+  ApiKeyListSchema,
+  ApiKeySchema,
+  ApplicationListSchema,
+  ApplicationSchema,
+  CampaignListSchema,
+  CampaignSchema,
+  DashboardStatsSchema,
+  EarningsByAppListSchema,
+  EarningsSummarySchema,
+  LedgerPageSchema,
+  PayoutRecordListSchema,
+  PayoutRecordSchema,
+  QualityHistoryListSchema,
+  UserSessionListSchema,
+  WalletListSchema,
+  WalletSchema,
+  LoginResponseSchema,
+} from './schemas';
 
 const API_BASE = '/api';
 
@@ -16,36 +36,98 @@ interface NestJSResponse<T> {
   timestamp: string;
 }
 
-async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+/**
+ * Typed API error so callers can distinguish 401/403/404/500 from generic failures.
+ * Use `error instanceof ApiError && error.status === 401` etc.
+ */
+export class ApiError extends Error {
+  status: number;
+  body: unknown;
+  constructor(status: number, message: string, body?: unknown) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.body = body;
+  }
+}
+
+/**
+ * Sentinel attached to ApiError when a response shape fails its zod schema.
+ * Use `error instanceof ApiError && error.status === 0 && error.body?.kind === 'schema'`
+ * if you need to distinguish schema drift from network errors.
+ */
+export class SchemaValidationError extends ApiError {
+  zodIssues: unknown;
+  constructor(endpoint: string, issues: unknown) {
+    super(0, `Response shape mismatch for ${endpoint}`, {
+      kind: 'schema',
+      issues,
+    });
+    this.name = 'SchemaValidationError';
+    this.zodIssues = issues;
+  }
+}
+
+interface RequestExtras<T> {
+  schema?: z.ZodType<T>;
+}
+
+async function request<T>(
+  endpoint: string,
+  options?: RequestInit & RequestExtras<T>
+): Promise<T> {
   // Get the auth token from localStorage (support both developer and user contexts)
-  const token = typeof window !== 'undefined' 
+  const token = typeof window !== 'undefined'
     ? (localStorage.getItem('dataclaus_token') || localStorage.getItem('dataclaus_user_access_token'))
     : null;
-  
+
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...options?.headers,
   };
-  
+
   // Add Authorization header if token exists
   if (token) {
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
   }
-  
+
+  // Strip `schema` from options before handing off to fetch
+  const { schema, ...fetchOptions } = options ?? {};
+
   const res = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
+    ...fetchOptions,
     headers,
   });
+
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || error.message || 'Request failed');
+    const body = await res.json().catch(() => ({ error: 'Request failed' }));
+    const message =
+      (body && (body.error || body.message)) || `Request failed (${res.status})`;
+    // Throw a typed error; pages handle it locally (toast / error state / retry).
+    // We deliberately do NOT auto-logout on 401 — a transient 401 should not
+    // kick the user out. Logout is reserved for explicit user action and for
+    // failed session-validation calls (`/auth/me`) made from RequireAuth.
+    throw new ApiError(res.status, message, body);
   }
+
   const json = await res.json();
   // Handle NestJS wrapped response format
-  if (json && typeof json === 'object' && 'data' in json && 'statusCode' in json) {
-    return json.data as T;
+  const payload =
+    json && typeof json === 'object' && 'data' in json && 'statusCode' in json
+      ? (json as { data: unknown }).data
+      : json;
+
+  // Optional runtime validation. Throws SchemaValidationError on drift, which
+  // bubbles up to the route segment's error.tsx if uncaught.
+  if (schema) {
+    const result = schema.safeParse(payload);
+    if (!result.success) {
+      throw new SchemaValidationError(endpoint, result.error.issues);
+    }
+    return result.data;
   }
-  return json;
+
+  return payload as T;
 }
 
 // Users
@@ -70,14 +152,12 @@ export const loginUser = async (email: string, password: string): Promise<{
   role: string;
   token: string;
 }> => {
-  const response = await request<{
-    accessToken: string;
-    user: { id: string; email: string; name: string; role: string };
-  }>('/auth/login', {
+  const response = await request('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
+    schema: LoginResponseSchema,
   });
-  
+
   return {
     id: response.user.id,
     email: response.user.email,
@@ -119,13 +199,16 @@ export const updateDeveloperUserShare = (
   });
 
 export const generateApiKey = (developerId: string, name: string) =>
-  request<ApiKey & { raw_key: string }>(`/developers/${developerId}/api-keys`, {
+  request(`/developers/${developerId}/api-keys`, {
     method: 'POST',
     body: JSON.stringify({ name }),
-  });
+    schema: ApiKeySchema,
+  }) as Promise<ApiKey & { raw_key: string }>;
 
 export const listApiKeys = (developerId: string) =>
-  request<ApiKey[]>(`/developers/${developerId}/api-keys`);
+  request(`/developers/${developerId}/api-keys`, {
+    schema: ApiKeyListSchema,
+  }) as Promise<ApiKey[]>;
 
 export const revokeApiKey = (developerId: string, keyId: string) =>
   request<{ status: string }>(`/developers/${developerId}/api-keys/${keyId}`, {
@@ -140,10 +223,13 @@ export const createWallet = (data: {
 }) =>
   request<Wallet>('/wallets', { method: 'POST', body: JSON.stringify(data) });
 
-export const getWallet = (id: string) => request<Wallet>(`/wallets/${id}`);
+export const getWallet = (id: string) =>
+  request(`/wallets/${id}`, { schema: WalletSchema }) as Promise<Wallet>;
 
 export const getWalletsByOwner = (ownerId: string) =>
-  request<Wallet[]>(`/wallets/owner/${ownerId}`);
+  request(`/wallets/owner/${ownerId}`, {
+    schema: WalletListSchema,
+  }) as Promise<Wallet[]>;
 
 export const creditWallet = (id: string, amount: number) =>
   request<{ status: string }>(`/wallets/${id}/credit`, {
@@ -173,24 +259,34 @@ export const createCampaign = (data: {
   starts_at?: string;
   ends_at?: string;
 }) =>
-  request<Campaign>('/campaigns', {
+  request('/campaigns', {
     method: 'POST',
     body: JSON.stringify(data),
-  });
+    schema: CampaignSchema,
+  }) as Promise<Campaign>;
 
 export const pauseCampaign = (id: string) =>
-  request<Campaign>(`/campaigns/${id}/pause`, { method: 'POST' });
+  request(`/campaigns/${id}/pause`, {
+    method: 'POST',
+    schema: CampaignSchema,
+  }) as Promise<Campaign>;
 
 export const resumeCampaign = (id: string) =>
-  request<Campaign>(`/campaigns/${id}/resume`, { method: 'POST' });
+  request(`/campaigns/${id}/resume`, {
+    method: 'POST',
+    schema: CampaignSchema,
+  }) as Promise<Campaign>;
 
-export const getCampaigns = () => request<Campaign[]>('/campaigns');
+export const getCampaigns = () =>
+  request('/campaigns', { schema: CampaignListSchema }) as Promise<Campaign[]>;
 
 export const getCampaign = (id: string) =>
-  request<Campaign>(`/campaigns/${id}`);
+  request(`/campaigns/${id}`, { schema: CampaignSchema }) as Promise<Campaign>;
 
 export const getCampaignsByBuyer = (buyerId: string) =>
-  request<Campaign[]>(`/campaigns/buyer/${buyerId}`);
+  request(`/campaigns/buyer/${buyerId}`, {
+    schema: CampaignListSchema,
+  }) as Promise<Campaign[]>;
 
 export const updateCampaignStatus = (id: string, status: string) =>
   request<{ status: string }>(`/campaigns/${id}/status`, {
@@ -233,7 +329,9 @@ export interface DashboardStats {
 }
 
 export const getDashboard = (): Promise<DashboardStats> =>
-  request('/analytics/dashboard');
+  request('/analytics/dashboard', {
+    schema: DashboardStatsSchema,
+  });
 
 // Health
 export const getHealth = () =>
@@ -289,16 +387,19 @@ export const requestPayout = (data: {
   method: PayoutMethod;
   destination?: string;
 }) =>
-  request<PayoutRecord>(`/payouts/request`, {
+  request(`/payouts/request`, {
     method: 'POST',
     body: JSON.stringify(data),
-  });
+    schema: PayoutRecordSchema,
+  }) as Promise<PayoutRecord>;
 
 export const listMyPayouts = () =>
-  request<PayoutRecord[]>('/payouts/me');
+  request('/payouts/me', {
+    schema: PayoutRecordListSchema,
+  }) as Promise<PayoutRecord[]>;
 
 export const getPayout = (id: string) =>
-  request<PayoutRecord>(`/payouts/${id}`);
+  request(`/payouts/${id}`, { schema: PayoutRecordSchema }) as Promise<PayoutRecord>;
 
 export interface LedgerInvariantStatus {
   ok: boolean;
@@ -352,16 +453,21 @@ export const createApplication = (
     user_share_percent?: number;
   }
 ) =>
-  request<Application>(`/developers/${developerId}/applications`, {
+  request(`/developers/${developerId}/applications`, {
     method: 'POST',
     body: JSON.stringify(data),
-  });
+    schema: ApplicationSchema,
+  }) as Promise<Application>;
 
 export const getApplications = (developerId: string) =>
-  request<Application[]>(`/developers/${developerId}/applications`);
+  request(`/developers/${developerId}/applications`, {
+    schema: ApplicationListSchema,
+  }) as Promise<Application[]>;
 
 export const getApplication = (id: string) =>
-  request<Application>(`/applications/${id}`);
+  request(`/applications/${id}`, {
+    schema: ApplicationSchema,
+  }) as Promise<Application>;
 
 export const getApplicationStats = (id: string) =>
   request<ApplicationStats>(`/applications/${id}/stats`);
@@ -376,10 +482,11 @@ export const updateApplication = (
     user_share_percent?: number;
   }
 ) =>
-  request<Application>(`/applications/${id}`, {
+  request(`/applications/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
-  });
+    schema: ApplicationSchema,
+  }) as Promise<Application>;
 
 export const toggleApplicationStatus = (id: string, isActive: boolean) =>
   request<{ status: string; is_active: boolean }>(`/applications/${id}/status`, {
@@ -581,7 +688,9 @@ export interface UserSession {
 }
 
 export const getMyEarningsByApp = () =>
-  request<EarningsByApp[]>('/me/earnings/by-app');
+  request('/me/earnings/by-app', {
+    schema: EarningsByAppListSchema,
+  }) as Promise<EarningsByApp[]>;
 
 export const getMyLedger = (params?: {
   from?: string;
@@ -599,13 +708,20 @@ export const getMyLedger = (params?: {
   if (params?.page) search.set('page', String(params.page));
   if (params?.pageSize) search.set('pageSize', String(params.pageSize));
   const qs = search.toString();
-  return request<LedgerPage>(`/me/ledger${qs ? `?${qs}` : ''}`);
+  return request(`/me/ledger${qs ? `?${qs}` : ''}`, {
+    schema: LedgerPageSchema,
+  }) as Promise<LedgerPage>;
 };
 
 export const getMyQualityHistory = (days = 30) =>
-  request<QualityHistoryPoint[]>(`/me/quality-score-history?days=${days}`);
+  request(`/me/quality-score-history?days=${days}`, {
+    schema: QualityHistoryListSchema,
+  }) as Promise<QualityHistoryPoint[]>;
 
-export const getMySessions = () => request<UserSession[]>('/me/sessions');
+export const getMySessions = () =>
+  request('/me/sessions', {
+    schema: UserSessionListSchema,
+  }) as Promise<UserSession[]>;
 
 export const revokeMySession = (id: string) =>
   request<{ status: string }>(`/me/sessions/${id}`, { method: 'DELETE' });
@@ -614,14 +730,16 @@ export const revokeAllMySessions = () =>
   request<{ status: string }>('/me/sessions', { method: 'DELETE' });
 
 export const getMyEarningsSummary = () =>
-  request<{
+  request('/users/me/earnings', {
+    schema: EarningsSummarySchema,
+  }) as Promise<{
     userId: string;
     walletId: string | null;
     balance: number;
     pendingBalance: number;
     totalEarned: number;
     currency: string;
-  }>('/users/me/earnings');
+  }>;
 
 export const requestAccountDeletion = () =>
   request<{ status: string }>('/me/account/delete-request', { method: 'POST' });

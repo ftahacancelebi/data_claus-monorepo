@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -47,7 +47,11 @@ import {
     CircleNotch,
     Info
 } from 'phosphor-react';
-import { getApplications, createApplication, getDashboard, DashboardStats, Application } from '@/lib/api';
+import {
+  useApplications,
+  useCreateApplication,
+  useDashboardStats,
+} from '@/lib/api-hooks';
 
 // Categories with icons
 const categories = [
@@ -77,18 +81,25 @@ const item = {
 export default function MyAppsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  
-  // Real data from API
-  const [apps, setApps] = useState<Application[]>([]);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  // Server state via React Query — invalidated automatically after create.
+  const appsQuery = useApplications(user?.id);
+  const statsQuery = useDashboardStats();
+  const createMutation = useCreateApplication(user?.id);
+
+  const apps = appsQuery.data ?? [];
+  const stats = statsQuery.data ?? null;
+  const loading = appsQuery.isLoading;
+  const error =
+    appsQuery.error?.message ??
+    (appsQuery.error ? 'Failed to load applications. Make sure the backend is running.' : null);
+  const creating = createMutation.isPending;
+
   const [newAppApiKey, setNewAppApiKey] = useState<string | null>(null);
-  
+
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
-  const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -96,38 +107,9 @@ export default function MyAppsPage() {
     userSharePercent: 70, // Default 70% to users
   });
 
-  // Fetch applications from backend
-  useEffect(() => {
-    async function fetchData() {
-      if (!user?.id) return;
-      
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // Fetch applications for this developer
-        const applications = await getApplications(user.id);
-        setApps(applications || []);
-        
-        // Fetch dashboard stats
-        const dashboardStats = await getDashboard();
-        setStats(dashboardStats);
-      } catch (err) {
-        console.error('Failed to fetch apps:', err);
-        setError('Failed to load applications. Make sure the backend is running.');
-        // Keep page usable with empty data
-        setApps([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    
-    fetchData();
-  }, [user?.id]);
-
   if (!user) return null;
 
-  const filteredCategories = categories.filter(cat => 
+  const filteredCategories = categories.filter(cat =>
     cat.name.toLowerCase().includes(categorySearch.toLowerCase())
   );
 
@@ -137,23 +119,19 @@ export default function MyAppsPage() {
       toast({ title: 'Please enter an app name', variant: 'destructive' });
       return;
     }
-    
-    setCreating(true);
+
     setNewAppApiKey(null);
-    
+
     try {
-      // Create application (returns app with API key)
-      const result = await createApplication(user.id, {
+      const result = await createMutation.mutateAsync({
         name: form.name,
         description: form.description,
         category: form.category,
         user_share_percent: form.userSharePercent,
       });
-      
-      // Add to local state
-      setApps([result, ...apps]);
-      
-      // Store the API key to show to user
+
+      // Cache invalidation already handled by useCreateApplication.onSuccess.
+      // Show the raw API key (one-time) before closing.
       if (result.api_key) {
         setNewAppApiKey(result.api_key);
         toast({
@@ -166,14 +144,12 @@ export default function MyAppsPage() {
         toast({ title: 'Application Created!' });
       }
     } catch (err) {
-      console.error('Failed to create app:', err);
       toast({
         title: 'Failed to create application',
-        description: 'Make sure the backend server is running.',
+        description:
+          err instanceof Error ? err.message : 'Make sure the backend server is running.',
         variant: 'destructive',
       });
-    } finally {
-      setCreating(false);
     }
   };
 

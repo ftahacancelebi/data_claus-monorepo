@@ -1,21 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { AppEarningsCard } from '@/components/user/AppEarningsCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { AppWindow } from 'phosphor-react';
-import { getMyEarningsByApp, type EarningsByApp } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { useEarningsByApp } from '@/lib/api-hooks';
 
 export default function EarningsByAppPage() {
-  const [apps, setApps] = useState<EarningsByApp[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getMyEarningsByApp()
-      .then(setApps)
-      .catch(() => setApps([]))
-      .finally(() => setLoading(false));
-  }, []);
+  const appsQuery = useEarningsByApp();
+  const apps = appsQuery.data ?? [];
+  const loading = appsQuery.isLoading;
+  const error = appsQuery.error?.message ?? null;
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -26,7 +21,20 @@ export default function EarningsByAppPage() {
         </p>
       </header>
 
-      {loading ? (
+      {error && !loading ? (
+        <Card className="border-rose-100 bg-rose-50">
+          <CardContent className="p-4 text-sm text-rose-700 flex items-center justify-between">
+            <span>{error}</span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => appsQuery.refetch()}
+            >
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
+      ) : loading ? (
         <div className="grid gap-3 md:grid-cols-2">
           {[0, 1, 2].map((i) => (
             <Card key={i} className="border-slate-100 animate-pulse h-20" />

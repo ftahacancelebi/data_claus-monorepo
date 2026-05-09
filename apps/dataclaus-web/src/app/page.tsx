@@ -37,14 +37,16 @@ export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<UserRole>('user');
   const [submitting, setSubmitting] = useState(false);
 
-  // Redirect if already logged in
-  if (!isLoading && user) {
-    router.push(user.role === 'user' ? '/u/dashboard' : '/dashboard');
-    return null;
-  }
+  // Redirect if already logged in (effect, NOT during render).
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace(user.role === 'user' ? '/u/dashboard' : '/dashboard');
+    }
+  }, [isLoading, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
     setSubmitting(true);
 
     try {
@@ -54,15 +56,10 @@ export default function LoginPage() {
         resolvedRole = selectedRole;
         toast({ title: 'Account created successfully' });
       } else {
-        await login(email, password);
-        resolvedRole =
-          (typeof window !== 'undefined'
-            ? (JSON.parse(
-                window.localStorage.getItem('dataclaus_user') ?? 'null',
-              )?.role as UserRole | undefined)
-            : undefined) ?? undefined;
+        const authedUser = await login(email, password);
+        resolvedRole = authedUser.role;
       }
-      router.push(resolvedRole === 'user' ? '/u/dashboard' : '/dashboard');
+      router.replace(resolvedRole === 'user' ? '/u/dashboard' : '/dashboard');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Authentication failed';
       toast({ title: 'Error', description: message, variant: 'destructive' });
@@ -71,7 +68,9 @@ export default function LoginPage() {
     }
   };
 
-  if (isLoading) {
+  // Render skeleton while AuthProvider is hydrating, OR while we're about to
+  // bounce an already-authed user away (the effect above does router.replace).
+  if (isLoading || user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <CircleNotch size={32} className="animate-spin text-primary" />
@@ -219,7 +218,11 @@ export default function LoginPage() {
                          </div>
                     )}
 
-                    <Button className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl shadow-lg shadow-slate-900/10 transition-all active:scale-[0.98] mt-2">
+                    <Button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl shadow-lg shadow-slate-900/10 transition-all active:scale-[0.98] mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
                         {submitting ? <CircleNotch className="animate-spin" /> : (
                             <span className="flex items-center gap-2">
                                 {isRegister ? 'Create Account' : 'Sign In'} <ArrowRight weight="bold"/>
