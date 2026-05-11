@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Logo from '../assets/logos/logo.svg';
 import { Button } from '@/components/ui/button';
@@ -25,25 +26,11 @@ import {
 } from 'phosphor-react';
 
 
-/**
- * Safely resolve the `?next=` redirect target from the login URL. Reject any
- * absolute URL or protocol-relative path — only same-origin paths starting
- * with a single `/` are honored. This blocks open-redirect attempts where a
- * crafted login link sends the user to an attacker domain after auth.
- */
-function safeNext(raw: string | null): string | null {
-  if (!raw) return null;
-  if (!raw.startsWith('/') || raw.startsWith('//')) return null;
-  return raw;
-}
-
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const next = safeNext(searchParams?.get('next') ?? null);
   const { toast } = useToast();
   const { login, register, user, isLoading } = useAuth();
-  
+
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -51,16 +38,15 @@ export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<UserRole>('user');
   const [submitting, setSubmitting] = useState(false);
 
-  // Default landing for each role. `next` (from middleware) wins when set.
   const defaultLanding = (role: UserRole | undefined): string =>
     role === 'user' ? '/u/dashboard' : '/dashboard';
 
   // Redirect if already logged in (effect, NOT during render).
   useEffect(() => {
     if (!isLoading && user) {
-      router.replace(next ?? defaultLanding(user.role));
+      router.replace(defaultLanding(user.role));
     }
-  }, [isLoading, user, router, next]);
+  }, [isLoading, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +63,7 @@ export default function LoginPage() {
         const authedUser = await login(email, password);
         resolvedRole = authedUser.role;
       }
-      router.replace(next ?? defaultLanding(resolvedRole));
+      router.replace(defaultLanding(resolvedRole));
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Authentication failed';
       toast({ title: 'Error', description: message, variant: 'destructive' });
@@ -86,15 +72,12 @@ export default function LoginPage() {
     }
   };
 
-  // Render skeleton while AuthProvider is hydrating, OR while we're about to
-  // bounce an already-authed user away (the effect above does router.replace).
-  if (isLoading || user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <CircleNotch size={32} className="animate-spin text-primary" />
-      </div>
-    );
-  }
+  // No blocking spinner here. The useEffect above replaces the route when
+  // `user` becomes available; rendering the form underneath that navigation
+  // tick is harmless and — more importantly — guarantees the user never gets
+  // stuck staring at a spinner if the redirect ever fails to take effect
+  // (which is exactly the bug class the middleware/cookie mismatch used to
+  // produce).
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden bg-slate-900">

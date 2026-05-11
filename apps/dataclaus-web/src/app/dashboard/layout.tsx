@@ -39,19 +39,17 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <TourProvider>
-      <div className="flex min-h-screen bg-slate-50 relative overflow-hidden">
-        {/* Background (Shared with LOGIN aesthetics) */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+      <div className="flex h-screen bg-slate-50 overflow-hidden">
+        {/* Background */}
+        <div className="fixed inset-0 pointer-events-none z-0">
           <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-100/60 rounded-full blur-[120px] animate-float opacity-60"></div>
           <div className="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] bg-blue-100/40 rounded-full blur-[100px] animate-float-delayed"></div>
-
-          {/* Subtle Grid Overlay */}
           <div className="absolute inset-0 bg-grid-pattern opacity-[0.3]"></div>
         </div>
 
         <Sidebar />
 
-        <main className="flex-1 p-8 z-10 overflow-auto relative">
+        <main className="flex-1 p-8 z-10 overflow-y-auto relative">
           {children}
         </main>
 

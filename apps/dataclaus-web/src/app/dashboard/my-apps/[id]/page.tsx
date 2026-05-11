@@ -128,10 +128,9 @@ export default function AppDetailPage() {
   }
 
   const copyApiKey = () => {
-    // API key is not fully available here, but we can simulate or show instruction
-    // In reality, api key is only shown once on creation.
-    // Here we might copy a placeholder or the prefix
-    navigator.clipboard.writeText(app.apiKey); 
+    const key = app?.api_key_prefix ?? '';
+    if (!key) return;
+    navigator.clipboard.writeText(key);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -168,20 +167,42 @@ export default function AppDetailPage() {
       {/* API Key Card */}
       <Card className="glass-panel border-0 shadow-lg">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <ShieldCheck size={24} className="text-primary" weight="duotone" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900">API Key Prefix</h3>
-                <p className="text-sm text-slate-500">For security, full key is only shown on creation</p>
+                <h3 className="font-semibold text-slate-900">API Key</h3>
+                <p className="text-sm text-slate-500">
+                  Full key is shown only once at creation — prefix identifies this key
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <code className="px-4 py-2 bg-slate-100 rounded-lg text-sm font-mono text-slate-700">
-                {app.apiKey}
+            <div className="flex items-center gap-2">
+              <code className="px-4 py-2.5 bg-slate-100 rounded-xl text-sm font-mono text-slate-700 tracking-widest min-w-[220px] text-center">
+                {showApiKey
+                  ? `${app.api_key_prefix ?? 'N/A'}••••••••`
+                  : '•••••••••••••••••••••••••'}
               </code>
+              <button
+                onClick={() => setShowApiKey((v) => !v)}
+                className="h-9 w-9 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors"
+                title={showApiKey ? 'Hide key' : 'Reveal prefix'}
+              >
+                {showApiKey ? <EyeSlash size={16} /> : <Eye size={16} />}
+              </button>
+              <button
+                onClick={copyApiKey}
+                className={`h-9 w-9 rounded-lg flex items-center justify-center transition-colors ${
+                  copied
+                    ? 'bg-emerald-100 text-emerald-600'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700'
+                }`}
+                title="Copy prefix"
+              >
+                {copied ? <CheckCircle size={16} weight="fill" /> : <Copy size={16} />}
+              </button>
             </div>
           </div>
         </CardContent>

@@ -22,7 +22,8 @@ import {
   TrendUp,
   User,
   Book,
-  Question
+  Question,
+  ChartLineUp,
 } from 'phosphor-react';
 import { Button } from '@/components/ui/button';
 
@@ -59,6 +60,12 @@ const navItems: NavItem[] = [
     roles: ['developer'],
   },
   {
+    href: '/dashboard/packages',
+    label: 'Data Packages',
+    icon: Database,
+    roles: ['developer'],
+  },
+  {
     href: '/dashboard/docs',
     label: 'SDK Docs',
     icon: Book,
@@ -77,10 +84,28 @@ const navItems: NavItem[] = [
     roles: ['buyer'],
   },
   {
+    href: '/dashboard/insights',
+    label: 'AI Insights',
+    icon: ChartLineUp,
+    roles: ['developer'],
+  },
+  {
     href: '/dashboard/marketplace',
     label: 'Marketplace',
     icon: Database,
-    roles: ['buyer'],
+    roles: ['buyer', 'user', 'admin'],
+  },
+  {
+    href: '/dashboard/purchases',
+    label: 'Purchases',
+    icon: ShieldCheck,
+    roles: ['buyer', 'user'],
+  },
+  {
+    href: '/dashboard/admin/packages',
+    label: 'Packages',
+    icon: Database,
+    roles: ['admin'],
   },
   {
     href: '/dashboard/admin/users',
@@ -119,7 +144,7 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm">
+    <aside className="w-64 h-screen bg-white border-r border-slate-200 flex flex-col shadow-sm shrink-0 relative z-10">
       {/* Header */}
       <div className="p-6 border-b border-slate-100">
         <div className="flex items-center justify-center mb-4">

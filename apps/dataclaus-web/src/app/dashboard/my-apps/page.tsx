@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Fragment } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,37 +14,36 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/auth-context';
-import { REVENUE_SHARES, ApiKey } from '@/lib/types';
 import { Slider } from '@/components/ui/slider';
-import { 
-    Plus, 
-    Code, 
-    Users, 
-    CurrencyDollar, 
-    AppWindow,
-    X,
-    MagnifyingGlass,
-    CheckCircle,
-    Heart,
-    GameController,
-    ShoppingCart,
-    Airplane,
-    Briefcase,
-    ChartBar,
-    Flask,
-    MusicNote,
-    Camera,
-    Book,
-    Wallet,
-    ArrowRight,
-    Activity,
-    TrendUp,
-    Lightning,
-    Key,
-    Copy,
-    Warning,
-    CircleNotch,
-    Info
+import {
+  Plus,
+  Code,
+  Users,
+  CurrencyDollar,
+  AppWindow,
+  X,
+  MagnifyingGlass,
+  CheckCircle,
+  Heart,
+  GameController,
+  ShoppingCart,
+  Airplane,
+  Briefcase,
+  ChartBar,
+  Flask,
+  MusicNote,
+  Camera,
+  Book,
+  Wallet,
+  ArrowRight,
+  Activity,
+  TrendUp,
+  Lightning,
+  Key,
+  Copy,
+  Warning,
+  CircleNotch,
+  Info,
 } from 'phosphor-react';
 import {
   useApplications,
@@ -53,7 +51,6 @@ import {
   useDashboardStats,
 } from '@/lib/api-hooks';
 
-// Categories with icons
 const categories = [
   { id: 'health', name: 'Health & Fitness', icon: Heart },
   { id: 'gaming', name: 'Gaming', icon: GameController },
@@ -68,21 +65,22 @@ const categories = [
   { id: 'finance', name: 'Finance', icon: Wallet },
 ];
 
+const STEP_LABELS = ['App Info', 'Category', 'Revenue', 'Review'];
+
 const container = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.08 } }
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
 };
 
 const item = {
-    hidden: { opacity: 0, y: 10 },
-    show: { opacity: 1, y: 0 }
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0 },
 };
 
 export default function MyAppsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Server state via React Query — invalidated automatically after create.
   const appsQuery = useApplications(user?.id);
   const statsQuery = useDashboardStats();
   const createMutation = useCreateApplication(user?.id);
@@ -96,32 +94,33 @@ export default function MyAppsPage() {
   const creating = createMutation.isPending;
 
   const [newAppApiKey, setNewAppApiKey] = useState<string | null>(null);
-
-  // Modal state
   const [showModal, setShowModal] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
+  const [step, setStep] = useState(1);
+  const [mounted, setMounted] = useState(false);
   const [form, setForm] = useState({
     name: '',
     description: '',
     category: '',
-    userSharePercent: 70, // Default 70% to users
+    userSharePercent: 70,
   });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   if (!user) return null;
 
-  const filteredCategories = categories.filter(cat =>
+  const filteredCategories = categories.filter((cat) =>
     cat.name.toLowerCase().includes(categorySearch.toLowerCase())
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreate = async () => {
     if (!form.name.trim()) {
       toast({ title: 'Please enter an app name', variant: 'destructive' });
       return;
     }
-
     setNewAppApiKey(null);
-
     try {
       const result = await createMutation.mutateAsync({
         name: form.name,
@@ -129,9 +128,6 @@ export default function MyAppsPage() {
         category: form.category,
         user_share_percent: form.userSharePercent,
       });
-
-      // Cache invalidation already handled by useCreateApplication.onSuccess.
-      // Show the raw API key (one-time) before closing.
       if (result.api_key) {
         setNewAppApiKey(result.api_key);
         toast({
@@ -139,8 +135,7 @@ export default function MyAppsPage() {
           description: 'Your API key has been generated. Copy it now!',
         });
       } else {
-        setForm({ name: '', description: '', category: '', userSharePercent: 70 });
-        setShowModal(false);
+        closeModal();
         toast({ title: 'Application Created!' });
       }
     } catch (err) {
@@ -160,25 +155,282 @@ export default function MyAppsPage() {
 
   const closeModal = () => {
     setShowModal(false);
+    setStep(1);
     setForm({ name: '', description: '', category: '', userSharePercent: 70 });
     setNewAppApiKey(null);
+    setCategorySearch('');
   };
 
-  const activeApps = apps.filter(app => app.is_active).length;
+  const activeApps = apps.filter((app) => app.is_active).length;
+
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div className="space-y-5">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-1">Name your application</h3>
+              <p className="text-sm text-slate-500">Give your app a recognizable name and description</p>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-slate-700">
+                Application Name <span className="text-red-400">*</span>
+              </Label>
+              <Input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="My Awesome App"
+                className="h-11"
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-slate-700">
+                Description{' '}
+                <span className="text-slate-400 font-normal text-xs">(optional)</span>
+              </Label>
+              <Input
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder="A brief description of your app..."
+                className="h-11"
+              />
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-1">Choose a category</h3>
+              <p className="text-sm text-slate-500">Help users discover your app — optional</p>
+            </div>
+            <div className="relative">
+              <MagnifyingGlass className="absolute left-3 top-3 text-slate-400" size={16} />
+              <Input
+                value={categorySearch}
+                onChange={(e) => setCategorySearch(e.target.value)}
+                placeholder="Search categories..."
+                className="h-10 pl-9"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto pr-1">
+              {filteredCategories.map((cat) => {
+                const Icon = cat.icon;
+                const isSelected = form.category === cat.name;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setForm({ ...form, category: isSelected ? '' : cat.name })}
+                    className={`p-2.5 rounded-xl border transition-all flex flex-col items-center gap-1.5 ${
+                      isSelected
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div
+                      className={`h-8 w-8 rounded-lg flex items-center justify-center ${
+                        isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'
+                      }`}
+                    >
+                      <Icon size={16} weight={isSelected ? 'fill' : 'duotone'} />
+                    </div>
+                    <span
+                      className={`text-[10px] font-medium leading-tight text-center ${
+                        isSelected ? 'text-blue-700' : 'text-slate-600'
+                      }`}
+                    >
+                      {cat.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {form.category && (
+              <p className="text-xs text-slate-500">
+                Selected:{' '}
+                <span className="font-medium text-blue-600">{form.category}</span>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, category: '' })}
+                  className="ml-2 text-slate-400 hover:text-slate-600 underline"
+                >
+                  clear
+                </button>
+              </p>
+            )}
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-5">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-1">Revenue distribution</h3>
+              <p className="text-sm text-slate-500">
+                Set how earnings are split between you and your users
+              </p>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-slate-500 w-24 shrink-0">User Share</span>
+                <div className="flex-1">
+                  <Slider
+                    value={[form.userSharePercent]}
+                    onValueChange={(value) => setForm({ ...form, userSharePercent: value[0] })}
+                    min={50}
+                    max={90}
+                    step={5}
+                    className="cursor-pointer"
+                  />
+                </div>
+                <span className="text-lg font-bold text-emerald-600 w-14 text-right shrink-0">
+                  {form.userSharePercent}%
+                </span>
+              </div>
+              <div className="h-2.5 rounded-full overflow-hidden flex bg-slate-100">
+                <div
+                  className="bg-emerald-500 transition-all duration-300"
+                  style={{ width: `${form.userSharePercent}%` }}
+                />
+                <div
+                  className="bg-blue-500 transition-all duration-300"
+                  style={{ width: `${100 - 5 - form.userSharePercent}%` }}
+                />
+                <div className="bg-slate-300 flex-1" />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                  <p className="text-2xl font-bold text-emerald-600">{form.userSharePercent}%</p>
+                  <p className="text-xs text-emerald-700 font-medium mt-0.5">User Earnings</p>
+                </div>
+                <div className="text-center p-3 bg-blue-50 rounded-xl border border-blue-100">
+                  <p className="text-2xl font-bold text-blue-600">
+                    {100 - 5 - form.userSharePercent}%
+                  </p>
+                  <p className="text-xs text-blue-700 font-medium mt-0.5">Your Revenue</p>
+                </div>
+                <div className="text-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <p className="text-2xl font-bold text-slate-500">5%</p>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">Platform Fee</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                <Info size={12} />
+                Higher user share attracts more users but reduces your margins
+              </p>
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-5">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-1">Review & Create</h3>
+              <p className="text-sm text-slate-500">
+                Confirm your application settings before creating
+              </p>
+            </div>
+            <div className="space-y-2">
+              {[
+                { label: 'App Name', value: form.name, className: 'text-slate-900' },
+                {
+                  label: 'Description',
+                  value: form.description || '—',
+                  className: form.description ? 'text-slate-900' : 'text-slate-400',
+                },
+                {
+                  label: 'Category',
+                  value: form.category || '—',
+                  className: form.category ? 'text-slate-900' : 'text-slate-400',
+                },
+                {
+                  label: 'User Share',
+                  value: `${form.userSharePercent}%`,
+                  className: 'text-emerald-600',
+                },
+                {
+                  label: 'Your Revenue',
+                  value: `${100 - 5 - form.userSharePercent}%`,
+                  className: 'text-blue-600',
+                },
+                { label: 'Platform Fee', value: '5%', className: 'text-slate-500' },
+              ].map(({ label, value, className }) => (
+                <div
+                  key={label}
+                  className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl"
+                >
+                  <span className="text-sm text-slate-500">{label}</span>
+                  <span className={`text-sm font-semibold ${className}`}>{value}</span>
+                </div>
+              ))}
+            </div>
+            <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 flex items-start gap-3">
+              <Warning size={18} className="text-amber-600 shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-800">
+                After creation, you'll receive an API key.{' '}
+                <strong>Copy it immediately</strong> — it won't be shown again.
+              </p>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  const renderSuccess = () => (
+    <div className="text-center space-y-5 py-4">
+      <div className="flex justify-center">
+        <div className="h-16 w-16 rounded-full bg-emerald-100 flex items-center justify-center">
+          <CheckCircle size={36} className="text-emerald-600" weight="fill" />
+        </div>
+      </div>
+      <div>
+        <h3 className="text-xl font-bold text-slate-900 mb-2">Application Created!</h3>
+        <p className="text-sm text-slate-500">
+          Your API key is ready. Copy it now — it won't be shown again.
+        </p>
+      </div>
+      <div className="p-4 bg-slate-900 rounded-xl text-left">
+        <p className="text-[10px] text-slate-400 mb-2 font-mono uppercase tracking-widest">
+          API Key
+        </p>
+        <div className="flex items-start gap-2">
+          <code className="flex-1 text-emerald-400 text-xs font-mono break-all leading-relaxed">
+            {newAppApiKey}
+          </code>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => newAppApiKey && copyApiKey(newAppApiKey)}
+            className="shrink-0 text-slate-400 hover:text-emerald-400 hover:bg-white/10 h-8 w-8 p-0"
+          >
+            <Copy size={15} />
+          </Button>
+        </div>
+      </div>
+      <Button onClick={closeModal} className="w-full bg-slate-900 hover:bg-slate-800 text-white">
+        Done
+      </Button>
+    </div>
+  );
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Header Section */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Applications</h1>
-          <p className="text-slate-500 mt-1">
-            Manage your integrated applications and API keys.
-          </p>
+          <p className="text-slate-500 mt-1">Manage your integrated applications and API keys.</p>
         </div>
-        <Button 
-            onClick={() => setShowModal(true)} 
-            className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 transition-all font-medium"
+        <Button
+          onClick={() => setShowModal(true)}
+          className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 transition-all font-medium"
         >
           <Plus weight="bold" className="mr-2" />
           Create New App
@@ -192,26 +444,25 @@ export default function MyAppsPage() {
           <div>
             <p className="font-medium text-amber-800">{error}</p>
             <p className="text-sm text-amber-600 mt-1">
-              Run `docker-compose up -d` and `go run apps/dataclaus-api/cmd/api` to start the backend.
+              Run `docker-compose up -d` and `go run apps/dataclaus-api/cmd/api` to start the
+              backend.
             </p>
           </div>
         </div>
       )}
 
-      {/* ========== STATISTICS SECTION ========== */}
+      {/* Statistics */}
       <section>
         <div className="flex items-center gap-2 mb-4">
           <ChartBar size={20} className="text-slate-400" weight="duotone" />
           <h2 className="text-lg font-semibold text-slate-700">Statistics Overview</h2>
         </div>
-        
-        <motion.div 
+        <motion.div
           variants={container}
           initial="hidden"
           animate="show"
           className="grid gap-4 md:grid-cols-4"
         >
-          {/* Total Apps */}
           <motion.div variants={item}>
             <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
               <CardContent className="p-5">
@@ -220,13 +471,14 @@ export default function MyAppsPage() {
                     <AppWindow size={20} className="text-blue-600" weight="duotone" />
                   </div>
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Total Apps</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                  Total Apps
+                </p>
                 <p className="text-3xl font-bold text-slate-900">{loading ? '-' : apps.length}</p>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Active Apps */}
           <motion.div variants={item}>
             <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
               <CardContent className="p-5">
@@ -239,13 +491,14 @@ export default function MyAppsPage() {
                     Live
                   </Badge>
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Active Apps</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                  Active Apps
+                </p>
                 <p className="text-3xl font-bold text-slate-900">{loading ? '-' : activeApps}</p>
               </CardContent>
             </Card>
           </motion.div>
-          
-          {/* Total Events */}
+
           <motion.div variants={item}>
             <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
               <CardContent className="p-5">
@@ -255,17 +508,21 @@ export default function MyAppsPage() {
                   </div>
                   {stats && (
                     <span className="flex items-center text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                      <TrendUp size={10} className="mr-1" weight="bold" />Live
+                      <TrendUp size={10} className="mr-1" weight="bold" />
+                      Live
                     </span>
                   )}
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Total Events</p>
-                <p className="text-3xl font-bold text-slate-900">{stats?.total_events?.toLocaleString() ?? '-'}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                  Total Events
+                </p>
+                <p className="text-3xl font-bold text-slate-900">
+                  {stats?.total_events?.toLocaleString() ?? '-'}
+                </p>
               </CardContent>
             </Card>
           </motion.div>
-          
-          {/* Total Payouts */}
+
           <motion.div variants={item}>
             <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
               <CardContent className="p-5">
@@ -274,21 +531,29 @@ export default function MyAppsPage() {
                     <CurrencyDollar size={20} className="text-slate-700" weight="duotone" />
                   </div>
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Total Payouts</p>
-                <p className="text-3xl font-bold text-slate-900">${stats?.total_payouts?.toLocaleString() ?? '0'}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                  Total Payouts
+                </p>
+                <p className="text-3xl font-bold text-slate-900">
+                  ${stats?.total_payouts?.toLocaleString() ?? '0'}
+                </p>
               </CardContent>
             </Card>
           </motion.div>
         </motion.div>
       </section>
 
-      {/* ========== APPLICATIONS SECTION ========== */}
+      {/* Applications */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Key size={20} className="text-slate-400" weight="duotone" />
-            <h2 className="text-lg font-semibold text-slate-700">Your Applications (API Keys)</h2>
-            <Badge variant="outline" className="ml-2 text-xs">{apps.length} apps</Badge>
+            <h2 className="text-lg font-semibold text-slate-700">
+              Your Applications (API Keys)
+            </h2>
+            <Badge variant="outline" className="ml-2 text-xs">
+              {apps.length} apps
+            </Badge>
           </div>
         </div>
 
@@ -299,7 +564,7 @@ export default function MyAppsPage() {
         ) : (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {apps.map((app, index) => (
-              <motion.div 
+              <motion.div
                 key={app.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -311,26 +576,32 @@ export default function MyAppsPage() {
                       <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-900/20">
                         <Code size={22} weight="duotone" />
                       </div>
-                      <Badge className={
-                        app.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                        'bg-slate-50 text-slate-600 border-slate-200'
-                      }>
+                      <Badge
+                        className={
+                          app.is_active
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-slate-50 text-slate-600 border-slate-200'
+                        }
+                      >
                         {app.is_active && <Activity size={10} className="mr-1" weight="fill" />}
                         {app.is_active ? 'active' : 'inactive'}
                       </Badge>
                     </div>
-
-                    <h3 className="font-bold text-lg text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">{app.name}</h3>
-                    <p className="text-sm text-slate-500 mb-4">{app.description || 'Your SDK integration app'}</p>
-                    
-                    {/* API Key Preview */}
+                    <h3 className="font-bold text-lg text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
+                      {app.name}
+                    </h3>
+                    <p className="text-sm text-slate-500 mb-4">
+                      {app.description || 'Your SDK integration app'}
+                    </p>
                     {app.api_key_prefix && (
                       <div className="p-3 bg-slate-100 rounded-lg mb-4">
                         <div className="flex items-center justify-between">
-                          <code className="text-xs text-slate-600 font-mono">{app.api_key_prefix}••••••••</code>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <code className="text-xs text-slate-600 font-mono">
+                            {app.api_key_prefix}••••••••
+                          </code>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => copyApiKey(app.api_key_prefix || '')}
                             className="h-7 w-7 p-0"
                           >
@@ -339,23 +610,26 @@ export default function MyAppsPage() {
                         </div>
                       </div>
                     )}
-
-                    {/* Stats */}
                     <div className="grid grid-cols-3 gap-2 mb-4 pb-4 border-b border-slate-100">
                       <div className="text-center">
-                        <p className="text-lg font-bold text-slate-900">{app.total_events.toLocaleString()}</p>
+                        <p className="text-lg font-bold text-slate-900">
+                          {app.total_events.toLocaleString()}
+                        </p>
                         <p className="text-xs text-slate-400">Events</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-lg font-bold text-slate-900">{app.total_users.toLocaleString()}</p>
+                        <p className="text-lg font-bold text-slate-900">
+                          {app.total_users.toLocaleString()}
+                        </p>
                         <p className="text-xs text-slate-400">Users</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-lg font-bold text-emerald-600">${app.total_revenue.toFixed(2)}</p>
+                        <p className="text-lg font-bold text-emerald-600">
+                          ${app.total_revenue.toFixed(2)}
+                        </p>
                         <p className="text-xs text-slate-400">Revenue</p>
                       </div>
                     </div>
-
                     <div className="flex items-center gap-2">
                       <Link href={`/dashboard/my-apps/${app.id}`} className="flex-1">
                         <Button variant="outline" size="sm" className="w-full hover:bg-slate-50">
@@ -369,22 +643,30 @@ export default function MyAppsPage() {
               </motion.div>
             ))}
 
-            {/* Empty State / Create New Card */}
+            {/* Create New Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: apps.length * 0.08 }}
             >
-              <Card 
+              <Card
                 className="border-2 border-dashed border-slate-200 hover:border-blue-300 bg-slate-50/50 hover:bg-blue-50/30 transition-all h-full cursor-pointer group"
                 onClick={() => setShowModal(true)}
               >
                 <CardContent className="p-6 flex flex-col items-center justify-center h-full min-h-[280px]">
                   <div className="h-14 w-14 rounded-2xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center mb-4 transition-colors">
-                    <Plus size={28} className="text-slate-400 group-hover:text-blue-600 transition-colors" weight="bold" />
+                    <Plus
+                      size={28}
+                      className="text-slate-400 group-hover:text-blue-600 transition-colors"
+                      weight="bold"
+                    />
                   </div>
-                  <h3 className="font-semibold text-slate-600 group-hover:text-blue-700 transition-colors mb-1">Create New App</h3>
-                  <p className="text-sm text-slate-400 text-center">Register a new application to get an API key</p>
+                  <h3 className="font-semibold text-slate-600 group-hover:text-blue-700 transition-colors mb-1">
+                    Create New App
+                  </h3>
+                  <p className="text-sm text-slate-400 text-center">
+                    Register a new application to get an API key
+                  </p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -392,202 +674,161 @@ export default function MyAppsPage() {
         )}
       </section>
 
-      {/* Create App Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <>
+      {/* Modal Portal — renders at document.body to escape any CSS stacking context */}
+      {mounted &&
+        showModal &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999]">
             {/* Backdrop */}
             <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-              style={{ zIndex: 99999 }}
-              onClick={() => setShowModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => !newAppApiKey && closeModal()}
             />
-            
-            {/* Modal Container */}
-            <div 
-              className="fixed inset-0 flex items-center justify-center p-4"
-              style={{ zIndex: 100000 }}
-            >
+
+            {/* Modal */}
+            <div className="absolute inset-0 flex items-center justify-center p-4">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="w-full max-w-xl"
+                className="w-full max-w-lg bg-white rounded-3xl shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-                  {/* Header */}
-                  <div className="relative h-24 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 flex items-center px-8">
-                    <div className="absolute inset-0 overflow-hidden">
-                      <div className="absolute top-[-50%] right-[-20%] w-[60%] h-[200%] bg-blue-500/10 rotate-12"></div>
-                    </div>
-                    <div className="relative flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                        <Plus size={24} className="text-white" weight="bold" />
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-bold text-white">Create New Application</h2>
-                        <p className="text-slate-300 text-sm">Generate a new API key for your app</p>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => setShowModal(false)}
-                      className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition-colors"
-                    >
-                      <X size={16} weight="bold" />
-                    </button>
+                {/* Header */}
+                <div className="flex items-center justify-between px-8 pt-7">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">Create Application</h2>
+                    {!newAppApiKey && (
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Step {step} of {STEP_LABELS.length}
+                      </p>
+                    )}
                   </div>
+                  <button
+                    onClick={closeModal}
+                    className="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-700 transition-colors"
+                  >
+                    <X size={15} weight="bold" />
+                  </button>
+                </div>
 
-                  {/* Form */}
-                  <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                    {/* App Name */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">Application Name *</Label>
-                      <Input 
-                        value={form.name}
-                        onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        placeholder="My Awesome App"
-                        className="h-11"
-                        required
-                      />
-                      <p className="text-xs text-slate-500">This will be the name of your API key</p>
-                    </div>
-
-                    {/* Category (optional) */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">Category (optional)</Label>
-                      <div className="relative">
-                        <MagnifyingGlass className="absolute left-3 top-3 text-slate-400" size={18} />
-                        <Input 
-                          value={categorySearch}
-                          onChange={(e) => setCategorySearch(e.target.value)}
-                          placeholder="Search categories..."
-                          className="h-11 pl-10 mb-3"
-                        />
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 max-h-[140px] overflow-y-auto p-1">
-                        {filteredCategories.slice(0, 9).map((cat) => {
-                          const Icon = cat.icon;
-                          const isSelected = form.category === cat.name;
-                          return (
-                            <button
-                              key={cat.id}
-                              type="button"
-                              onClick={() => setForm({ ...form, category: cat.name })}
-                              className={`p-2 rounded-xl border transition-all flex flex-col items-center text-center gap-1 ${
-                                isSelected 
-                                  ? 'border-blue-500 bg-blue-50' 
-                                  : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                {/* Step indicator */}
+                {!newAppApiKey && (
+                  <div className="flex items-start px-8 pt-5">
+                    {STEP_LABELS.map((label, i) => {
+                      const stepNum = i + 1;
+                      const isActive = step === stepNum;
+                      const isDone = step > stepNum;
+                      return (
+                        <Fragment key={stepNum}>
+                          <div className="flex flex-col items-center">
+                            <div
+                              className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
+                                isDone
+                                  ? 'bg-emerald-500 border-emerald-500 text-white'
+                                  : isActive
+                                    ? 'bg-slate-900 border-slate-900 text-white'
+                                    : 'border-slate-200 text-slate-400 bg-white'
                               }`}
                             >
-                              <div className={`h-7 w-7 rounded-lg flex items-center justify-center ${
-                                isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'
-                              }`}>
-                                <Icon size={14} weight={isSelected ? 'fill' : 'duotone'} />
-                              </div>
-                              <span className={`text-[10px] font-medium ${isSelected ? 'text-blue-700' : 'text-slate-600'}`}>
-                                {cat.name}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Revenue Share Configuration */}
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-sm font-medium text-slate-700">Revenue Share Distribution</Label>
-                        <Badge variant="outline" className="text-xs font-normal">
-                          Configurable per app
-                        </Badge>
-                      </div>
-                      
-                      {/* Slider */}
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm text-slate-500 w-24">User Share</span>
-                          <div className="flex-1">
-                            <Slider
-                              value={[form.userSharePercent]}
-                              onValueChange={(value) => setForm({ ...form, userSharePercent: value[0] })}
-                              min={50}
-                              max={90}
-                              step={5}
-                              className="cursor-pointer"
+                              {isDone ? '✓' : stepNum}
+                            </div>
+                            <span
+                              className={`text-[9px] mt-1.5 font-medium whitespace-nowrap transition-colors ${
+                                isActive
+                                  ? 'text-slate-900'
+                                  : isDone
+                                    ? 'text-emerald-600'
+                                    : 'text-slate-400'
+                              }`}
+                            >
+                              {label}
+                            </span>
+                          </div>
+                          {i < STEP_LABELS.length - 1 && (
+                            <div
+                              className={`h-0.5 flex-1 mx-2 mt-3.5 transition-colors ${
+                                isDone ? 'bg-emerald-400' : 'bg-slate-200'
+                              }`}
                             />
-                          </div>
-                          <span className="text-lg font-bold text-emerald-600 w-16 text-right">{form.userSharePercent}%</span>
-                        </div>
-                        
-                        {/* Visual breakdown */}
-                        <div className="grid grid-cols-3 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                          <div className="text-center">
-                            <div className="h-2 rounded-full bg-emerald-500 mb-2" style={{ width: `${form.userSharePercent}%`, minWidth: '20%' }} />
-                            <p className="text-xl font-bold text-emerald-600">{form.userSharePercent}%</p>
-                            <p className="text-xs text-slate-500">User Earnings</p>
-                          </div>
-                          <div className="text-center">
-                            <div className="h-2 rounded-full bg-blue-500 mb-2" style={{ width: `${100 - 5 - form.userSharePercent}%`, minWidth: '10%' }} />
-                            <p className="text-xl font-bold text-blue-600">{100 - 5 - form.userSharePercent}%</p>
-                            <p className="text-xs text-slate-500">Your Revenue</p>
-                          </div>
-                          <div className="text-center">
-                            <div className="h-2 rounded-full bg-slate-400 mb-2 w-[20%]" />
-                            <p className="text-xl font-bold text-slate-600">5%</p>
-                            <p className="text-xs text-slate-500">Platform Fee</p>
-                          </div>
-                        </div>
-                        
-                        <p className="text-xs text-slate-500 flex items-center gap-1">
-                          <Info size={12} />
-                          Higher user share attracts more users but reduces your margins
-                        </p>
-                      </div>
-                    </div>
+                          )}
+                        </Fragment>
+                      );
+                    })}
+                  </div>
+                )}
 
-                    {/* Info Box */}
-                    <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                      <p className="text-sm text-blue-800">
-                        <strong>Important:</strong> After creation, you'll receive an API key. 
-                        Copy it immediately - you won't be able to see it again!
-                      </p>
-                    </div>
+                {/* Step content */}
+                <div className="px-8 py-6">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={newAppApiKey ? 'success' : step}
+                      initial={{ opacity: 0, x: 16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -16 }}
+                      transition={{ duration: 0.18 }}
+                    >
+                      {newAppApiKey ? renderSuccess() : renderStepContent()}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
 
-                    {/* Submit */}
-                    <div className="flex gap-3 pt-2">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={() => setShowModal(false)}
+                {/* Navigation */}
+                {!newAppApiKey && (
+                  <div className="flex gap-3 px-8 pb-7">
+                    {step > 1 ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setStep((s) => s - 1)}
                         className="flex-1"
-                        disabled={creating}
+                      >
+                        ← Back
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={closeModal}
+                        className="flex-1"
                       >
                         Cancel
                       </Button>
-                      <Button 
-                        type="submit" 
-                        className="flex-1 bg-slate-900 hover:bg-slate-800 text-white"
+                    )}
+
+                    {step < STEP_LABELS.length ? (
+                      <Button
+                        type="button"
+                        onClick={() => setStep((s) => s + 1)}
+                        disabled={step === 1 && !form.name.trim()}
+                        className="flex-1 bg-slate-900 hover:bg-slate-800 text-white disabled:opacity-40"
+                      >
+                        Next →
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        onClick={handleCreate}
                         disabled={creating}
+                        className="flex-1 bg-slate-900 hover:bg-slate-800 text-white"
                       >
                         {creating ? (
                           <>
-                            <CircleNotch size={16} className="mr-2 animate-spin" />
+                            <CircleNotch size={15} className="mr-2 animate-spin" />
                             Creating...
                           </>
                         ) : (
                           'Create Application'
                         )}
                       </Button>
-                    </div>
-                  </form>
-                </div>
+                    )}
+                  </div>
+                )}
               </motion.div>
             </div>
-          </>
+          </div>,
+          document.body
         )}
-      </AnimatePresence>
     </div>
   );
 }
