@@ -79,6 +79,26 @@ export enum TransactionType {
   BUYER_TOPUP = 'buyer_topup',
   WITHDRAWAL = 'withdrawal',
   WITHDRAWAL_REVERSAL = 'withdrawal_reversal',
+  PACKAGE_SALE = 'package_sale',
+}
+
+/**
+ * Status lifecycle for `data_packages` (Phase: marketplace pivot).
+ *
+ *   pending     – row created, evaluator not yet run
+ *   evaluating  – LLM call in flight
+ *   certified   – passed AI audit, listed in marketplace
+ *   rejected    – failed AI audit, hidden from marketplace
+ *   sold        – at least one buyer purchased (advisory; row stays listed)
+ *   delisted    – owner / admin removed from marketplace
+ */
+export enum PackageStatus {
+  PENDING = 'pending',
+  EVALUATING = 'evaluating',
+  CERTIFIED = 'certified',
+  REJECTED = 'rejected',
+  SOLD = 'sold',
+  DELISTED = 'delisted',
 }
 
 export enum TransactionStatus {

@@ -40,8 +40,11 @@ export interface OtpVerifyResult extends AuthResponseDto {
 
 const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const OTP_MAX_ATTEMPTS = 5;
-const ACCESS_TOKEN_TTL = '15m';
-const REFRESH_TOKEN_TTL = '30d';
+// MVP: long-lived tokens so the user is not asked to re-login on refresh.
+// The 15min/30day split caused a redirect loop when the cookie expired but
+// localStorage still claimed the user was authed.
+const ACCESS_TOKEN_TTL = '30d';
+const REFRESH_TOKEN_TTL = '90d';
 
 @Injectable()
 export class AuthService {

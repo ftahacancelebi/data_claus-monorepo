@@ -32,6 +32,7 @@ import { WebhookModule } from './modules/webhook/webhook.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuditInterceptor } from './modules/audit/audit.interceptor';
 import { DsarModule } from './modules/dsar/dsar.module';
+import { DataPackagesModule } from './modules/data-packages/data-packages.module';
 import { CryptoModule } from './common/crypto';
 
 // Entities
@@ -51,6 +52,10 @@ import {
   WebhookDelivery,
 } from './modules/webhook/entities';
 import { AuditLog } from './modules/audit/entities/audit-log.entity';
+import {
+  DataPackage,
+  PackagePurchase,
+} from './modules/data-packages/entities';
 
 @Module({
   imports: [
@@ -87,6 +92,8 @@ import { AuditLog } from './modules/audit/entities/audit-log.entity';
           WebhookSecret,
           WebhookDelivery,
           AuditLog,
+          DataPackage,
+          PackagePurchase,
         ],
         synchronize: configService.get<boolean>('database.synchronize'),
         logging: configService.get<boolean>('database.logging'),
@@ -131,6 +138,7 @@ import { AuditLog } from './modules/audit/entities/audit-log.entity';
     WebhookModule,
     AuditModule,
     DsarModule,
+    DataPackagesModule,
   ],
   controllers: [AppController],
   providers: [

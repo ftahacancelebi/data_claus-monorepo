@@ -43,7 +43,11 @@ import { Public, CurrentUser, CurrentUserData } from '../../common/decorators';
  * themselves; the cookie unlocks server-side route gating in the web app.
  */
 const SESSION_COOKIE_NAME = 'dc_session';
-const SESSION_COOKIE_MAX_AGE_MS = 15 * 60 * 1000; // matches access token TTL
+// 30 days — kept in sync with the JWT access-token TTL in auth.service.ts.
+// Anything shorter creates a window where the cookie expires but the
+// frontend localStorage token is still valid, which produces the
+// middleware ↔ login-page redirect loop.
+const SESSION_COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
 function setSessionCookie(res: Response, token: string) {
   res.cookie(SESSION_COOKIE_NAME, token, {
