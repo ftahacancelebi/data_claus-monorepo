@@ -1,4 +1,4 @@
-import type { Row, SchemaJson } from './types';
+import type { Row, SchemaJson, ClaimedMetrics } from './types';
 import { PackagerError } from './packager-errors';
 
 const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/;
@@ -85,4 +85,65 @@ export function pickSampleRows(rows: Row[], n = 8): Row[] {
     indexes.add(Math.floor(rand() * rows.length));
   }
   return [...indexes].sort((a, b) => a - b).map((i) => stripUndefined(rows[i]));
+}
+
+const USER_FIELD_FALLBACKS = ['user_id', 'userId', 'external_user_id', 'externalUserId'] as const;
+const TIMESTAMP_FIELD_FALLBACKS = ['timestamp', 'created_at', 'createdAt', 'ts', 'date'] as const;
+
+function findField(rows: Row[], candidates: readonly string[]): string | undefined {
+  for (const cand of candidates) {
+    if (rows.some((r) => r[cand] !== undefined && r[cand] !== null)) return cand;
+  }
+  return undefined;
+}
+
+function toIsoDate(value: unknown): string | null {
+  if (typeof value !== 'string' && !(value instanceof Date)) return null;
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+}
+
+export function computeClaimedMetrics(
+  rows: Row[],
+  opts: { userField?: string; timestampField?: string } = {},
+): ClaimedMetrics {
+  const userField = opts.userField ?? findField(rows, USER_FIELD_FALLBACKS);
+  if (!userField) {
+    throw new PackagerError(
+      'VALIDATION',
+      `cannot find user field; tried [${USER_FIELD_FALLBACKS.join(', ')}]. Pass userField explicitly.`,
+    );
+  }
+  const tsField = opts.timestampField ?? findField(rows, TIMESTAMP_FIELD_FALLBACKS);
+  if (!tsField) {
+    throw new PackagerError(
+      'VALIDATION',
+      `cannot find timestamp field; tried [${TIMESTAMP_FIELD_FALLBACKS.join(', ')}]. Pass timestampField explicitly.`,
+    );
+  }
+
+  const users = new Set<string>();
+  const dates: string[] = [];
+  for (const row of rows) {
+    const u = row[userField];
+    if (u !== undefined && u !== null) users.add(String(u));
+    const iso = toIsoDate(row[tsField]);
+    if (iso) dates.push(iso);
+  }
+
+  if (dates.length === 0) {
+    throw new PackagerError(
+      'VALIDATION',
+      `field "${tsField}" had no parseable timestamps across ${rows.length} rows`,
+    );
+  }
+
+  dates.sort();
+  return {
+    row_count: rows.length,
+    unique_users: users.size,
+    date_range_start: dates[0],
+    date_range_end: dates[dates.length - 1],
+  };
 }

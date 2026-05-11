@@ -1,4 +1,4 @@
-import { inferSchema, pickSampleRows } from '../src/packager-helpers';
+import { inferSchema, pickSampleRows, computeClaimedMetrics } from '../src/packager-helpers';
 import { PackagerError } from '../src/packager-errors';
 
 describe('inferSchema', () => {
@@ -104,5 +104,93 @@ describe('pickSampleRows', () => {
     for (const row of out) {
       expect(Object.prototype.hasOwnProperty.call(row, 'b') ? row.b : 'missing').not.toBe(undefined);
     }
+  });
+});
+
+describe('computeClaimedMetrics', () => {
+  const rows = [
+    { user_id: 'u1', timestamp: '2025-05-01T10:00:00Z' },
+    { user_id: 'u2', timestamp: '2025-05-03T11:00:00Z' },
+    { user_id: 'u1', timestamp: '2025-05-05T12:00:00Z' },
+    { user_id: 'u3', timestamp: '2025-05-08T13:00:00Z' },
+  ];
+
+  it('computes row_count and unique_users', () => {
+    const out = computeClaimedMetrics(rows);
+    expect(out.row_count).toBe(4);
+    expect(out.unique_users).toBe(3);
+  });
+
+  it('computes ISO date range from timestamp field', () => {
+    const out = computeClaimedMetrics(rows);
+    expect(out.date_range_start).toBe('2025-05-01');
+    expect(out.date_range_end).toBe('2025-05-08');
+  });
+
+  it('falls back through user-field aliases (userId)', () => {
+    const out = computeClaimedMetrics([
+      { userId: 'a', timestamp: '2025-05-01' },
+      { userId: 'b', timestamp: '2025-05-02' },
+      { userId: 'a', timestamp: '2025-05-03' },
+    ]);
+    expect(out.unique_users).toBe(2);
+  });
+
+  it('falls back through timestamp-field aliases (created_at)', () => {
+    const out = computeClaimedMetrics([
+      { user_id: 'a', created_at: '2025-05-01' },
+      { user_id: 'b', created_at: '2025-05-02' },
+    ]);
+    expect(out.date_range_start).toBe('2025-05-01');
+    expect(out.date_range_end).toBe('2025-05-02');
+  });
+
+  it('uses explicit options over heuristics', () => {
+    const out = computeClaimedMetrics(
+      [
+        { account: 'a', ts: '2025-05-01' },
+        { account: 'b', ts: '2025-05-02' },
+      ],
+      { userField: 'account', timestampField: 'ts' },
+    );
+    expect(out.unique_users).toBe(2);
+    expect(out.date_range_start).toBe('2025-05-01');
+  });
+
+  it('throws PackagerError VALIDATION when no user field is found', () => {
+    expect(() =>
+      computeClaimedMetrics([
+        { something: 'x', timestamp: '2025-05-01' },
+        { something: 'y', timestamp: '2025-05-02' },
+      ]),
+    ).toThrow(PackagerError);
+  });
+
+  it('throws PackagerError VALIDATION when no timestamp field is found', () => {
+    expect(() =>
+      computeClaimedMetrics([
+        { user_id: 'a', payload: {} },
+        { user_id: 'b', payload: {} },
+      ]),
+    ).toThrow(PackagerError);
+  });
+
+  it('skips rows whose timestamp does not parse', () => {
+    const out = computeClaimedMetrics([
+      { user_id: 'a', timestamp: 'not-a-date' },
+      { user_id: 'b', timestamp: '2025-05-02' },
+      { user_id: 'c', timestamp: '2025-05-04' },
+    ]);
+    expect(out.date_range_start).toBe('2025-05-02');
+    expect(out.date_range_end).toBe('2025-05-04');
+  });
+
+  it('throws PackagerError VALIDATION when all timestamps are invalid', () => {
+    expect(() =>
+      computeClaimedMetrics([
+        { user_id: 'a', timestamp: 'nope' },
+        { user_id: 'b', timestamp: 'nope' },
+      ]),
+    ).toThrow(PackagerError);
   });
 });
