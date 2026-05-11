@@ -68,6 +68,22 @@ import {
   getAdminUsers,
   getLedgerEntries,
   getAdminHealth,
+  // packages
+  listPackages,
+  listMyPackages,
+  listMyPurchases,
+  listAllPackagesAdmin,
+  getPackage,
+  createPackage,
+  purchasePackage,
+  reevaluatePackage,
+  delistPackage,
+  type DataPackage,
+  type PackagePurchaseWithPackage,
+  type PackageListFilters,
+  type CreatePackageInput,
+  type CreatePackageResponse,
+  type PurchaseResponse,
   // types
   type EarningsByApp,
   type QualityHistoryPoint,
@@ -563,5 +579,130 @@ export function useAdminHealth(
     refetchInterval: 2_000,
     refetchIntervalInBackground: false,
     ...options,
+  });
+}
+
+// =============================================================================
+// DATA PACKAGES (Marketplace pivot)
+// =============================================================================
+
+interface PackageListResult {
+  data: DataPackage[];
+  meta: { total: number; page: number; limit: number };
+}
+
+export function usePackages(
+  filters?: PackageListFilters,
+  options?: Omit<UseQueryOptions<PackageListResult>, 'queryKey' | 'queryFn'>,
+) {
+  return useQuery({
+    queryKey: queryKeys.packages.list(filters as Record<string, unknown> | undefined),
+    queryFn: () => listPackages(filters) as Promise<PackageListResult>,
+    ...options,
+  });
+}
+
+export function useMyPackages(
+  options?: Omit<UseQueryOptions<DataPackage[]>, 'queryKey' | 'queryFn'>,
+) {
+  return useQuery({
+    queryKey: queryKeys.packages.mine(),
+    queryFn: listMyPackages,
+    ...options,
+  });
+}
+
+/**
+ * Polled detail view. While a package is in `evaluating`, React Query refetches
+ * every 2 s so the page flips to `certified` / `rejected` without user action.
+ */
+export function usePackage(
+  id: string,
+  options?: Omit<UseQueryOptions<DataPackage>, 'queryKey' | 'queryFn'>,
+) {
+  return useQuery({
+    queryKey: queryKeys.packages.detail(id),
+    queryFn: () => getPackage(id),
+    enabled: !!id,
+    refetchInterval: (query) => {
+      const pkg = query.state.data as DataPackage | undefined;
+      return pkg && (pkg.status === 'evaluating' || pkg.status === 'pending')
+        ? 2_000
+        : false;
+    },
+    refetchIntervalInBackground: false,
+    ...options,
+  });
+}
+
+export function useMyPurchases(
+  options?: Omit<UseQueryOptions<PackagePurchaseWithPackage[]>, 'queryKey' | 'queryFn'>,
+) {
+  return useQuery({
+    queryKey: queryKeys.purchases.mine(),
+    queryFn: listMyPurchases,
+    ...options,
+  });
+}
+
+export function useAdminAllPackages(
+  options?: Omit<UseQueryOptions<DataPackage[]>, 'queryKey' | 'queryFn'>,
+) {
+  return useQuery({
+    queryKey: queryKeys.packages.adminAll(),
+    queryFn: listAllPackagesAdmin,
+    ...options,
+  });
+}
+
+export function useCreatePackage() {
+  const qc = useQueryClient();
+  return useMutation<CreatePackageResponse, Error, CreatePackageInput>({
+    mutationFn: (input) => createPackage(input),
+    onSuccess: () => {
+      // New row affects my-packages, marketplace listings, and admin all.
+      qc.invalidateQueries({ queryKey: queryKeys.packages.all });
+    },
+  });
+}
+
+export function usePurchasePackage() {
+  const qc = useQueryClient();
+  return useMutation<PurchaseResponse, Error, string>({
+    mutationFn: (packageId) => purchasePackage(packageId),
+    onSuccess: (_data, packageId) => {
+      // Buyer's wallet drained; seller's wallet credited. Touch:
+      // - the purchased package row (status flips to 'sold' after first sale)
+      // - my purchases list
+      // - both wallet caches (buyer ledger + earnings reflect immediately)
+      qc.invalidateQueries({ queryKey: queryKeys.packages.detail(packageId) });
+      qc.invalidateQueries({ queryKey: queryKeys.packages.all });
+      qc.invalidateQueries({ queryKey: queryKeys.purchases.all });
+      qc.invalidateQueries({ queryKey: queryKeys.earnings.all });
+      qc.invalidateQueries({ queryKey: queryKeys.ledger.all });
+      qc.invalidateQueries({ queryKey: queryKeys.wallets.all });
+    },
+  });
+}
+
+export function useReevaluatePackage() {
+  const qc = useQueryClient();
+  return useMutation<CreatePackageResponse, Error, string>({
+    mutationFn: (id) => reevaluatePackage(id),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: queryKeys.packages.detail(id) });
+      qc.invalidateQueries({ queryKey: queryKeys.packages.all });
+    },
+  });
+}
+
+export function useDelistPackage() {
+  const qc = useQueryClient();
+  return useMutation<CreatePackageResponse, Error, string>({
+    mutationFn: (id) => delistPackage(id),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: queryKeys.packages.detail(id) });
+      qc.invalidateQueries({ queryKey: queryKeys.packages.all });
+    },
   });
 }

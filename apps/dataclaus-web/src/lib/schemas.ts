@@ -170,9 +170,9 @@ export const ApplicationSchema = z.object({
   id: z.string(),
   developer_id: z.string(),
   name: z.string(),
-  description: z.string(),
-  category: z.string(),
-  website_url: z.string(),
+  description: z.string().optional().default(''),
+  category: z.string().optional().default(''),
+  website_url: z.string().optional(),
   is_active: z.boolean(),
   total_events: z.coerce.number(),
   total_users: z.coerce.number(),
@@ -181,6 +181,7 @@ export const ApplicationSchema = z.object({
   user_share_percent: z.coerce.number(),
   api_key_prefix: z.string().optional(),
   api_key: z.string().optional(),
+  last_event_at: z.string().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -409,3 +410,100 @@ export const WebhookSecretSchema = z.object({
   last_used_at: z.string().optional(),
 });
 export const WebhookSecretListSchema = z.array(WebhookSecretSchema);
+
+// =============================================================================
+// DATA PACKAGES (Marketplace pivot — spec memory-bank/implementation/08-…)
+// =============================================================================
+
+export const PackageStatusSchema = z.enum([
+  'pending',
+  'evaluating',
+  'certified',
+  'rejected',
+  'sold',
+  'delisted',
+]);
+
+export const LlmEvaluationSchema = z.object({
+  trust_score: z.coerce.number().min(0).max(1),
+  summary: z.string(),
+  red_flags: z.array(z.string()),
+  buyer_match: z.array(z.string()),
+  rubric: z.object({
+    schema_integrity: z.coerce.number().min(0).max(1),
+    sample_diversity: z.coerce.number().min(0).max(1),
+    bot_signature_absence: z.coerce.number().min(0).max(1),
+    claim_evidence_alignment: z.coerce.number().min(0).max(1),
+    price_fairness: z.coerce.number().min(0).max(1),
+  }),
+  confidence: z.enum(['high', 'medium', 'low']),
+  verdict: z.enum(['certified', 'rejected']),
+});
+
+export const ClaimedMetricsSchema = z.object({
+  row_count: z.coerce.number(),
+  unique_users: z.coerce.number(),
+  date_range_start: z.string(),
+  date_range_end: z.string(),
+});
+
+// Use renamed timestamp keys to match TypeORM's snake_case → camelCase boundary:
+// the NestJS response wrapper unwraps to entity-shape rows, which DO use camelCase.
+export const DataPackageSchema = z.object({
+  id: z.string(),
+  developerId: z.string(),
+  applicationId: z.string().nullable(),
+  title: z.string(),
+  description: z.string().nullable(),
+  category: z.string(),
+  claimedMetrics: ClaimedMetricsSchema,
+  schemaJson: z.record(z.string(), z.string()),
+  sampleRows: z.array(z.unknown()),
+  price: z.coerce.number(),
+  status: PackageStatusSchema,
+  dataclausScore: z.coerce.number().nullable(),
+  llmEvaluation: LlmEvaluationSchema.nullable(),
+  evaluatedAt: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const DataPackageListMetaSchema = z.object({
+  total: z.coerce.number(),
+  page: z.coerce.number(),
+  limit: z.coerce.number(),
+});
+
+export const DataPackageListResponseSchema = z.object({
+  data: z.array(DataPackageSchema),
+  meta: DataPackageListMetaSchema,
+});
+
+export const PackagePurchaseSchema = z.object({
+  id: z.string(),
+  packageId: z.string(),
+  buyerId: z.string(),
+  amount: z.coerce.number(),
+  ledgerTransactionId: z.string().nullable(),
+  downloadToken: z.string().nullable(),
+  purchasedAt: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const PackagePurchaseWithPackageSchema = PackagePurchaseSchema.extend({
+  package: DataPackageSchema.nullable(),
+});
+
+export const PurchaseResponseSchema = z.object({
+  purchase_id: z.string(),
+  package_id: z.string(),
+  amount: z.coerce.number(),
+  download_token: z.string().nullable(),
+  ledger_transaction_id: z.string().nullable(),
+});
+
+export const CreatePackageResponseSchema = z.object({
+  id: z.string(),
+  status: PackageStatusSchema,
+});

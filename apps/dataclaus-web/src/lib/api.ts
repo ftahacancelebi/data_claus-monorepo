@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 import type {
   Wallet,
   Transaction,
@@ -18,8 +18,11 @@ import {
   ApplicationStatsSchema,
   CampaignListSchema,
   CampaignSchema,
+  CreatePackageResponseSchema,
   DashboardStatsSchema,
   DataClausUserSchema,
+  DataPackageListResponseSchema,
+  DataPackageSchema,
   DeveloperResponseSchema,
   EarningsByAppListSchema,
   EarningsSummarySchema,
@@ -29,8 +32,11 @@ import {
   LedgerTransactionListSchema,
   LinkUserResponseSchema,
   LoginResponseSchema,
+  PackagePurchaseSchema,
+  PackagePurchaseWithPackageSchema,
   PayoutRecordListSchema,
   PayoutRecordSchema,
+  PurchaseResponseSchema,
   QualityHistoryListSchema,
   RevenueShareConfigSchema,
   UserEarningsResponseSchema,
@@ -884,4 +890,108 @@ export const getAdminHealth = () =>
     schema: HealthSummarySchema,
     cache: 'no-store',
   }) as Promise<HealthSummary>;
+
+// =============================================================================
+// DATA PACKAGES (Marketplace pivot)
+// =============================================================================
+
+export type DataPackage = z.infer<typeof DataPackageSchema>;
+export type PackagePurchase = z.infer<typeof PackagePurchaseSchema>;
+export type PackagePurchaseWithPackage = z.infer<
+  typeof PackagePurchaseWithPackageSchema
+>;
+export type PurchaseResponse = z.infer<typeof PurchaseResponseSchema>;
+export type CreatePackageResponse = z.infer<typeof CreatePackageResponseSchema>;
+
+export interface PackageListFilters {
+  category?: string;
+  min_score?: number;
+  max_price?: number;
+  page?: number;
+  limit?: number;
+}
+
+export interface CreatePackageInput {
+  title: string;
+  category: string;
+  description?: string;
+  claimed_metrics: {
+    row_count: number;
+    unique_users: number;
+    date_range_start: string;
+    date_range_end: string;
+  };
+  schema_json: Record<string, string>;
+  sample_rows: Record<string, unknown>[];
+  price: number;
+  application_id?: string;
+}
+
+function buildPackagesQuery(filters?: PackageListFilters): string {
+  if (!filters) return '';
+  const qs = new URLSearchParams();
+  if (filters.category) qs.set('category', filters.category);
+  if (typeof filters.min_score === 'number')
+    qs.set('min_score', String(filters.min_score));
+  if (typeof filters.max_price === 'number')
+    qs.set('max_price', String(filters.max_price));
+  if (filters.page) qs.set('page', String(filters.page));
+  if (filters.limit) qs.set('limit', String(filters.limit));
+  const s = qs.toString();
+  return s ? `?${s}` : '';
+}
+
+export const listPackages = (filters?: PackageListFilters) =>
+  request(`/v1/packages${buildPackagesQuery(filters)}`, {
+    schema: DataPackageListResponseSchema,
+  });
+
+export const getPackage = (id: string) =>
+  request(`/v1/packages/${id}`, {
+    schema: DataPackageSchema,
+  });
+
+export const listMyPackages = () =>
+  // Endpoint returns a bare array (no list-meta), so we wrap with z.array.
+  request(`/v1/packages/mine`, {
+    schema: z.array(DataPackageSchema),
+  });
+
+export const listMyPurchases = () =>
+  request(`/v1/packages/purchases`, {
+    schema: z.array(PackagePurchaseWithPackageSchema),
+  });
+
+export const listAllPackagesAdmin = () =>
+  request(`/v1/packages/admin/all`, {
+    schema: z.array(DataPackageSchema),
+  });
+
+export const createPackage = (input: CreatePackageInput) =>
+  request(`/v1/packages`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+    schema: CreatePackageResponseSchema,
+  });
+
+export const purchasePackage = (id: string) =>
+  request(`/v1/packages/${id}/purchase`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+    schema: PurchaseResponseSchema,
+  });
+
+export const reevaluatePackage = (id: string) =>
+  request(`/v1/packages/${id}/reevaluate`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+    schema: CreatePackageResponseSchema,
+  });
+
+export const delistPackage = (id: string) =>
+  request(`/v1/packages/${id}/delist`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+    schema: CreatePackageResponseSchema,
+  });
 

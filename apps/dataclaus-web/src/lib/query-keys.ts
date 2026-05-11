@@ -75,4 +75,16 @@ export const queryKeys = {
     health: () => [...queryKeys.admin.all, 'health'] as const,
     ledger: () => [...queryKeys.admin.all, 'ledger'] as const,
   },
+  packages: {
+    all: ['packages'] as const,
+    list: (filters?: Record<string, unknown>) =>
+      [...queryKeys.packages.all, 'list', filters ?? {}] as const,
+    mine: () => [...queryKeys.packages.all, 'mine'] as const,
+    detail: (id: string) => [...queryKeys.packages.all, 'detail', id] as const,
+    adminAll: () => [...queryKeys.packages.all, 'admin'] as const,
+  },
+  purchases: {
+    all: ['purchases'] as const,
+    mine: () => [...queryKeys.purchases.all, 'mine'] as const,
+  },
 } as const;
