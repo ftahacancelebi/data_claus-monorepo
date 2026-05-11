@@ -221,3 +221,67 @@ describe('DataClausPackager.login', () => {
     ).rejects.toMatchObject({ code: 'AUTH' });
   });
 });
+
+describe('RecurringExporter', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('expands {start} and {end} placeholders in the title', async () => {
+    const fetchMock = mockFetchOnce({
+      ok: true,
+      status: 201,
+      body: { data: { id: 'pkg_rec', status: 'evaluating' } },
+    });
+    const packager = new DataClausPackager({ apiUrl: 'http://api.test', authToken: 't' });
+    const exporter = packager.recurring({
+      category: 'fitness',
+      basePrice: 49.99,
+      titleTemplate: 'Workouts — Week of {start} to {end}',
+    });
+    const rows = [
+      { user_id: 'a', timestamp: '2025-05-01' },
+      { user_id: 'b', timestamp: '2025-05-03' },
+      { user_id: 'c', timestamp: '2025-05-05' },
+      { user_id: 'a', timestamp: '2025-05-07' },
+      { user_id: 'd', timestamp: '2025-05-08' },
+    ];
+    await exporter.publish(rows);
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    const body = JSON.parse(init.body as string);
+    expect(body.title).toBe('Workouts — Week of 2025-05-01 to 2025-05-08');
+    expect(body.price).toBe(49.99);
+    expect(body.category).toBe('fitness');
+  });
+
+  it('passes optional description and applicationId through', async () => {
+    const fetchMock = mockFetchOnce({
+      ok: true,
+      status: 201,
+      body: { data: { id: 'pkg_rec2', status: 'evaluating' } },
+    });
+    const packager = new DataClausPackager({ apiUrl: 'http://api.test', authToken: 't' });
+    const exporter = packager.recurring({
+      category: 'fitness',
+      basePrice: 19,
+      titleTemplate: 'Static title',
+      description: 'A description',
+      applicationId: 'app_123',
+      userField: 'account',
+      timestampField: 'ts',
+    });
+    const rows = [
+      { account: 'a', ts: '2025-05-01' },
+      { account: 'b', ts: '2025-05-02' },
+      { account: 'a', ts: '2025-05-03' },
+      { account: 'c', ts: '2025-05-04' },
+      { account: 'd', ts: '2025-05-05' },
+    ];
+    await exporter.publish(rows);
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    const body = JSON.parse(init.body as string);
+    expect(body.description).toBe('A description');
+    expect(body.application_id).toBe('app_123');
+    expect(body.claimed_metrics.unique_users).toBe(4);
+  });
+});

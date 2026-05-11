@@ -151,4 +151,52 @@ export class DataClausPackager {
     }
     return new DataClausPackager({ apiUrl: base, authToken: data.accessToken });
   }
+
+  recurring(template: RecurringTemplate): RecurringExporter {
+    if (!template.titleTemplate) {
+      throw new PackagerError('VALIDATION', 'titleTemplate is required');
+    }
+    return new RecurringExporter(this, template);
+  }
+}
+
+export interface RecurringTemplate {
+  category: string;
+  basePrice: number;
+  titleTemplate: string;
+  description?: string;
+  applicationId?: string;
+  userField?: string;
+  timestampField?: string;
+}
+
+export class RecurringExporter {
+  constructor(
+    private readonly packager: DataClausPackager,
+    private readonly template: RecurringTemplate,
+  ) {}
+
+  async publish(rows: Row[]): Promise<CreatePackageResult> {
+    // Compute metrics first so we can plug date_range into the title template.
+    const claimedMetrics = computeClaimedMetrics(rows, {
+      userField: this.template.userField,
+      timestampField: this.template.timestampField,
+    });
+    const title = this.template.titleTemplate
+      .replace('{start}', claimedMetrics.date_range_start)
+      .replace('{end}', claimedMetrics.date_range_end);
+
+    return this.packager.create({
+      title,
+      category: this.template.category,
+      description: this.template.description,
+      rows,
+      price: this.template.basePrice,
+      applicationId: this.template.applicationId,
+      userField: this.template.userField,
+      timestampField: this.template.timestampField,
+      // Skip schema/metrics overrides — `create()` will infer / compute.
+      claimedMetrics,
+    });
+  }
 }
