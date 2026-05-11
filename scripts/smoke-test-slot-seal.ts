@@ -25,9 +25,34 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 const API_BASE = process.env.API_BASE ?? 'http://localhost:3000';
-const APP_ID =
-  process.env.DEMO_APP_ID ?? 'fd6036a9-d4f4-448a-9712-2dc1ea429903';
 const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? 'demo1234';
+
+const UUID_RE =
+  /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+function readJuryFile(): string | null {
+  try {
+    return readFileSync(join(__dirname, '..', 'JURY_LOGIN.md'), 'utf8');
+  } catch {
+    return null;
+  }
+}
+
+function readDemoAppId(): string {
+  if (process.env.DEMO_APP_ID) return process.env.DEMO_APP_ID;
+  const md = readJuryFile();
+  if (md) {
+    // Look for the Applications section first to avoid matching a user UUID.
+    const section = md.split(/^## Applications/im)[1];
+    const match = (section ?? md).match(UUID_RE);
+    if (match) return match[0];
+  }
+  throw new Error(
+    'DEMO_APP_ID not set and no app UUID found in JURY_LOGIN.md — run `pnpm run demo:seed` first.',
+  );
+}
+
+const APP_ID = readDemoAppId();
 
 type LoginResponse = {
   accessToken: string;
@@ -77,6 +102,17 @@ async function fetchJson<T>(
     body = text ? JSON.parse(text) : {};
   } catch {
     body = { error: text };
+  }
+  // NestJS ResponseInterceptor wraps successful payloads as { data, statusCode, message }.
+  // Errors stay flat ({ statusCode, message, error }), so only unwrap on success.
+  if (
+    res.ok &&
+    body &&
+    typeof body === 'object' &&
+    'data' in (body as Record<string, unknown>) &&
+    (body as Record<string, unknown>).data !== undefined
+  ) {
+    body = (body as Record<string, unknown>).data;
   }
   return { ok: res.ok, status: res.status, body: body as T };
 }

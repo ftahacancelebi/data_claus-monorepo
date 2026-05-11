@@ -5,6 +5,14 @@ dist
 tmp
 /out-tsc
 
+# runtime logs (api.log / web.log / tiktok-be.log)
+logs/
+
+# secrets — never commit
+.env
+.env.local
+.env.*.local
+
 # dependencies
 node_modules
 
