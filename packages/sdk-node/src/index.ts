@@ -297,5 +297,33 @@ export {
   type TopEarner,
 } from './auth';
 
+// Data Packages
+export {
+  DataClausPackager,
+  RecurringExporter,
+  type PackagerConfig,
+  type CreatePackageInput,
+  type CreatePackageResult,
+  type RecurringTemplate,
+} from './packager';
+
+export {
+  inferSchema,
+  pickSampleRows,
+  computeClaimedMetrics,
+} from './packager-helpers';
+
+export {
+  PackagerError,
+  type PackagerErrorCode,
+} from './packager-errors';
+
+export type {
+  ClaimedMetrics,
+  PackageStatus,
+  SchemaJson,
+  Row,
+} from './types';
+
 // Default export
 export default DataClausClient;
