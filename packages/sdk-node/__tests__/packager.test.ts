@@ -165,3 +165,59 @@ describe('DataClausPackager.create — error paths', () => {
     ).rejects.toMatchObject({ code: 'NETWORK' });
   });
 });
+
+describe('DataClausPackager.login', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('exchanges email/password for a JWT and returns a usable Packager', async () => {
+    const fetchMock = jest.fn(async (input: FetchInput, init?: FetchInit) => {
+      const url = String(input);
+      if (url.endsWith('/auth/login')) {
+        return {
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          json: async () => ({
+            data: { accessToken: 'minted-jwt', user: { id: 'u1', role: 'developer' } },
+          }),
+        };
+      }
+      // Second call: POST /v1/packages with the new token
+      const headers = (init?.headers ?? {}) as Record<string, string>;
+      expect(headers.Authorization).toBe('Bearer minted-jwt');
+      return {
+        ok: true,
+        status: 201,
+        statusText: 'Created',
+        json: async () => ({ data: { id: 'pkg_1', status: 'evaluating' } }),
+      };
+    }) as unknown as typeof fetch;
+    (globalThis as { fetch: typeof fetch }).fetch = fetchMock;
+
+    const packager = await DataClausPackager.login({
+      apiUrl: 'http://api.test',
+      email: 'dev@example.com',
+      password: 'secret',
+    });
+
+    const rows = Array.from({ length: 8 }, (_, i) => ({
+      user_id: `u${i}`,
+      timestamp: '2025-05-01',
+    }));
+    const res = await packager.create({ title: 't', category: 'fitness', rows, price: 9.99 });
+    expect(res.id).toBe('pkg_1');
+  });
+
+  it('throws AUTH when login returns non-2xx', async () => {
+    mockFetchOnce({ ok: false, status: 401, body: { message: 'invalid creds' } });
+    await expect(
+      DataClausPackager.login({
+        apiUrl: 'http://api.test',
+        email: 'x@y.z',
+        password: 'wrong',
+      }),
+    ).rejects.toMatchObject({ code: 'AUTH' });
+  });
+});

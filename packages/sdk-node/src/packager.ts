@@ -121,4 +121,34 @@ export class DataClausPackager {
     const data = unwrap<CreatePackageResult>(json);
     return { id: data.id, status: data.status };
   }
+
+  static async login(opts: {
+    apiUrl: string;
+    email: string;
+    password: string;
+  }): Promise<DataClausPackager> {
+    const base = opts.apiUrl.replace(/\/+$/, '');
+    let response: Response;
+    try {
+      response = await fetch(`${base}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: opts.email, password: opts.password }),
+      });
+    } catch (err) {
+      throw new PackagerError('NETWORK', `network error during login: ${(err as Error).message}`, err);
+    }
+    const json = (await response.json().catch(() => null)) as unknown;
+    if (!response.ok) {
+      throw new PackagerError(
+        'AUTH',
+        `login failed (${response.status}): ${(json as ApiError)?.message ?? response.statusText}`,
+      );
+    }
+    const data = unwrap<{ accessToken: string }>(json);
+    if (!data?.accessToken) {
+      throw new PackagerError('AUTH', 'login response did not contain accessToken');
+    }
+    return new DataClausPackager({ apiUrl: base, authToken: data.accessToken });
+  }
 }
