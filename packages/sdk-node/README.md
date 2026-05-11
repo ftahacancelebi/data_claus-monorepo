@@ -102,6 +102,96 @@ console.log('Your share:', summary.totalDevShare);
 console.log('Average eCPM:', summary.averageEcpm);
 ```
 
+## Data Packages (Marketplace)
+
+Sell behavioral data your app collected. The SDK turns a `rows[]` array
+(from your own database) into a marketplace package, auto-filling the
+schema, sample rows, and claimed metrics that the DataClaus AI evaluator
+needs.
+
+### One-shot (selective) usage
+
+```typescript
+import { DataClausPackager } from '@dataclaus/sdk-node';
+
+const packager = new DataClausPackager({
+  apiUrl: process.env.DATACLAUS_API_URL ?? 'http://localhost:3000',
+  authToken: process.env.DATACLAUS_JWT!,
+});
+
+// 1. You select the rows + fields with your own SQL.
+const rows = await db.query(`
+  SELECT user_id, workout_type, duration_min, calories, timestamp
+  FROM workouts
+  WHERE timestamp >= NOW() - INTERVAL '7 days'
+`);
+
+// 2. SDK handles the rest.
+const result = await packager.create({
+  title: 'Premium Workout Data — Week of May 5',
+  category: 'fitness',
+  description: 'High-quality session data from active iOS users.',
+  rows,
+  price: 49.99,
+});
+
+console.log(result); // { id: 'pkg_...', status: 'evaluating' }
+```
+
+`schema_json`, the 8-row sample, and `claimed_metrics` are inferred from
+`rows`. Pass `schemaJson`, `claimedMetrics`, `userField`, or
+`timestampField` to override the defaults.
+
+### Recurring (auto-export) usage
+
+```typescript
+const exporter = packager.recurring({
+  category: 'fitness',
+  basePrice: 49.99,
+  titleTemplate: 'Workout Data — Week of {start}',
+  description: 'Auto-published weekly batch.',
+});
+
+// In your weekly cron:
+const rows = await db.query(/* last 7 days */);
+await exporter.publish(rows);
+// → "Workout Data — Week of 2026-05-04" auto-named from rows.
+```
+
+### Demo-friendly login
+
+For demo scripts where the JWT isn't pre-provisioned:
+
+```typescript
+const packager = await DataClausPackager.login({
+  apiUrl: 'http://localhost:3000',
+  email: 'developer@fitandmove.io',
+  password: process.env.DATACLAUS_PASSWORD!,
+});
+```
+
+### Error handling
+
+All packager errors throw a typed `PackagerError`:
+
+```typescript
+import { PackagerError } from '@dataclaus/sdk-node';
+
+try {
+  await packager.create({ /* ... */ });
+} catch (err) {
+  if (err instanceof PackagerError) {
+    switch (err.code) {
+      case 'AUTH':       // 401 or login failure
+      case 'VALIDATION': // rows < 5, missing user/timestamp field, etc.
+      case 'API':        // 4xx/5xx from the API
+      case 'NETWORK':    // fetch threw (server down, DNS, etc.)
+    }
+  }
+  throw err;
+}
+```
+
 ## API Reference
 
 ### `DataClausAuth`
