@@ -1,0 +1,8731 @@
+[
+  {
+    "user_id": "u_5u",
+    "workout_type": "swim",
+    "duration_min": 39,
+    "calories": 159,
+    "timestamp": "2026-04-19T21:17:04.030Z"
+  },
+  {
+    "user_id": "u_7n",
+    "workout_type": "yoga",
+    "duration_min": 78,
+    "calories": 458,
+    "timestamp": "2026-05-10T08:10:08.311Z"
+  },
+  {
+    "user_id": "u_26",
+    "workout_type": "yoga",
+    "duration_min": 80,
+    "calories": 481,
+    "timestamp": "2026-04-18T01:30:45.852Z"
+  },
+  {
+    "user_id": "u_3i",
+    "workout_type": "yoga",
+    "duration_min": 88,
+    "calories": 600,
+    "timestamp": "2026-05-08T03:42:48.644Z"
+  },
+  {
+    "user_id": "u_58",
+    "workout_type": "yoga",
+    "duration_min": 48,
+    "calories": 384,
+    "timestamp": "2026-05-04T08:56:20.413Z"
+  },
+  {
+    "user_id": "u_k",
+    "workout_type": "yoga",
+    "duration_min": 21,
+    "calories": 84,
+    "timestamp": "2026-05-01T18:15:12.837Z"
+  },
+  {
+    "user_id": "u_4k",
+    "workout_type": "yoga",
+    "duration_min": 25,
+    "calories": 156,
+    "timestamp": "2026-05-04T21:17:46.607Z"
+  },
+  {
+    "user_id": "u_l",
+    "workout_type": "run",
+    "duration_min": 33,
+    "calories": 327,
+    "timestamp": "2026-05-03T05:56:09.711Z"
+  },
+  {
+    "user_id": "u_2",
+    "workout_type": "run",
+    "duration_min": 35,
+    "calories": 308,
+    "timestamp": "2026-04-29T14:32:45.324Z"
+  },
+  {
+    "user_id": "u_2m",
+    "workout_type": "cycle",
+    "duration_min": 44,
+    "calories": 226,
+    "timestamp": "2026-05-01T17:49:52.403Z"
+  },
+  {
+    "user_id": "u_2l",
+    "workout_type": "lift",
+    "duration_min": 34,
+    "calories": 256,
+    "timestamp": "2026-04-15T23:43:14.433Z"
+  },
+  {
+    "user_id": "u_53",
+    "workout_type": "run",
+    "duration_min": 29,
+    "calories": 130,
+    "timestamp": "2026-04-15T21:55:57.414Z"
+  },
+  {
+    "user_id": "u_7o",
+    "workout_type": "yoga",
+    "duration_min": 32,
+    "calories": 186,
+    "timestamp": "2026-05-04T06:47:29.815Z"
+  },
+  {
+    "user_id": "u_s",
+    "workout_type": "lift",
+    "duration_min": 46,
+    "calories": 234,
+    "timestamp": "2026-05-09T19:17:04.307Z"
+  },
+  {
+    "user_id": "u_4r",
+    "workout_type": "swim",
+    "duration_min": 70,
+    "calories": 640,
+    "timestamp": "2026-05-06T20:51:06.452Z"
+  },
+  {
+    "user_id": "u_36",
+    "workout_type": "run",
+    "duration_min": 15,
+    "calories": 110,
+    "timestamp": "2026-04-26T02:04:06.096Z"
+  },
+  {
+    "user_id": "u_m",
+    "workout_type": "run",
+    "duration_min": 33,
+    "calories": 203,
+    "timestamp": "2026-05-06T05:54:01.017Z"
+  },
+  {
+    "user_id": "u_30",
+    "workout_type": "lift",
+    "duration_min": 28,
+    "calories": 238,
+    "timestamp": "2026-05-03T18:11:29.724Z"
+  },
+  {
+    "user_id": "u_6a",
+    "workout_type": "swim",
+    "duration_min": 17,
+    "calories": 128,
+    "timestamp": "2026-04-17T12:43:02.775Z"
+  },
+  {
+    "user_id": "u_84",
+    "workout_type": "run",
+    "duration_min": 30,
+    "calories": 146,
+    "timestamp": "2026-04-22T01:51:49.872Z"
+  },
+  {
+    "user_id": "u_t",
+    "workout_type": "cycle",
+    "duration_min": 68,
+    "calories": 408,
+    "timestamp": "2026-04-17T14:15:57.999Z"
+  },
+  {
+    "user_id": "u_21",
+    "workout_type": "yoga",
+    "duration_min": 38,
+    "calories": 228,
+    "timestamp": "2026-05-01T08:23:47.439Z"
+  },
+  {
+    "user_id": "u_4b",
+    "workout_type": "cycle",
+    "duration_min": 51,
+    "calories": 339,
+    "timestamp": "2026-05-08T09:59:45.598Z"
+  },
+  {
+    "user_id": "u_21",
+    "workout_type": "lift",
+    "duration_min": 25,
+    "calories": 121,
+    "timestamp": "2026-05-04T15:05:16.727Z"
+  },
+  {
+    "user_id": "u_1s",
+    "workout_type": "swim",
+    "duration_min": 81,
+    "calories": 448,
+    "timestamp": "2026-05-10T23:04:50.848Z"
+  },
+  {
+    "user_id": "u_2s",
+    "workout_type": "run",
+    "duration_min": 33,
+    "calories": 176,
+    "timestamp": "2026-04-21T10:13:26.686Z"
+  },
+  {
+    "user_id": "u_5m",
+    "workout_type": "lift",
+    "duration_min": 64,
+    "calories": 438,
+    "timestamp": "2026-05-03T21:12:52.533Z"
+  },
+  {
+    "user_id": "u_1d",
+    "workout_type": "swim",
+    "duration_min": 85,
+    "calories": 431,
+    "timestamp": "2026-04-17T10:17:33.517Z"
+  },
+  {
+    "user_id": "u_86",
+    "workout_type": "swim",
+    "duration_min": 62,
+    "calories": 574,
+    "timestamp": "2026-05-05T16:36:57.472Z"
+  },
+  {
+    "user_id": "u_70",
+    "workout_type": "cycle",
+    "duration_min": 16,
+    "calories": 120,
+    "timestamp": "2026-04-22T00:01:09.573Z"
+  },
+  {
+    "user_id": "u_4v",
+    "workout_type": "run",
+    "duration_min": 71,
+    "calories": 533,
+    "timestamp": "2026-05-06T18:20:47.074Z"
+  },
+  {
+    "user_id": "u_8e",
+    "workout_type": "yoga",
+    "duration_min": 25,
+    "calories": 145,
+    "timestamp": "2026-04-23T20:12:37.676Z"
+  },
+  {
+    "user_id": "u_6q",
+    "workout_type": "run",
+    "duration_min": 32,
+    "calories": 242,
+    "timestamp": "2026-05-06T16:25:06.862Z"
+  },
+  {
+    "user_id": "u_7o",
+    "workout_type": "lift",
+    "duration_min": 33,
+    "calories": 185,
+    "timestamp": "2026-05-07T04:24:40.591Z"
+  },
+  {
+    "user_id": "u_14",
+    "workout_type": "cycle",
+    "duration_min": 57,
+    "calories": 478,
+    "timestamp": "2026-05-01T13:24:04.000Z"
+  },
+  {
+    "user_id": "u_4b",
+    "workout_type": "cycle",
+    "duration_min": 41,
+    "calories": 252,
+    "timestamp": "2026-04-28T06:21:24.681Z"
+  },
+  {
+    "user_id": "u_4",
+    "workout_type": "lift",
+    "duration_min": 70,
+    "calories": 357,
+    "timestamp": "2026-04-24T21:41:59.503Z"
+  },
+  {
+    "user_id": "u_2c",
+    "workout_type": "swim",
+    "duration_min": 77,
+    "calories": 485,
+    "timestamp": "2026-05-07T18:34:11.377Z"
+  },
+  {
+    "user_id": "u_15",
+    "workout_type": "lift",
+    "duration_min": 44,
+    "calories": 302,
+    "timestamp": "2026-05-12T11:48:02.274Z"
+  },
+  {
+    "user_id": "u_20",
+    "workout_type": "lift",
+    "duration_min": 33,
+    "calories": 225,
+    "timestamp": "2026-05-07T18:37:29.556Z"
+  },
+  {
+    "user_id": "u_e",
+    "workout_type": "lift",
+    "duration_min": 58,
+    "calories": 577,
+    "timestamp": "2026-04-17T01:54:24.892Z"
+  },
+  {
+    "user_id": "u_89",
+    "workout_type": "swim",
+    "duration_min": 53,
+    "calories": 343,
+    "timestamp": "2026-05-04T01:02:00.638Z"
+  },
+  {
+    "user_id": "u_i",
+    "workout_type": "yoga",
+    "duration_min": 71,
+    "calories": 390,
+    "timestamp": "2026-04-25T18:06:47.188Z"
+  },
+  {
+    "user_id": "u_5u",
+    "workout_type": "cycle",
+    "duration_min": 82,
+    "calories": 655,
+    "timestamp": "2026-04-30T02:35:06.531Z"
+  },
+  {
+    "user_id": "u_g",
+    "workout_type": "cycle",
+    "duration_min": 83,
+    "calories": 349,
+    "timestamp": "2026-04-20T10:42:37.148Z"
+  },
+  {
+    "user_id": "u_57",
+    "workout_type": "swim",
+    "duration_min": 85,
+    "calories": 397,
+    "timestamp": "2026-04-24T21:47:00.447Z"
+  },
+  {
+    "user_id": "u_7j",
+    "workout_type": "swim",
+    "duration_min": 41,
+    "calories": 222,
+    "timestamp": "2026-04-26T22:41:39.879Z"
+  },
+  {
+    "user_id": "u_3h",
+    "workout_type": "swim",
+    "duration_min": 86,
+    "calories": 410,
+    "timestamp": "2026-04-20T05:22:04.779Z"
+  },
+  {
+    "user_id": "u_21",
+    "workout_type": "swim",
+    "duration_min": 32,
+    "calories": 276,
+    "timestamp": "2026-04-15T18:24:07.384Z"
+  },
+  {
+    "user_id": "u_5n",
+    "workout_type": "run",
+    "duration_min": 23,
+    "calories": 146,
+    "timestamp": "2026-04-21T22:49:17.873Z"
+  },
+  {
+    "user_id": "u_4f",
+    "workout_type": "yoga",
+    "duration_min": 34,
+    "calories": 216,
+    "timestamp": "2026-05-06T04:07:46.681Z"
+  },
+  {
+    "user_id": "u_18",
+    "workout_type": "yoga",
+    "duration_min": 77,
+    "calories": 458,
+    "timestamp": "2026-04-22T01:40:14.916Z"
+  },
+  {
+    "user_id": "u_7t",
+    "workout_type": "lift",
+    "duration_min": 63,
+    "calories": 567,
+    "timestamp": "2026-04-17T08:29:45.371Z"
+  },
+  {
+    "user_id": "u_8g",
+    "workout_type": "lift",
+    "duration_min": 28,
+    "calories": 238,
+    "timestamp": "2026-04-26T17:17:18.883Z"
+  },
+  {
+    "user_id": "u_h",
+    "workout_type": "run",
+    "duration_min": 82,
+    "calories": 587,
+    "timestamp": "2026-04-16T09:37:40.006Z"
+  },
+  {
+    "user_id": "u_j",
+    "workout_type": "cycle",
+    "duration_min": 75,
+    "calories": 679,
+    "timestamp": "2026-05-06T17:36:01.256Z"
+  },
+  {
+    "user_id": "u_3u",
+    "workout_type": "yoga",
+    "duration_min": 16,
+    "calories": 75,
+    "timestamp": "2026-04-18T04:33:44.705Z"
+  },
+  {
+    "user_id": "u_18",
+    "workout_type": "cycle",
+    "duration_min": 16,
+    "calories": 156,
+    "timestamp": "2026-04-28T21:12:07.838Z"
+  },
+  {
+    "user_id": "u_6l",
+    "workout_type": "run",
+    "duration_min": 17,
+    "calories": 95,
+    "timestamp": "2026-04-22T06:24:31.926Z"
+  },
+  {
+    "user_id": "u_6v",
+    "workout_type": "lift",
+    "duration_min": 44,
+    "calories": 181,
+    "timestamp": "2026-04-27T05:35:36.354Z"
+  },
+  {
+    "user_id": "u_4b",
+    "workout_type": "run",
+    "duration_min": 78,
+    "calories": 614,
+    "timestamp": "2026-05-05T08:26:27.915Z"
+  },
+  {
+    "user_id": "u_8j",
+    "workout_type": "cycle",
+    "duration_min": 50,
+    "calories": 357,
+    "timestamp": "2026-04-19T14:22:07.592Z"
+  },
+  {
+    "user_id": "u_w",
+    "workout_type": "cycle",
+    "duration_min": 32,
+    "calories": 220,
+    "timestamp": "2026-05-04T13:37:31.674Z"
+  },
+  {
+    "user_id": "u_12",
+    "workout_type": "swim",
+    "duration_min": 52,
+    "calories": 232,
+    "timestamp": "2026-04-28T08:49:43.655Z"
+  },
+  {
+    "user_id": "u_3c",
+    "workout_type": "lift",
+    "duration_min": 33,
+    "calories": 212,
+    "timestamp": "2026-05-09T14:41:55.149Z"
+  },
+  {
+    "user_id": "u_2g",
+    "workout_type": "cycle",
+    "duration_min": 35,
+    "calories": 259,
+    "timestamp": "2026-05-01T16:17:11.803Z"
+  },
+  {
+    "user_id": "u_1j",
+    "workout_type": "run",
+    "duration_min": 19,
+    "calories": 126,
+    "timestamp": "2026-04-15T03:42:17.034Z"
+  },
+  {
+    "user_id": "u_76",
+    "workout_type": "swim",
+    "duration_min": 22,
+    "calories": 129,
+    "timestamp": "2026-04-19T03:58:23.065Z"
+  },
+  {
+    "user_id": "u_2g",
+    "workout_type": "swim",
+    "duration_min": 85,
+    "calories": 598,
+    "timestamp": "2026-04-19T05:14:36.012Z"
+  },
+  {
+    "user_id": "u_5k",
+    "workout_type": "yoga",
+    "duration_min": 61,
+    "calories": 484,
+    "timestamp": "2026-05-07T10:25:19.931Z"
+  },
+  {
+    "user_id": "u_y",
+    "workout_type": "run",
+    "duration_min": 75,
+    "calories": 325,
+    "timestamp": "2026-04-25T05:18:35.503Z"
+  },
+  {
+    "user_id": "u_3a",
+    "workout_type": "swim",
+    "duration_min": 88,
+    "calories": 766,
+    "timestamp": "2026-05-07T01:40:21.877Z"
+  },
+  {
+    "user_id": "u_79",
+    "workout_type": "run",
+    "duration_min": 35,
+    "calories": 149,
+    "timestamp": "2026-05-02T18:57:04.096Z"
+  },
+  {
+    "user_id": "u_2y",
+    "workout_type": "yoga",
+    "duration_min": 78,
+    "calories": 615,
+    "timestamp": "2026-04-16T05:37:49.751Z"
+  },
+  {
+    "user_id": "u_32",
+    "workout_type": "yoga",
+    "duration_min": 61,
+    "calories": 443,
+    "timestamp": "2026-04-18T05:35:29.335Z"
+  },
+  {
+    "user_id": "u_3j",
+    "workout_type": "lift",
+    "duration_min": 87,
+    "calories": 778,
+    "timestamp": "2026-04-30T04:06:16.563Z"
+  },
+  {
+    "user_id": "u_4",
+    "workout_type": "cycle",
+    "duration_min": 87,
+    "calories": 446,
+    "timestamp": "2026-04-27T05:04:16.619Z"
+  },
+  {
+    "user_id": "u_3r",
+    "workout_type": "swim",
+    "duration_min": 86,
+    "calories": 786,
+    "timestamp": "2026-05-09T17:43:30.093Z"
+  },
+  {
+    "user_id": "u_59",
+    "workout_type": "run",
+    "duration_min": 80,
+    "calories": 755,
+    "timestamp": "2026-04-29T15:16:21.255Z"
+  },
+  {
+    "user_id": "u_3w",
+    "workout_type": "run",
+    "duration_min": 82,
+    "calories": 686,
+    "timestamp": "2026-05-02T15:30:58.399Z"
+  },
+  {
+    "user_id": "u_79",
+    "workout_type": "lift",
+    "duration_min": 83,
+    "calories": 724,
+    "timestamp": "2026-04-20T00:20:34.224Z"
+  },
+  {
+    "user_id": "u_5z",
+    "workout_type": "swim",
+    "duration_min": 37,
+    "calories": 245,
+    "timestamp": "2026-04-23T12:02:32.354Z"
+  },
+  {
+    "user_id": "u_6l",
+    "workout_type": "swim",
+    "duration_min": 61,
+    "calories": 523,
+    "timestamp": "2026-05-02T06:21:57.533Z"
+  },
+  {
+    "user_id": "u_1u",
+    "workout_type": "swim",
+    "duration_min": 28,
+    "calories": 212,
+    "timestamp": "2026-04-29T06:24:19.778Z"
+  },
+  {
+    "user_id": "u_8f",
+    "workout_type": "swim",
+    "duration_min": 29,
+    "calories": 271,
+    "timestamp": "2026-04-27T01:29:07.552Z"
+  },
+  {
+    "user_id": "u_4o",
+    "workout_type": "run",
+    "duration_min": 64,
+    "calories": 406,
+    "timestamp": "2026-05-01T11:16:42.237Z"
+  },
+  {
+    "user_id": "u_7",
+    "workout_type": "yoga",
+    "duration_min": 87,
+    "calories": 535,
+    "timestamp": "2026-05-03T03:13:24.015Z"
+  },
+  {
+    "user_id": "u_87",
+    "workout_type": "cycle",
+    "duration_min": 78,
+    "calories": 521,
+    "timestamp": "2026-04-27T17:04:08.248Z"
+  },
+  {
+    "user_id": "u_34",
+    "workout_type": "lift",
+    "duration_min": 19,
+    "calories": 163,
+    "timestamp": "2026-04-28T15:53:09.181Z"
+  },
+  {
+    "user_id": "u_8m",
+    "workout_type": "yoga",
+    "duration_min": 78,
+    "calories": 383,
+    "timestamp": "2026-04-22T12:27:47.486Z"
+  },
+  {
+    "user_id": "u_7d",
+    "workout_type": "cycle",
+    "duration_min": 27,
+    "calories": 121,
+    "timestamp": "2026-05-07T10:29:25.835Z"
+  },
+  {
+    "user_id": "u_d",
+    "workout_type": "lift",
+    "duration_min": 47,
+    "calories": 198,
+    "timestamp": "2026-05-07T13:32:57.147Z"
+  },
+  {
+    "user_id": "u_1w",
+    "workout_type": "swim",
+    "duration_min": 62,
+    "calories": 257,
+    "timestamp": "2026-05-02T11:13:06.766Z"
+  },
+  {
+    "user_id": "u_4w",
+    "workout_type": "yoga",
+    "duration_min": 44,
+    "calories": 362,
+    "timestamp": "2026-04-21T06:03:34.293Z"
+  },
+  {
+    "user_id": "u_q",
+    "workout_type": "lift",
+    "duration_min": 18,
+    "calories": 157,
+    "timestamp": "2026-04-28T01:57:25.023Z"
+  },
+  {
+    "user_id": "u_29",
+    "workout_type": "run",
+    "duration_min": 15,
+    "calories": 123,
+    "timestamp": "2026-04-19T03:35:30.989Z"
+  },
+  {
+    "user_id": "u_8h",
+    "workout_type": "lift",
+    "duration_min": 77,
+    "calories": 602,
+    "timestamp": "2026-05-02T02:54:43.570Z"
+  },
+  {
+    "user_id": "u_2i",
+    "workout_type": "run",
+    "duration_min": 63,
+    "calories": 463,
+    "timestamp": "2026-04-16T11:52:48.862Z"
+  },
+  {
+    "user_id": "u_5e",
+    "workout_type": "lift",
+    "duration_min": 88,
+    "calories": 748,
+    "timestamp": "2026-04-18T10:04:35.958Z"
+  },
+  {
+    "user_id": "u_7s",
+    "workout_type": "cycle",
+    "duration_min": 49,
+    "calories": 278,
+    "timestamp": "2026-05-06T14:02:42.535Z"
+  },
+  {
+    "user_id": "u_6x",
+    "workout_type": "run",
+    "duration_min": 83,
+    "calories": 790,
+    "timestamp": "2026-05-10T02:10:39.712Z"
+  },
+  {
+    "user_id": "u_5g",
+    "workout_type": "yoga",
+    "duration_min": 66,
+    "calories": 445,
+    "timestamp": "2026-04-19T15:02:45.119Z"
+  },
+  {
+    "user_id": "u_7i",
+    "workout_type": "cycle",
+    "duration_min": 38,
+    "calories": 339,
+    "timestamp": "2026-05-03T18:25:04.664Z"
+  },
+  {
+    "user_id": "u_5s",
+    "workout_type": "cycle",
+    "duration_min": 28,
+    "calories": 118,
+    "timestamp": "2026-05-02T17:48:34.517Z"
+  },
+  {
+    "user_id": "u_6a",
+    "workout_type": "cycle",
+    "duration_min": 66,
+    "calories": 343,
+    "timestamp": "2026-05-06T12:50:16.596Z"
+  },
+  {
+    "user_id": "u_55",
+    "workout_type": "yoga",
+    "duration_min": 48,
+    "calories": 401,
+    "timestamp": "2026-04-29T11:48:58.103Z"
+  },
+  {
+    "user_id": "u_q",
+    "workout_type": "run",
+    "duration_min": 21,
+    "calories": 104,
+    "timestamp": "2026-05-10T19:14:05.254Z"
+  },
+  {
+    "user_id": "u_1c",
+    "workout_type": "cycle",
+    "duration_min": 57,
+    "calories": 406,
+    "timestamp": "2026-04-18T02:50:48.437Z"
+  },
+  {
+    "user_id": "u_5e",
+    "workout_type": "run",
+    "duration_min": 66,
+    "calories": 572,
+    "timestamp": "2026-05-08T18:31:03.196Z"
+  },
+  {
+    "user_id": "u_6f",
+    "workout_type": "swim",
+    "duration_min": 42,
+    "calories": 188,
+    "timestamp": "2026-04-16T01:48:19.397Z"
+  },
+  {
+    "user_id": "u_3l",
+    "workout_type": "run",
+    "duration_min": 71,
+    "calories": 347,
+    "timestamp": "2026-04-19T09:26:44.324Z"
+  },
+  {
+    "user_id": "u_31",
+    "workout_type": "swim",
+    "duration_min": 17,
+    "calories": 86,
+    "timestamp": "2026-04-16T11:51:37.776Z"
+  },
+  {
+    "user_id": "u_77",
+    "workout_type": "cycle",
+    "duration_min": 81,
+    "calories": 464,
+    "timestamp": "2026-05-08T19:17:08.579Z"
+  },
+  {
+    "user_id": "u_2f",
+    "workout_type": "run",
+    "duration_min": 61,
+    "calories": 430,
+    "timestamp": "2026-05-05T08:21:19.411Z"
+  },
+  {
+    "user_id": "u_6a",
+    "workout_type": "run",
+    "duration_min": 54,
+    "calories": 451,
+    "timestamp": "2026-04-25T23:05:34.749Z"
+  },
+  {
+    "user_id": "u_7k",
+    "workout_type": "swim",
+    "duration_min": 67,
+    "calories": 337,
+    "timestamp": "2026-04-20T22:28:38.099Z"
+  },
+  {
+    "user_id": "u_67",
+    "workout_type": "lift",
+    "duration_min": 21,
+    "calories": 164,
+    "timestamp": "2026-05-06T02:13:02.265Z"
+  },
+  {
+    "user_id": "u_7o",
+    "workout_type": "cycle",
+    "duration_min": 19,
+    "calories": 139,
+    "timestamp": "2026-05-08T12:55:18.207Z"
+  },
+  {
+    "user_id": "u_1m",
+    "workout_type": "lift",
+    "duration_min": 78,
+    "calories": 485,
+    "timestamp": "2026-05-05T09:51:00.181Z"
+  },
+  {
+    "user_id": "u_72",
+    "workout_type": "cycle",
+    "duration_min": 40,
+    "calories": 246,
+    "timestamp": "2026-05-05T16:38:24.683Z"
+  },
+  {
+    "user_id": "u_6d",
+    "workout_type": "cycle",
+    "duration_min": 62,
+    "calories": 282,
+    "timestamp": "2026-04-22T02:26:56.607Z"
+  },
+  {
+    "user_id": "u_1x",
+    "workout_type": "lift",
+    "duration_min": 34,
+    "calories": 163,
+    "timestamp": "2026-04-29T19:14:04.859Z"
+  },
+  {
+    "user_id": "u_8j",
+    "workout_type": "yoga",
+    "duration_min": 89,
+    "calories": 663,
+    "timestamp": "2026-05-02T07:56:01.660Z"
+  },
+  {
+    "user_id": "u_3k",
+    "workout_type": "run",
+    "duration_min": 50,
+    "calories": 366,
+    "timestamp": "2026-04-24T23:20:07.318Z"
+  },
+  {
+    "user_id": "u_g",
+    "workout_type": "cycle",
+    "duration_min": 53,
+    "calories": 292,
+    "timestamp": "2026-04-15T17:33:23.598Z"
+  },
+  {
+    "user_id": "u_6y",
+    "workout_type": "swim",
+    "duration_min": 55,
+    "calories": 366,
+    "timestamp": "2026-04-23T10:19:22.068Z"
+  },
+  {
+    "user_id": "u_7l",
+    "workout_type": "swim",
+    "duration_min": 56,
+    "calories": 472,
+    "timestamp": "2026-05-03T19:01:27.244Z"
+  },
+  {
+    "user_id": "u_6p",
+    "workout_type": "run",
+    "duration_min": 42,
+    "calories": 267,
+    "timestamp": "2026-04-15T18:29:11.461Z"
+  },
+  {
+    "user_id": "u_3v",
+    "workout_type": "swim",
+    "duration_min": 80,
+    "calories": 559,
+    "timestamp": "2026-05-08T05:57:52.372Z"
+  },
+  {
+    "user_id": "u_3u",
+    "workout_type": "cycle",
+    "duration_min": 61,
+    "calories": 445,
+    "timestamp": "2026-04-21T23:47:33.468Z"
+  },
+  {
+    "user_id": "u_7d",
+    "workout_type": "swim",
+    "duration_min": 20,
+    "calories": 186,
+    "timestamp": "2026-04-29T21:22:50.343Z"
+  },
+  {
+    "user_id": "u_2q",
+    "workout_type": "lift",
+    "duration_min": 54,
+    "calories": 251,
+    "timestamp": "2026-04-23T12:46:59.949Z"
+  },
+  {
+    "user_id": "u_7y",
+    "workout_type": "cycle",
+    "duration_min": 36,
+    "calories": 159,
+    "timestamp": "2026-04-26T03:43:03.948Z"
+  },
+  {
+    "user_id": "u_1u",
+    "workout_type": "run",
+    "duration_min": 72,
+    "calories": 615,
+    "timestamp": "2026-05-02T07:41:02.824Z"
+  },
+  {
+    "user_id": "u_5h",
+    "workout_type": "lift",
+    "duration_min": 38,
+    "calories": 185,
+    "timestamp": "2026-04-15T01:05:57.189Z"
+  },
+  {
+    "user_id": "u_4o",
+    "workout_type": "swim",
+    "duration_min": 61,
+    "calories": 608,
+    "timestamp": "2026-05-06T06:57:12.167Z"
+  },
+  {
+    "user_id": "u_1g",
+    "workout_type": "run",
+    "duration_min": 61,
+    "calories": 297,
+    "timestamp": "2026-05-09T02:39:50.819Z"
+  },
+  {
+    "user_id": "u_s",
+    "workout_type": "swim",
+    "duration_min": 49,
+    "calories": 383,
+    "timestamp": "2026-04-16T17:37:22.117Z"
+  },
+  {
+    "user_id": "u_13",
+    "workout_type": "lift",
+    "duration_min": 34,
+    "calories": 263,
+    "timestamp": "2026-05-09T08:41:22.792Z"
+  },
+  {
+    "user_id": "u_6m",
+    "workout_type": "lift",
+    "duration_min": 88,
+    "calories": 723,
+    "timestamp": "2026-05-10T22:52:46.547Z"
+  },
+  {
+    "user_id": "u_2x",
+    "workout_type": "cycle",
+    "duration_min": 66,
+    "calories": 524,
+    "timestamp": "2026-04-26T10:19:54.450Z"
+  },
+  {
+    "user_id": "u_6p",
+    "workout_type": "run",
+    "duration_min": 71,
+    "calories": 527,
+    "timestamp": "2026-04-30T21:46:28.888Z"
+  },
+  {
+    "user_id": "u_7w",
+    "workout_type": "lift",
+    "duration_min": 83,
+    "calories": 526,
+    "timestamp": "2026-05-03T12:41:02.626Z"
+  },
+  {
+    "user_id": "u_6j",
+    "workout_type": "cycle",
+    "duration_min": 69,
+    "calories": 346,
+    "timestamp": "2026-05-07T02:33:35.620Z"
+  },
+  {
+    "user_id": "u_1s",
+    "workout_type": "lift",
+    "duration_min": 28,
+    "calories": 131,
+    "timestamp": "2026-04-30T17:42:49.939Z"
+  },
+  {
+    "user_id": "u_13",
+    "workout_type": "run",
+    "duration_min": 70,
+    "calories": 494,
+    "timestamp": "2026-04-26T23:48:42.983Z"
+  },
+  {
+    "user_id": "u_8b",
+    "workout_type": "cycle",
+    "duration_min": 15,
+    "calories": 124,
+    "timestamp": "2026-04-23T17:15:52.144Z"
+  },
+  {
+    "user_id": "u_6m",
+    "workout_type": "lift",
+    "duration_min": 65,
+    "calories": 466,
+    "timestamp": "2026-04-30T15:10:26.168Z"
+  },
+  {
+    "user_id": "u_3o",
+    "workout_type": "lift",
+    "duration_min": 45,
+    "calories": 183,
+    "timestamp": "2026-04-20T00:31:03.673Z"
+  },
+  {
+    "user_id": "u_55",
+    "workout_type": "run",
+    "duration_min": 17,
+    "calories": 73,
+    "timestamp": "2026-04-18T14:45:58.267Z"
+  },
+  {
+    "user_id": "u_4w",
+    "workout_type": "yoga",
+    "duration_min": 82,
+    "calories": 770,
+    "timestamp": "2026-05-10T10:18:46.646Z"
+  },
+  {
+    "user_id": "u_3r",
+    "workout_type": "lift",
+    "duration_min": 27,
+    "calories": 166,
+    "timestamp": "2026-04-26T11:06:50.364Z"
+  },
+  {
+    "user_id": "u_1b",
+    "workout_type": "lift",
+    "duration_min": 63,
+    "calories": 346,
+    "timestamp": "2026-04-16T02:14:20.340Z"
+  },
+  {
+    "user_id": "u_2i",
+    "workout_type": "lift",
+    "duration_min": 21,
+    "calories": 87,
+    "timestamp": "2026-04-30T01:33:18.441Z"
+  },
+  {
+    "user_id": "u_7m",
+    "workout_type": "run",
+    "duration_min": 32,
+    "calories": 216,
+    "timestamp": "2026-05-09T04:59:59.810Z"
+  },
+  {
+    "user_id": "u_0",
+    "workout_type": "lift",
+    "duration_min": 22,
+    "calories": 204,
+    "timestamp": "2026-05-06T02:35:06.861Z"
+  },
+  {
+    "user_id": "u_2d",
+    "workout_type": "run",
+    "duration_min": 41,
+    "calories": 225,
+    "timestamp": "2026-04-16T01:15:26.112Z"
+  },
+  {
+    "user_id": "u_2w",
+    "workout_type": "lift",
+    "duration_min": 87,
+    "calories": 831,
+    "timestamp": "2026-04-16T12:33:05.034Z"
+  },
+  {
+    "user_id": "u_6z",
+    "workout_type": "lift",
+    "duration_min": 62,
+    "calories": 514,
+    "timestamp": "2026-04-25T08:55:33.443Z"
+  },
+  {
+    "user_id": "u_11",
+    "workout_type": "swim",
+    "duration_min": 15,
+    "calories": 129,
+    "timestamp": "2026-05-07T08:44:30.552Z"
+  },
+  {
+    "user_id": "u_2z",
+    "workout_type": "run",
+    "duration_min": 50,
+    "calories": 438,
+    "timestamp": "2026-04-24T18:20:36.691Z"
+  },
+  {
+    "user_id": "u_4k",
+    "workout_type": "cycle",
+    "duration_min": 57,
+    "calories": 320,
+    "timestamp": "2026-04-26T11:33:54.314Z"
+  },
+  {
+    "user_id": "u_b",
+    "workout_type": "yoga",
+    "duration_min": 65,
+    "calories": 384,
+    "timestamp": "2026-04-19T07:04:07.663Z"
+  },
+  {
+    "user_id": "u_5c",
+    "workout_type": "lift",
+    "duration_min": 29,
+    "calories": 137,
+    "timestamp": "2026-05-07T20:14:31.890Z"
+  },
+  {
+    "user_id": "u_4m",
+    "workout_type": "yoga",
+    "duration_min": 19,
+    "calories": 177,
+    "timestamp": "2026-04-24T16:34:48.549Z"
+  },
+  {
+    "user_id": "u_51",
+    "workout_type": "cycle",
+    "duration_min": 66,
+    "calories": 393,
+    "timestamp": "2026-05-09T06:16:47.810Z"
+  },
+  {
+    "user_id": "u_a",
+    "workout_type": "run",
+    "duration_min": 89,
+    "calories": 640,
+    "timestamp": "2026-04-17T09:02:47.127Z"
+  },
+  {
+    "user_id": "u_70",
+    "workout_type": "swim",
+    "duration_min": 18,
+    "calories": 107,
+    "timestamp": "2026-05-02T14:06:30.676Z"
+  },
+  {
+    "user_id": "u_4d",
+    "workout_type": "swim",
+    "duration_min": 29,
+    "calories": 187,
+    "timestamp": "2026-04-27T19:54:58.991Z"
+  },
+  {
+    "user_id": "u_7f",
+    "workout_type": "yoga",
+    "duration_min": 22,
+    "calories": 153,
+    "timestamp": "2026-05-05T16:38:27.023Z"
+  },
+  {
+    "user_id": "u_5g",
+    "workout_type": "yoga",
+    "duration_min": 32,
+    "calories": 225,
+    "timestamp": "2026-05-02T06:55:37.976Z"
+  },
+  {
+    "user_id": "u_b",
+    "workout_type": "run",
+    "duration_min": 78,
+    "calories": 404,
+    "timestamp": "2026-05-12T00:50:58.845Z"
+  },
+  {
+    "user_id": "u_8e",
+    "workout_type": "cycle",
+    "duration_min": 58,
+    "calories": 321,
+    "timestamp": "2026-05-02T05:33:30.405Z"
+  },
+  {
+    "user_id": "u_5j",
+    "workout_type": "lift",
+    "duration_min": 43,
+    "calories": 343,
+    "timestamp": "2026-05-02T22:40:58.720Z"
+  },
+  {
+    "user_id": "u_3i",
+    "workout_type": "run",
+    "duration_min": 86,
+    "calories": 822,
+    "timestamp": "2026-04-19T08:04:41.682Z"
+  },
+  {
+    "user_id": "u_6n",
+    "workout_type": "cycle",
+    "duration_min": 39,
+    "calories": 350,
+    "timestamp": "2026-05-03T21:25:32.414Z"
+  },
+  {
+    "user_id": "u_7c",
+    "workout_type": "cycle",
+    "duration_min": 62,
+    "calories": 466,
+    "timestamp": "2026-04-18T12:05:43.855Z"
+  },
+  {
+    "user_id": "u_7w",
+    "workout_type": "yoga",
+    "duration_min": 43,
+    "calories": 375,
+    "timestamp": "2026-05-05T16:20:01.495Z"
+  },
+  {
+    "user_id": "u_79",
+    "workout_type": "swim",
+    "duration_min": 33,
+    "calories": 280,
+    "timestamp": "2026-04-30T22:29:51.162Z"
+  },
+  {
+    "user_id": "u_7t",
+    "workout_type": "yoga",
+    "duration_min": 83,
+    "calories": 673,
+    "timestamp": "2026-05-08T23:14:06.836Z"
+  },
+  {
+    "user_id": "u_5t",
+    "workout_type": "cycle",
+    "duration_min": 36,
+    "calories": 268,
+    "timestamp": "2026-05-03T13:00:39.866Z"
+  },
+  {
+    "user_id": "u_14",
+    "workout_type": "yoga",
+    "duration_min": 20,
+    "calories": 145,
+    "timestamp": "2026-04-15T13:56:27.537Z"
+  },
+  {
+    "user_id": "u_80",
+    "workout_type": "yoga",
+    "duration_min": 63,
+    "calories": 470,
+    "timestamp": "2026-04-16T10:46:17.383Z"
+  },
+  {
+    "user_id": "u_5x",
+    "workout_type": "cycle",
+    "duration_min": 16,
+    "calories": 142,
+    "timestamp": "2026-04-25T05:59:25.080Z"
+  },
+  {
+    "user_id": "u_2t",
+    "workout_type": "cycle",
+    "duration_min": 38,
+    "calories": 322,
+    "timestamp": "2026-04-23T21:04:02.267Z"
+  },
+  {
+    "user_id": "u_2b",
+    "workout_type": "yoga",
+    "duration_min": 44,
+    "calories": 433,
+    "timestamp": "2026-05-05T05:27:49.123Z"
+  },
+  {
+    "user_id": "u_7m",
+    "workout_type": "lift",
+    "duration_min": 31,
+    "calories": 241,
+    "timestamp": "2026-05-05T11:37:59.691Z"
+  },
+  {
+    "user_id": "u_7r",
+    "workout_type": "swim",
+    "duration_min": 61,
+    "calories": 460,
+    "timestamp": "2026-05-02T15:10:22.283Z"
+  },
+  {
+    "user_id": "u_35",
+    "workout_type": "cycle",
+    "duration_min": 21,
+    "calories": 150,
+    "timestamp": "2026-05-09T13:01:40.205Z"
+  },
+  {
+    "user_id": "u_32",
+    "workout_type": "cycle",
+    "duration_min": 53,
+    "calories": 220,
+    "timestamp": "2026-05-11T10:56:04.785Z"
+  },
+  {
+    "user_id": "u_2e",
+    "workout_type": "yoga",
+    "duration_min": 25,
+    "calories": 196,
+    "timestamp": "2026-04-23T13:55:41.940Z"
+  },
+  {
+    "user_id": "u_84",
+    "workout_type": "yoga",
+    "duration_min": 78,
+    "calories": 467,
+    "timestamp": "2026-04-21T13:45:53.680Z"
+  },
+  {
+    "user_id": "u_70",
+    "workout_type": "run",
+    "duration_min": 76,
+    "calories": 710,
+    "timestamp": "2026-04-25T21:13:39.261Z"
+  },
+  {
+    "user_id": "u_5i",
+    "workout_type": "swim",
+    "duration_min": 66,
+    "calories": 451,
+    "timestamp": "2026-04-23T04:15:52.585Z"
+  },
+  {
+    "user_id": "u_7d",
+    "workout_type": "cycle",
+    "duration_min": 87,
+    "calories": 553,
+    "timestamp": "2026-04-16T08:45:38.444Z"
+  },
+  {
+    "user_id": "u_79",
+    "workout_type": "cycle",
+    "duration_min": 66,
+    "calories": 312,
+    "timestamp": "2026-05-06T09:59:59.539Z"
+  },
+  {
+    "user_id": "u_58",
+    "workout_type": "run",
+    "duration_min": 47,
+    "calories": 424,
+    "timestamp": "2026-05-03T19:19:49.289Z"
+  },
+  {
+    "user_id": "u_5g",
+    "workout_type": "cycle",
+    "duration_min": 72,
+    "calories": 357,
+    "timestamp": "2026-04-28T03:32:31.916Z"
+  },
+  {
+    "user_id": "u_7k",
+    "workout_type": "yoga",
+    "duration_min": 39,
+    "calories": 159,
+    "timestamp": "2026-05-04T13:42:20.361Z"
+  },
+  {
+    "user_id": "u_4b",
+    "workout_type": "cycle",
+    "duration_min": 72,
+    "calories": 414,
+    "timestamp": "2026-05-10T05:13:49.891Z"
+  },
+  {
+    "user_id": "u_6a",
+    "workout_type": "run",
+    "duration_min": 35,
+    "calories": 250,
+    "timestamp": "2026-04-17T06:02:43.374Z"
+  },
+  {
+    "user_id": "u_5b",
+    "workout_type": "lift",
+    "duration_min": 78,
+    "calories": 451,
+    "timestamp": "2026-05-10T08:20:47.647Z"
+  },
+  {
+    "user_id": "u_87",
+    "workout_type": "yoga",
+    "duration_min": 42,
+    "calories": 311,
+    "timestamp": "2026-04-17T18:27:15.147Z"
+  },
+  {
+    "user_id": "u_7a",
+    "workout_type": "yoga",
+    "duration_min": 58,
+    "calories": 488,
+    "timestamp": "2026-04-19T15:13:14.340Z"
+  },
+  {
+    "user_id": "u_6d",
+    "workout_type": "yoga",
+    "duration_min": 55,
+    "calories": 247,
+    "timestamp": "2026-04-19T02:12:21.797Z"
+  },
+  {
+    "user_id": "u_1j",
+    "workout_type": "run",
+    "duration_min": 28,
+    "calories": 249,
+    "timestamp": "2026-04-30T18:03:02.252Z"
+  },
+  {
+    "user_id": "u_6l",
+    "workout_type": "swim",
+    "duration_min": 57,
+    "calories": 300,
+    "timestamp": "2026-04-15T22:22:27.710Z"
+  },
+  {
+    "user_id": "u_67",
+    "workout_type": "swim",
+    "duration_min": 58,
+    "calories": 288,
+    "timestamp": "2026-04-25T22:04:03.841Z"
+  },
+  {
+    "user_id": "u_71",
+    "workout_type": "run",
+    "duration_min": 39,
+    "calories": 266,
+    "timestamp": "2026-04-21T09:46:48.952Z"
+  },
+  {
+    "user_id": "u_59",
+    "workout_type": "swim",
+    "duration_min": 19,
+    "calories": 144,
+    "timestamp": "2026-04-18T13:01:48.137Z"
+  },
+  {
+    "user_id": "u_1r",
+    "workout_type": "cycle",
+    "duration_min": 53,
+    "calories": 419,
+    "timestamp": "2026-04-30T10:30:31.635Z"
+  },
+  {
+    "user_id": "u_3f",
+    "workout_type": "cycle",
+    "duration_min": 43,
+    "calories": 190,
+    "timestamp": "2026-04-29T22:37:41.884Z"
+  },
+  {
+    "user_id": "u_5i",
+    "workout_type": "lift",
+    "duration_min": 50,
+    "calories": 268,
+    "timestamp": "2026-05-02T08:40:44.703Z"
+  },
+  {
+    "user_id": "u_2p",
+    "workout_type": "lift",
+    "duration_min": 33,
+    "calories": 185,
+    "timestamp": "2026-05-10T05:36:14.373Z"
+  },
+  {
+    "user_id": "u_3",
+    "workout_type": "cycle",
+    "duration_min": 72,
+    "calories": 662,
+    "timestamp": "2026-04-30T20:07:37.789Z"
+  },
+  {
+    "user_id": "u_2i",
+    "workout_type": "lift",
+    "duration_min": 50,
+    "calories": 397,
+    "timestamp": "2026-04-17T10:21:27.911Z"
+  },
+  {
+    "user_id": "u_14",
+    "workout_type": "cycle",
+    "duration_min": 76,
+    "calories": 377,
+    "timestamp": "2026-05-06T02:07:12.093Z"
+  },
+  {
+    "user_id": "u_5s",
+    "workout_type": "swim",
+    "duration_min": 77,
+    "calories": 720,
+    "timestamp": "2026-04-24T08:26:20.711Z"
+  },
+  {
+    "user_id": "u_2s",
+    "workout_type": "yoga",
+    "duration_min": 46,
+    "calories": 255,
+    "timestamp": "2026-04-30T09:02:11.683Z"
+  },
+  {
+    "user_id": "u_7w",
+    "workout_type": "swim",
+    "duration_min": 25,
+    "calories": 179,
+    "timestamp": "2026-04-25T21:52:41.439Z"
+  },
+  {
+    "user_id": "u_k",
+    "workout_type": "swim",
+    "duration_min": 89,
+    "calories": 385,
+    "timestamp": "2026-04-21T18:39:53.917Z"
+  },
+  {
+    "user_id": "u_21",
+    "workout_type": "cycle",
+    "duration_min": 23,
+    "calories": 197,
+    "timestamp": "2026-05-10T11:04:25.743Z"
+  },
+  {
+    "user_id": "u_3z",
+    "workout_type": "run",
+    "duration_min": 41,
+    "calories": 347,
+    "timestamp": "2026-04-23T12:38:53.889Z"
+  },
+  {
+    "user_id": "u_53",
+    "workout_type": "yoga",
+    "duration_min": 32,
+    "calories": 249,
+    "timestamp": "2026-05-06T19:54:11.504Z"
+  },
+  {
+    "user_id": "u_54",
+    "workout_type": "lift",
+    "duration_min": 66,
+    "calories": 443,
+    "timestamp": "2026-05-07T00:20:18.013Z"
+  },
+  {
+    "user_id": "u_k",
+    "workout_type": "swim",
+    "duration_min": 42,
+    "calories": 220,
+    "timestamp": "2026-05-06T18:20:52.669Z"
+  },
+  {
+    "user_id": "u_4r",
+    "workout_type": "lift",
+    "duration_min": 22,
+    "calories": 112,
+    "timestamp": "2026-05-03T08:18:07.817Z"
+  },
+  {
+    "user_id": "u_4e",
+    "workout_type": "run",
+    "duration_min": 73,
+    "calories": 365,
+    "timestamp": "2026-04-18T17:35:33.359Z"
+  },
+  {
+    "user_id": "u_7",
+    "workout_type": "lift",
+    "duration_min": 38,
+    "calories": 175,
+    "timestamp": "2026-05-05T10:16:37.831Z"
+  },
+  {
+    "user_id": "u_4d",
+    "workout_type": "run",
+    "duration_min": 27,
+    "calories": 213,
+    "timestamp": "2026-05-01T17:17:13.359Z"
+  },
+  {
+    "user_id": "u_3o",
+    "workout_type": "yoga",
+    "duration_min": 62,
+    "calories": 302,
+    "timestamp": "2026-04-23T06:56:36.848Z"
+  },
+  {
+    "user_id": "u_58",
+    "workout_type": "swim",
+    "duration_min": 32,
+    "calories": 220,
+    "timestamp": "2026-05-06T20:25:28.723Z"
+  },
+  {
+    "user_id": "u_4u",
+    "workout_type": "swim",
+    "duration_min": 54,
+    "calories": 261,
+    "timestamp": "2026-05-09T09:52:42.006Z"
+  },
+  {
+    "user_id": "u_21",
+    "workout_type": "swim",
+    "duration_min": 63,
+    "calories": 260,
+    "timestamp": "2026-05-12T13:06:23.519Z"
+  },
+  {
+    "user_id": "u_23",
+    "workout_type": "cycle",
+    "duration_min": 31,
+    "calories": 191,
+    "timestamp": "2026-05-08T20:46:24.235Z"
+  },
+  {
+    "user_id": "u_2e",
+    "workout_type": "run",
+    "duration_min": 61,
+    "calories": 259,
+    "timestamp": "2026-04-21T01:35:09.419Z"
+  },
+  {
+    "user_id": "u_6g",
+    "workout_type": "swim",
+    "duration_min": 76,
+    "calories": 442,
+    "timestamp": "2026-04-18T19:22:47.894Z"
+  },
+  {
+    "user_id": "u_3w",
+    "workout_type": "swim",
+    "duration_min": 15,
+    "calories": 136,
+    "timestamp": "2026-05-01T10:59:25.246Z"
+  },
+  {
+    "user_id": "u_6b",
+    "workout_type": "lift",
+    "duration_min": 54,
+    "calories": 496,
+    "timestamp": "2026-05-12T14:38:26.758Z"
+  },
+  {
+    "user_id": "u_6u",
+    "workout_type": "swim",
+    "duration_min": 79,
+    "calories": 641,
+    "timestamp": "2026-05-04T22:56:29.561Z"
+  },
+  {
+    "user_id": "u_e",
+    "workout_type": "run",
+    "duration_min": 83,
+    "calories": 769,
+    "timestamp": "2026-04-29T12:33:45.299Z"
+  },
+  {
+    "user_id": "u_4v",
+    "workout_type": "swim",
+    "duration_min": 29,
+    "calories": 242,
+    "timestamp": "2026-04-18T15:34:53.460Z"
+  },
+  {
+    "user_id": "u_6o",
+    "workout_type": "lift",
+    "duration_min": 29,
+    "calories": 208,
+    "timestamp": "2026-04-15T01:03:12.494Z"
+  },
+  {
+    "user_id": "u_8a",
+    "workout_type": "lift",
+    "duration_min": 18,
+    "calories": 172,
+    "timestamp": "2026-04-15T13:54:30.559Z"
+  },
+  {
+    "user_id": "u_87",
+    "workout_type": "run",
+    "duration_min": 78,
+    "calories": 536,
+    "timestamp": "2026-04-18T04:17:29.599Z"
+  },
+  {
+    "user_id": "u_2b",
+    "workout_type": "run",
+    "duration_min": 36,
+    "calories": 357,
+    "timestamp": "2026-05-06T07:32:27.948Z"
+  },
+  {
+    "user_id": "u_5n",
+    "workout_type": "lift",
+    "duration_min": 41,
+    "calories": 261,
+    "timestamp": "2026-05-06T09:21:33.635Z"
+  },
+  {
+    "user_id": "u_6",
+    "workout_type": "lift",
+    "duration_min": 29,
+    "calories": 228,
+    "timestamp": "2026-04-22T17:18:47.244Z"
+  },
+  {
+    "user_id": "u_1u",
+    "workout_type": "cycle",
+    "duration_min": 40,
+    "calories": 205,
+    "timestamp": "2026-04-18T23:06:35.039Z"
+  },
+  {
+    "user_id": "u_4p",
+    "workout_type": "swim",
+    "duration_min": 32,
+    "calories": 141,
+    "timestamp": "2026-05-03T00:51:30.655Z"
+  },
+  {
+    "user_id": "u_1p",
+    "workout_type": "run",
+    "duration_min": 45,
+    "calories": 297,
+    "timestamp": "2026-04-25T12:28:12.266Z"
+  },
+  {
+    "user_id": "u_8f",
+    "workout_type": "run",
+    "duration_min": 53,
+    "calories": 459,
+    "timestamp": "2026-04-25T19:01:06.452Z"
+  },
+  {
+    "user_id": "u_6a",
+    "workout_type": "yoga",
+    "duration_min": 79,
+    "calories": 757,
+    "timestamp": "2026-05-11T13:37:26.775Z"
+  },
+  {
+    "user_id": "u_59",
+    "workout_type": "cycle",
+    "duration_min": 46,
+    "calories": 194,
+    "timestamp": "2026-05-04T05:07:22.595Z"
+  },
+  {
+    "user_id": "u_5x",
+    "workout_type": "run",
+    "duration_min": 21,
+    "calories": 108,
+    "timestamp": "2026-05-08T18:48:13.437Z"
+  },
+  {
+    "user_id": "u_7f",
+    "workout_type": "run",
+    "duration_min": 46,
+    "calories": 255,
+    "timestamp": "2026-05-08T17:30:55.301Z"
+  },
+  {
+    "user_id": "u_2q",
+    "workout_type": "swim",
+    "duration_min": 73,
+    "calories": 535,
+    "timestamp": "2026-04-28T00:27:55.287Z"
+  },
+  {
+    "user_id": "u_6n",
+    "workout_type": "lift",
+    "duration_min": 49,
+    "calories": 343,
+    "timestamp": "2026-04-28T00:12:50.146Z"
+  },
+  {
+    "user_id": "u_3q",
+    "workout_type": "swim",
+    "duration_min": 57,
+    "calories": 285,
+    "timestamp": "2026-04-21T20:18:00.853Z"
+  },
+  {
+    "user_id": "u_2x",
+    "workout_type": "lift",
+    "duration_min": 40,
+    "calories": 338,
+    "timestamp": "2026-05-04T22:12:40.587Z"
+  },
+  {
+    "user_id": "u_4t",
+    "workout_type": "run",
+    "duration_min": 61,
+    "calories": 503,
+    "timestamp": "2026-04-25T18:22:00.049Z"
+  },
+  {
+    "user_id": "u_7x",
+    "workout_type": "yoga",
+    "duration_min": 29,
+    "calories": 238,
+    "timestamp": "2026-04-15T02:23:54.097Z"
+  },
+  {
+    "user_id": "u_v",
+    "workout_type": "swim",
+    "duration_min": 75,
+    "calories": 544,
+    "timestamp": "2026-04-20T00:43:19.107Z"
+  },
+  {
+    "user_id": "u_35",
+    "workout_type": "swim",
+    "duration_min": 82,
+    "calories": 814,
+    "timestamp": "2026-04-26T08:18:10.220Z"
+  },
+  {
+    "user_id": "u_79",
+    "workout_type": "run",
+    "duration_min": 82,
+    "calories": 430,
+    "timestamp": "2026-05-12T19:42:15.721Z"
+  },
+  {
+    "user_id": "u_35",
+    "workout_type": "cycle",
+    "duration_min": 76,
+    "calories": 323,
+    "timestamp": "2026-05-05T22:19:04.001Z"
+  },
+  {
+    "user_id": "u_31",
+    "workout_type": "lift",
+    "duration_min": 79,
+    "calories": 755,
+    "timestamp": "2026-05-09T02:49:51.601Z"
+  },
+  {
+    "user_id": "u_4r",
+    "workout_type": "swim",
+    "duration_min": 41,
+    "calories": 349,
+    "timestamp": "2026-05-09T16:36:07.309Z"
+  },
+  {
+    "user_id": "u_3x",
+    "workout_type": "swim",
+    "duration_min": 72,
+    "calories": 582,
+    "timestamp": "2026-05-04T11:23:33.249Z"
+  },
+  {
+    "user_id": "u_22",
+    "workout_type": "yoga",
+    "duration_min": 57,
+    "calories": 462,
+    "timestamp": "2026-05-04T10:12:27.450Z"
+  },
+  {
+    "user_id": "u_1q",
+    "workout_type": "swim",
+    "duration_min": 72,
+    "calories": 310,
+    "timestamp": "2026-04-25T04:07:25.284Z"
+  },
+  {
+    "user_id": "u_0",
+    "workout_type": "cycle",
+    "duration_min": 38,
+    "calories": 325,
+    "timestamp": "2026-04-16T01:00:03.360Z"
+  },
+  {
+    "user_id": "u_7w",
+    "workout_type": "swim",
+    "duration_min": 77,
+    "calories": 662,
+    "timestamp": "2026-05-09T12:50:27.620Z"
+  },
+  {
+    "user_id": "u_4b",
+    "workout_type": "yoga",
+    "duration_min": 44,
+    "calories": 338,
+    "timestamp": "2026-04-27T16:46:31.163Z"
+  },
+  {
+    "user_id": "u_69",
+    "workout_type": "lift",
+    "duration_min": 58,
+    "calories": 427,
+    "timestamp": "2026-04-20T20:47:21.420Z"
+  },
+  {
+    "user_id": "u_3b",
+    "workout_type": "lift",
+    "duration_min": 77,
+    "calories": 625,
+    "timestamp": "2026-04-15T15:44:28.865Z"
+  },
+  {
+    "user_id": "u_z",
+    "workout_type": "run",
+    "duration_min": 88,
+    "calories": 452,
+    "timestamp": "2026-05-06T20:52:30.367Z"
+  },
+  {
+    "user_id": "u_2o",
+    "workout_type": "cycle",
+    "duration_min": 75,
+    "calories": 719,
+    "timestamp": "2026-05-03T09:21:24.216Z"
+  },
+  {
+    "user_id": "u_2c",
+    "workout_type": "cycle",
+    "duration_min": 77,
+    "calories": 752,
+    "timestamp": "2026-05-12T21:39:38.097Z"
+  },
+  {
+    "user_id": "u_57",
+    "workout_type": "swim",
+    "duration_min": 51,
+    "calories": 414,
+    "timestamp": "2026-05-02T18:58:03.214Z"
+  },
+  {
+    "user_id": "u_41",
+    "workout_type": "cycle",
+    "duration_min": 76,
+    "calories": 507,
+    "timestamp": "2026-04-19T08:59:27.507Z"
+  },
+  {
+    "user_id": "u_5m",
+    "workout_type": "lift",
+    "duration_min": 65,
+    "calories": 461,
+    "timestamp": "2026-04-25T05:08:54.130Z"
+  },
+  {
+    "user_id": "u_2q",
+    "workout_type": "cycle",
+    "duration_min": 63,
+    "calories": 406,
+    "timestamp": "2026-04-28T05:44:15.043Z"
+  },
+  {
+    "user_id": "u_6x",
+    "workout_type": "lift",
+    "duration_min": 75,
+    "calories": 741,
+    "timestamp": "2026-04-30T09:10:07.315Z"
+  },
+  {
+    "user_id": "u_3q",
+    "workout_type": "lift",
+    "duration_min": 82,
+    "calories": 635,
+    "timestamp": "2026-04-15T22:38:07.972Z"
+  },
+  {
+    "user_id": "u_3j",
+    "workout_type": "run",
+    "duration_min": 32,
+    "calories": 296,
+    "timestamp": "2026-04-17T23:42:34.325Z"
+  },
+  {
+    "user_id": "u_38",
+    "workout_type": "cycle",
+    "duration_min": 58,
+    "calories": 540,
+    "timestamp": "2026-04-28T19:47:20.676Z"
+  },
+  {
+    "user_id": "u_4r",
+    "workout_type": "cycle",
+    "duration_min": 36,
+    "calories": 259,
+    "timestamp": "2026-04-16T09:22:02.878Z"
+  },
+  {
+    "user_id": "u_1o",
+    "workout_type": "yoga",
+    "duration_min": 36,
+    "calories": 161,
+    "timestamp": "2026-04-16T22:07:57.283Z"
+  },
+  {
+    "user_id": "u_68",
+    "workout_type": "lift",
+    "duration_min": 22,
+    "calories": 152,
+    "timestamp": "2026-04-18T22:52:05.363Z"
+  },
+  {
+    "user_id": "u_6",
+    "workout_type": "swim",
+    "duration_min": 44,
+    "calories": 189,
+    "timestamp": "2026-05-06T07:19:54.268Z"
+  },
+  {
+    "user_id": "u_p",
+    "workout_type": "swim",
+    "duration_min": 26,
+    "calories": 104,
+    "timestamp": "2026-05-12T10:23:09.655Z"
+  },
+  {
+    "user_id": "u_7a",
+    "workout_type": "yoga",
+    "duration_min": 54,
+    "calories": 261,
+    "timestamp": "2026-05-05T16:34:28.065Z"
+  },
+  {
+    "user_id": "u_78",
+    "workout_type": "cycle",
+    "duration_min": 47,
+    "calories": 284,
+    "timestamp": "2026-04-17T13:01:32.814Z"
+  },
+  {
+    "user_id": "u_4d",
+    "workout_type": "run",
+    "duration_min": 37,
+    "calories": 235,
+    "timestamp": "2026-04-19T20:50:47.912Z"
+  },
+  {
+    "user_id": "u_8j",
+    "workout_type": "yoga",
+    "duration_min": 22,
+    "calories": 184,
+    "timestamp": "2026-05-11T13:03:36.202Z"
+  },
+  {
+    "user_id": "u_1b",
+    "workout_type": "yoga",
+    "duration_min": 73,
+    "calories": 618,
+    "timestamp": "2026-05-12T04:46:48.252Z"
+  },
+  {
+    "user_id": "u_z",
+    "workout_type": "cycle",
+    "duration_min": 46,
+    "calories": 298,
+    "timestamp": "2026-05-12T03:51:50.561Z"
+  },
+  {
+    "user_id": "u_3t",
+    "workout_type": "yoga",
+    "duration_min": 35,
+    "calories": 165,
+    "timestamp": "2026-04-28T11:03:52.830Z"
+  },
+  {
+    "user_id": "u_2u",
+    "workout_type": "cycle",
+    "duration_min": 63,
+    "calories": 497,
+    "timestamp": "2026-05-03T15:03:29.037Z"
+  },
+  {
+    "user_id": "u_85",
+    "workout_type": "swim",
+    "duration_min": 70,
+    "calories": 410,
+    "timestamp": "2026-05-06T18:56:18.171Z"
+  },
+  {
+    "user_id": "u_1w",
+    "workout_type": "cycle",
+    "duration_min": 34,
+    "calories": 315,
+    "timestamp": "2026-05-09T07:25:41.134Z"
+  },
+  {
+    "user_id": "u_4l",
+    "workout_type": "run",
+    "duration_min": 75,
+    "calories": 652,
+    "timestamp": "2026-04-21T01:05:45.311Z"
+  },
+  {
+    "user_id": "u_57",
+    "workout_type": "yoga",
+    "duration_min": 57,
+    "calories": 527,
+    "timestamp": "2026-04-27T14:26:10.338Z"
+  },
+  {
+    "user_id": "u_7a",
+    "workout_type": "lift",
+    "duration_min": 74,
+    "calories": 644,
+    "timestamp": "2026-05-10T04:49:10.590Z"
+  },
+  {
+    "user_id": "u_20",
+    "workout_type": "lift",
+    "duration_min": 16,
+    "calories": 144,
+    "timestamp": "2026-04-23T16:37:07.659Z"
+  },
+  {
+    "user_id": "u_30",
+    "workout_type": "yoga",
+    "duration_min": 22,
+    "calories": 135,
+    "timestamp": "2026-05-05T21:35:53.261Z"
+  },
+  {
+    "user_id": "u_7q",
+    "workout_type": "run",
+    "duration_min": 41,
+    "calories": 171,
+    "timestamp": "2026-05-12T08:35:52.813Z"
+  },
+  {
+    "user_id": "u_22",
+    "workout_type": "swim",
+    "duration_min": 15,
+    "calories": 79,
+    "timestamp": "2026-04-19T03:08:35.191Z"
+  },
+  {
+    "user_id": "u_2p",
+    "workout_type": "cycle",
+    "duration_min": 60,
+    "calories": 252,
+    "timestamp": "2026-05-03T02:22:24.731Z"
+  },
+  {
+    "user_id": "u_5x",
+    "workout_type": "cycle",
+    "duration_min": 54,
+    "calories": 527,
+    "timestamp": "2026-05-04T11:02:20.022Z"
+  },
+  {
+    "user_id": "u_7n",
+    "workout_type": "swim",
+    "duration_min": 89,
+    "calories": 432,
+    "timestamp": "2026-05-06T12:27:59.033Z"
+  },
+  {
+    "user_id": "u_8n",
+    "workout_type": "yoga",
+    "duration_min": 81,
+    "calories": 541,
+    "timestamp": "2026-04-18T16:44:25.553Z"
+  },
+  {
+    "user_id": "u_69",
+    "workout_type": "lift",
+    "duration_min": 15,
+    "calories": 92,
+    "timestamp": "2026-05-08T19:43:02.329Z"
+  },
+  {
+    "user_id": "u_1n",
+    "workout_type": "lift",
+    "duration_min": 45,
+    "calories": 348,
+    "timestamp": "2026-05-03T13:21:07.616Z"
+  },
+  {
+    "user_id": "u_4s",
+    "workout_type": "run",
+    "duration_min": 20,
+    "calories": 120,
+    "timestamp": "2026-05-01T19:37:56.139Z"
+  },
+  {
+    "user_id": "u_63",
+    "workout_type": "swim",
+    "duration_min": 39,
+    "calories": 323,
+    "timestamp": "2026-04-19T10:26:50.977Z"
+  },
+  {
+    "user_id": "u_55",
+    "workout_type": "run",
+    "duration_min": 47,
+    "calories": 255,
+    "timestamp": "2026-04-24T17:39:34.774Z"
+  },
+  {
+    "user_id": "u_5i",
+    "workout_type": "swim",
+    "duration_min": 81,
+    "calories": 458,
+    "timestamp": "2026-04-16T04:48:43.393Z"
+  },
+  {
+    "user_id": "u_1m",
+    "workout_type": "cycle",
+    "duration_min": 88,
+    "calories": 638,
+    "timestamp": "2026-04-24T16:04:52.337Z"
+  },
+  {
+    "user_id": "u_42",
+    "workout_type": "cycle",
+    "duration_min": 77,
+    "calories": 459,
+    "timestamp": "2026-04-18T21:59:43.479Z"
+  },
+  {
+    "user_id": "u_1b",
+    "workout_type": "yoga",
+    "duration_min": 53,
+    "calories": 422,
+    "timestamp": "2026-05-10T14:46:28.127Z"
+  },
+  {
+    "user_id": "u_6v",
+    "workout_type": "run",
+    "duration_min": 48,
+    "calories": 285,
+    "timestamp": "2026-04-26T03:19:56.698Z"
+  },
+  {
+    "user_id": "u_4x",
+    "workout_type": "yoga",
+    "duration_min": 23,
+    "calories": 187,
+    "timestamp": "2026-04-23T06:53:54.266Z"
+  },
+  {
+    "user_id": "u_8a",
+    "workout_type": "swim",
+    "duration_min": 22,
+    "calories": 154,
+    "timestamp": "2026-05-08T00:02:19.747Z"
+  },
+  {
+    "user_id": "u_6h",
+    "workout_type": "swim",
+    "duration_min": 16,
+    "calories": 101,
+    "timestamp": "2026-04-26T09:57:37.312Z"
+  },
+  {
+    "user_id": "u_1d",
+    "workout_type": "lift",
+    "duration_min": 33,
+    "calories": 244,
+    "timestamp": "2026-05-10T12:00:35.088Z"
+  },
+  {
+    "user_id": "u_2",
+    "workout_type": "swim",
+    "duration_min": 76,
+    "calories": 397,
+    "timestamp": "2026-04-27T06:28:35.916Z"
+  },
+  {
+    "user_id": "u_7d",
+    "workout_type": "swim",
+    "duration_min": 53,
+    "calories": 215,
+    "timestamp": "2026-04-23T06:42:56.898Z"
+  },
+  {
+    "user_id": "u_1q",
+    "workout_type": "yoga",
+    "duration_min": 36,
+    "calories": 186,
+    "timestamp": "2026-05-12T08:21:47.193Z"
+  },
+  {
+    "user_id": "u_7z",
+    "workout_type": "run",
+    "duration_min": 24,
+    "calories": 181,
+    "timestamp": "2026-04-18T10:50:33.841Z"
+  },
+  {
+    "user_id": "u_8g",
+    "workout_type": "swim",
+    "duration_min": 52,
+    "calories": 513,
+    "timestamp": "2026-05-10T17:12:44.245Z"
+  },
+  {
+    "user_id": "u_75",
+    "workout_type": "run",
+    "duration_min": 57,
+    "calories": 271,
+    "timestamp": "2026-04-21T18:11:01.098Z"
+  },
+  {
+    "user_id": "u_32",
+    "workout_type": "run",
+    "duration_min": 71,
+    "calories": 636,
+    "timestamp": "2026-04-20T03:18:45.173Z"
+  },
+  {
+    "user_id": "u_8g",
+    "workout_type": "yoga",
+    "duration_min": 26,
+    "calories": 153,
+    "timestamp": "2026-05-01T08:02:33.152Z"
+  },
+  {
+    "user_id": "u_2b",
+    "workout_type": "yoga",
+    "duration_min": 85,
+    "calories": 718,
+    "timestamp": "2026-04-17T09:04:36.832Z"
+  },
+  {
+    "user_id": "u_8k",
+    "workout_type": "swim",
+    "duration_min": 35,
+    "calories": 348,
+    "timestamp": "2026-04-30T07:01:48.372Z"
+  },
+  {
+    "user_id": "u_5s",
+    "workout_type": "lift",
+    "duration_min": 76,
+    "calories": 427,
+    "timestamp": "2026-05-05T00:49:33.272Z"
+  },
+  {
+    "user_id": "u_34",
+    "workout_type": "run",
+    "duration_min": 57,
+    "calories": 440,
+    "timestamp": "2026-04-21T00:48:02.398Z"
+  },
+  {
+    "user_id": "u_5y",
+    "workout_type": "run",
+    "duration_min": 61,
+    "calories": 552,
+    "timestamp": "2026-04-15T23:26:57.485Z"
+  },
+  {
+    "user_id": "u_2b",
+    "workout_type": "run",
+    "duration_min": 25,
+    "calories": 216,
+    "timestamp": "2026-05-08T05:43:24.547Z"
+  },
+  {
+    "user_id": "u_6x",
+    "workout_type": "swim",
+    "duration_min": 41,
+    "calories": 277,
+    "timestamp": "2026-04-24T11:24:24.348Z"
+  },
+  {
+    "user_id": "u_3b",
+    "workout_type": "yoga",
+    "duration_min": 47,
+    "calories": 293,
+    "timestamp": "2026-04-24T00:48:18.260Z"
+  },
+  {
+    "user_id": "u_4a",
+    "workout_type": "lift",
+    "duration_min": 40,
+    "calories": 184,
+    "timestamp": "2026-04-22T12:33:06.400Z"
+  },
+  {
+    "user_id": "u_1a",
+    "workout_type": "cycle",
+    "duration_min": 88,
+    "calories": 875,
+    "timestamp": "2026-04-22T13:40:38.537Z"
+  },
+  {
+    "user_id": "u_6e",
+    "workout_type": "cycle",
+    "duration_min": 34,
+    "calories": 245,
+    "timestamp": "2026-05-02T08:02:42.481Z"
+  },
+  {
+    "user_id": "u_1m",
+    "workout_type": "cycle",
+    "duration_min": 54,
+    "calories": 252,
+    "timestamp": "2026-04-25T11:57:19.886Z"
+  },
+  {
+    "user_id": "u_17",
+    "workout_type": "yoga",
+    "duration_min": 83,
+    "calories": 653,
+    "timestamp": "2026-04-27T22:25:15.713Z"
+  },
+  {
+    "user_id": "u_3s",
+    "workout_type": "lift",
+    "duration_min": 73,
+    "calories": 537,
+    "timestamp": "2026-04-25T09:24:53.950Z"
+  },
+  {
+    "user_id": "u_3u",
+    "workout_type": "run",
+    "duration_min": 54,
+    "calories": 226,
+    "timestamp": "2026-04-18T09:52:27.209Z"
+  },
+  {
+    "user_id": "u_43",
+    "workout_type": "yoga",
+    "duration_min": 38,
+    "calories": 252,
+    "timestamp": "2026-04-16T18:46:37.433Z"
+  },
+  {
+    "user_id": "u_3y",
+    "workout_type": "swim",
+    "duration_min": 50,
+    "calories": 428,
+    "timestamp": "2026-04-23T04:13:36.202Z"
+  },
+  {
+    "user_id": "u_1c",
+    "workout_type": "cycle",
+    "duration_min": 28,
+    "calories": 145,
+    "timestamp": "2026-05-08T09:40:51.045Z"
+  },
+  {
+    "user_id": "u_6c",
+    "workout_type": "lift",
+    "duration_min": 60,
+    "calories": 566,
+    "timestamp": "2026-05-01T19:52:23.033Z"
+  },
+  {
+    "user_id": "u_g",
+    "workout_type": "lift",
+    "duration_min": 67,
+    "calories": 331,
+    "timestamp": "2026-04-28T09:27:01.012Z"
+  },
+  {
+    "user_id": "u_6t",
+    "workout_type": "run",
+    "duration_min": 54,
+    "calories": 405,
+    "timestamp": "2026-04-25T15:48:40.565Z"
+  },
+  {
+    "user_id": "u_h",
+    "workout_type": "cycle",
+    "duration_min": 62,
+    "calories": 443,
+    "timestamp": "2026-04-27T02:39:01.921Z"
+  },
+  {
+    "user_id": "u_1r",
+    "workout_type": "yoga",
+    "duration_min": 57,
+    "calories": 252,
+    "timestamp": "2026-05-01T10:45:30.859Z"
+  },
+  {
+    "user_id": "u_3i",
+    "workout_type": "yoga",
+    "duration_min": 41,
+    "calories": 213,
+    "timestamp": "2026-05-07T20:17:38.733Z"
+  },
+  {
+    "user_id": "u_6g",
+    "workout_type": "cycle",
+    "duration_min": 65,
+    "calories": 390,
+    "timestamp": "2026-05-05T03:14:26.976Z"
+  },
+  {
+    "user_id": "u_5i",
+    "workout_type": "lift",
+    "duration_min": 72,
+    "calories": 561,
+    "timestamp": "2026-04-22T20:29:39.879Z"
+  },
+  {
+    "user_id": "u_66",
+    "workout_type": "cycle",
+    "duration_min": 38,
+    "calories": 252,
+    "timestamp": "2026-04-17T11:26:30.318Z"
+  },
+  {
+    "user_id": "u_1w",
+    "workout_type": "cycle",
+    "duration_min": 77,
+    "calories": 434,
+    "timestamp": "2026-04-25T12:04:28.867Z"
+  },
+  {
+    "user_id": "u_r",
+    "workout_type": "run",
+    "duration_min": 22,
+    "calories": 207,
+    "timestamp": "2026-05-04T01:59:29.661Z"
+  },
+  {
+    "user_id": "u_6n",
+    "workout_type": "lift",
+    "duration_min": 64,
+    "calories": 381,
+    "timestamp": "2026-05-02T12:03:03.494Z"
+  },
+  {
+    "user_id": "u_6c",
+    "workout_type": "lift",
+    "duration_min": 69,
+    "calories": 340,
+    "timestamp": "2026-05-12T20:54:15.311Z"
+  },
+  {
+    "user_id": "u_2o",
+    "workout_type": "swim",
+    "duration_min": 78,
+    "calories": 435,
+    "timestamp": "2026-04-29T15:31:18.394Z"
+  },
+  {
+    "user_id": "u_1n",
+    "workout_type": "yoga",
+    "duration_min": 15,
+    "calories": 62,
+    "timestamp": "2026-04-24T16:23:17.634Z"
+  },
+  {
+    "user_id": "u_67",
+    "workout_type": "swim",
+    "duration_min": 29,
+    "calories": 247,
+    "timestamp": "2026-05-11T09:42:07.920Z"
+  },
+  {
+    "user_id": "u_5b",
+    "workout_type": "run",
+    "duration_min": 19,
+    "calories": 112,
+    "timestamp": "2026-04-21T08:30:35.105Z"
+  },
+  {
+    "user_id": "u_2l",
+    "workout_type": "cycle",
+    "duration_min": 87,
+    "calories": 711,
+    "timestamp": "2026-05-06T06:21:50.957Z"
+  },
+  {
+    "user_id": "u_3d",
+    "workout_type": "cycle",
+    "duration_min": 82,
+    "calories": 456,
+    "timestamp": "2026-05-04T18:25:52.590Z"
+  },
+  {
+    "user_id": "u_80",
+    "workout_type": "yoga",
+    "duration_min": 87,
+    "calories": 451,
+    "timestamp": "2026-05-12T01:16:45.820Z"
+  },
+  {
+    "user_id": "u_2g",
+    "workout_type": "cycle",
+    "duration_min": 38,
+    "calories": 224,
+    "timestamp": "2026-05-06T11:27:15.542Z"
+  },
+  {
+    "user_id": "u_2r",
+    "workout_type": "yoga",
+    "duration_min": 23,
+    "calories": 191,
+    "timestamp": "2026-04-20T07:57:41.415Z"
+  },
+  {
+    "user_id": "u_x",
+    "workout_type": "cycle",
+    "duration_min": 64,
+    "calories": 462,
+    "timestamp": "2026-04-29T05:22:33.408Z"
+  },
+  {
+    "user_id": "u_u",
+    "workout_type": "swim",
+    "duration_min": 85,
+    "calories": 521,
+    "timestamp": "2026-05-12T20:13:33.664Z"
+  },
+  {
+    "user_id": "u_6v",
+    "workout_type": "yoga",
+    "duration_min": 26,
+    "calories": 173,
+    "timestamp": "2026-05-05T07:00:56.593Z"
+  },
+  {
+    "user_id": "u_80",
+    "workout_type": "cycle",
+    "duration_min": 59,
+    "calories": 570,
+    "timestamp": "2026-04-16T20:26:29.522Z"
+  },
+  {
+    "user_id": "u_4n",
+    "workout_type": "lift",
+    "duration_min": 45,
+    "calories": 398,
+    "timestamp": "2026-04-17T06:36:19.273Z"
+  },
+  {
+    "user_id": "u_1o",
+    "workout_type": "cycle",
+    "duration_min": 72,
+    "calories": 688,
+    "timestamp": "2026-04-27T05:44:54.231Z"
+  },
+  {
+    "user_id": "u_2",
+    "workout_type": "yoga",
+    "duration_min": 56,
+    "calories": 498,
+    "timestamp": "2026-04-22T13:08:42.645Z"
+  },
+  {
+    "user_id": "u_8n",
+    "workout_type": "run",
+    "duration_min": 48,
+    "calories": 452,
+    "timestamp": "2026-04-19T17:31:42.206Z"
+  },
+  {
+    "user_id": "u_t",
+    "workout_type": "cycle",
+    "duration_min": 47,
+    "calories": 235,
+    "timestamp": "2026-05-02T13:37:58.936Z"
+  },
+  {
+    "user_id": "u_4x",
+    "workout_type": "yoga",
+    "duration_min": 63,
+    "calories": 271,
+    "timestamp": "2026-04-26T14:45:16.549Z"
+  },
+  {
+    "user_id": "u_3k",
+    "workout_type": "cycle",
+    "duration_min": 70,
+    "calories": 394,
+    "timestamp": "2026-04-20T06:12:17.587Z"
+  },
+  {
+    "user_id": "u_1u",
+    "workout_type": "swim",
+    "duration_min": 35,
+    "calories": 319,
+    "timestamp": "2026-04-19T15:18:00.875Z"
+  },
+  {
+    "user_id": "u_77",
+    "workout_type": "yoga",
+    "duration_min": 66,
+    "calories": 623,
+    "timestamp": "2026-05-07T16:17:28.144Z"
+  },
+  {
+    "user_id": "u_1c",
+    "workout_type": "swim",
+    "duration_min": 72,
+    "calories": 329,
+    "timestamp": "2026-04-26T00:33:46.076Z"
+  },
+  {
+    "user_id": "u_18",
+    "workout_type": "yoga",
+    "duration_min": 58,
+    "calories": 260,
+    "timestamp": "2026-04-24T00:07:53.099Z"
+  },
+  {
+    "user_id": "u_8c",
+    "workout_type": "cycle",
+    "duration_min": 89,
+    "calories": 687,
+    "timestamp": "2026-04-27T14:52:25.698Z"
+  },
+  {
+    "user_id": "u_54",
+    "workout_type": "yoga",
+    "duration_min": 79,
+    "calories": 664,
+    "timestamp": "2026-04-21T00:14:10.981Z"
+  },
+  {
+    "user_id": "u_2t",
+    "workout_type": "run",
+    "duration_min": 83,
+    "calories": 522,
+    "timestamp": "2026-04-28T19:55:19.991Z"
+  },
+  {
+    "user_id": "u_4f",
+    "workout_type": "cycle",
+    "duration_min": 58,
+    "calories": 473,
+    "timestamp": "2026-04-29T19:14:30.101Z"
+  },
+  {
+    "user_id": "u_2i",
+    "workout_type": "run",
+    "duration_min": 53,
+    "calories": 441,
+    "timestamp": "2026-04-27T17:23:36.030Z"
+  },
+  {
+    "user_id": "u_g",
+    "workout_type": "cycle",
+    "duration_min": 73,
+    "calories": 683,
+    "timestamp": "2026-05-06T06:37:41.577Z"
+  },
+  {
+    "user_id": "u_76",
+    "workout_type": "swim",
+    "duration_min": 87,
+    "calories": 460,
+    "timestamp": "2026-05-02T03:34:37.951Z"
+  },
+  {
+    "user_id": "u_5i",
+    "workout_type": "run",
+    "duration_min": 63,
+    "calories": 597,
+    "timestamp": "2026-04-16T07:25:28.911Z"
+  },
+  {
+    "user_id": "u_82",
+    "workout_type": "cycle",
+    "duration_min": 48,
+    "calories": 242,
+    "timestamp": "2026-05-08T10:46:19.357Z"
+  },
+  {
+    "user_id": "u_2n",
+    "workout_type": "cycle",
+    "duration_min": 77,
+    "calories": 328,
+    "timestamp": "2026-05-01T21:45:33.758Z"
+  },
+  {
+    "user_id": "u_2u",
+    "workout_type": "cycle",
+    "duration_min": 35,
+    "calories": 315,
+    "timestamp": "2026-04-18T14:11:02.005Z"
+  },
+  {
+    "user_id": "u_74",
+    "workout_type": "lift",
+    "duration_min": 55,
+    "calories": 361,
+    "timestamp": "2026-04-17T15:12:14.781Z"
+  },
+  {
+    "user_id": "u_6p",
+    "workout_type": "swim",
+    "duration_min": 51,
+    "calories": 204,
+    "timestamp": "2026-04-22T10:16:22.139Z"
+  },
+  {
+    "user_id": "u_3m",
+    "workout_type": "lift",
+    "duration_min": 88,
+    "calories": 824,
+    "timestamp": "2026-05-12T14:14:39.717Z"
+  },
+  {
+    "user_id": "u_83",
+    "workout_type": "swim",
+    "duration_min": 27,
+    "calories": 206,
+    "timestamp": "2026-05-10T22:30:31.428Z"
+  },
+  {
+    "user_id": "u_m",
+    "workout_type": "cycle",
+    "duration_min": 67,
+    "calories": 532,
+    "timestamp": "2026-05-09T03:31:42.588Z"
+  },
+  {
+    "user_id": "u_5",
+    "workout_type": "yoga",
+    "duration_min": 29,
+    "calories": 130,
+    "timestamp": "2026-04-17T06:52:12.388Z"
+  },
+  {
+    "user_id": "u_2v",
+    "workout_type": "cycle",
+    "duration_min": 76,
+    "calories": 388,
+    "timestamp": "2026-05-03T16:48:21.695Z"
+  },
+  {
+    "user_id": "u_1b",
+    "workout_type": "yoga",
+    "duration_min": 78,
+    "calories": 348,
+    "timestamp": "2026-05-03T08:57:05.774Z"
+  },
+  {
+    "user_id": "u_30",
+    "workout_type": "lift",
+    "duration_min": 82,
+    "calories": 656,
+    "timestamp": "2026-04-17T07:19:18.342Z"
+  },
+  {
+    "user_id": "u_5h",
+    "workout_type": "lift",
+    "duration_min": 69,
+    "calories": 353,
+    "timestamp": "2026-04-19T20:53:11.052Z"
+  },
+  {
+    "user_id": "u_6h",
+    "workout_type": "yoga",
+    "duration_min": 68,
+    "calories": 311,
+    "timestamp": "2026-05-01T04:44:24.414Z"
+  },
+  {
+    "user_id": "u_68",
+    "workout_type": "lift",
+    "duration_min": 53,
+    "calories": 261,
+    "timestamp": "2026-05-11T21:01:45.013Z"
+  },
+  {
+    "user_id": "u_h",
+    "workout_type": "run",
+    "duration_min": 51,
+    "calories": 369,
+    "timestamp": "2026-05-03T00:41:08.659Z"
+  },
+  {
+    "user_id": "u_1g",
+    "workout_type": "lift",
+    "duration_min": 38,
+    "calories": 186,
+    "timestamp": "2026-05-09T19:32:54.329Z"
+  },
+  {
+    "user_id": "u_1v",
+    "workout_type": "cycle",
+    "duration_min": 60,
+    "calories": 424,
+    "timestamp": "2026-04-27T19:46:30.483Z"
+  },
+  {
+    "user_id": "u_d",
+    "workout_type": "yoga",
+    "duration_min": 29,
+    "calories": 134,
+    "timestamp": "2026-04-23T23:42:39.320Z"
+  },
+  {
+    "user_id": "u_2f",
+    "workout_type": "cycle",
+    "duration_min": 39,
+    "calories": 314,
+    "timestamp": "2026-04-28T06:05:22.946Z"
+  },
+  {
+    "user_id": "u_48",
+    "workout_type": "run",
+    "duration_min": 77,
+    "calories": 733,
+    "timestamp": "2026-04-17T22:02:30.827Z"
+  },
+  {
+    "user_id": "u_63",
+    "workout_type": "lift",
+    "duration_min": 81,
+    "calories": 364,
+    "timestamp": "2026-04-25T11:50:13.309Z"
+  },
+  {
+    "user_id": "u_7x",
+    "workout_type": "cycle",
+    "duration_min": 20,
+    "calories": 110,
+    "timestamp": "2026-05-08T18:16:19.076Z"
+  },
+  {
+    "user_id": "u_7k",
+    "workout_type": "yoga",
+    "duration_min": 86,
+    "calories": 362,
+    "timestamp": "2026-04-21T06:42:58.483Z"
+  },
+  {
+    "user_id": "u_55",
+    "workout_type": "lift",
+    "duration_min": 87,
+    "calories": 731,
+    "timestamp": "2026-04-18T00:58:52.116Z"
+  },
+  {
+    "user_id": "u_5k",
+    "workout_type": "lift",
+    "duration_min": 74,
+    "calories": 706,
+    "timestamp": "2026-04-26T17:58:58.935Z"
+  },
+  {
+    "user_id": "u_7i",
+    "workout_type": "swim",
+    "duration_min": 53,
+    "calories": 302,
+    "timestamp": "2026-04-15T01:16:34.443Z"
+  },
+  {
+    "user_id": "u_69",
+    "workout_type": "lift",
+    "duration_min": 15,
+    "calories": 109,
+    "timestamp": "2026-04-19T13:36:54.895Z"
+  },
+  {
+    "user_id": "u_88",
+    "workout_type": "swim",
+    "duration_min": 15,
+    "calories": 61,
+    "timestamp": "2026-04-24T10:15:02.262Z"
+  },
+  {
+    "user_id": "u_5m",
+    "workout_type": "swim",
+    "duration_min": 22,
+    "calories": 151,
+    "timestamp": "2026-04-19T11:53:09.084Z"
+  },
+  {
+    "user_id": "u_2o",
+    "workout_type": "lift",
+    "duration_min": 72,
+    "calories": 468,
+    "timestamp": "2026-05-09T17:43:49.571Z"
+  },
+  {
+    "user_id": "u_47",
+    "workout_type": "yoga",
+    "duration_min": 64,
+    "calories": 521,
+    "timestamp": "2026-05-03T12:56:23.593Z"
+  },
+  {
+    "user_id": "u_6z",
+    "workout_type": "lift",
+    "duration_min": 79,
+    "calories": 359,
+    "timestamp": "2026-04-23T04:33:43.198Z"
+  },
+  {
+    "user_id": "u_10",
+    "workout_type": "lift",
+    "duration_min": 75,
+    "calories": 624,
+    "timestamp": "2026-05-10T04:46:59.274Z"
+  },
+  {
+    "user_id": "u_1w",
+    "workout_type": "cycle",
+    "duration_min": 88,
+    "calories": 564,
+    "timestamp": "2026-05-12T12:20:16.291Z"
+  },
+  {
+    "user_id": "u_5o",
+    "workout_type": "yoga",
+    "duration_min": 44,
+    "calories": 428,
+    "timestamp": "2026-05-03T20:15:09.614Z"
+  },
+  {
+    "user_id": "u_6w",
+    "workout_type": "cycle",
+    "duration_min": 77,
+    "calories": 631,
+    "timestamp": "2026-04-20T16:21:48.195Z"
+  },
+  {
+    "user_id": "u_5g",
+    "workout_type": "swim",
+    "duration_min": 63,
+    "calories": 285,
+    "timestamp": "2026-05-04T02:48:54.314Z"
+  },
+  {
+    "user_id": "u_41",
+    "workout_type": "lift",
+    "duration_min": 31,
+    "calories": 160,
+    "timestamp": "2026-04-24T23:10:22.472Z"
+  },
+  {
+    "user_id": "u_83",
+    "workout_type": "run",
+    "duration_min": 77,
+    "calories": 464,
+    "timestamp": "2026-05-02T00:04:10.868Z"
+  },
+  {
+    "user_id": "u_70",
+    "workout_type": "cycle",
+    "duration_min": 59,
+    "calories": 439,
+    "timestamp": "2026-04-18T11:55:11.646Z"
+  },
+  {
+    "user_id": "u_3h",
+    "workout_type": "yoga",
+    "duration_min": 55,
+    "calories": 286,
+    "timestamp": "2026-05-09T08:27:33.510Z"
+  },
+  {
+    "user_id": "u_6a",
+    "workout_type": "swim",
+    "duration_min": 70,
+    "calories": 446,
+    "timestamp": "2026-05-10T22:58:58.856Z"
+  },
+  {
+    "user_id": "u_7z",
+    "workout_type": "lift",
+    "duration_min": 80,
+    "calories": 748,
+    "timestamp": "2026-05-01T19:21:05.198Z"
+  },
+  {
+    "user_id": "u_1t",
+    "workout_type": "run",
+    "duration_min": 51,
+    "calories": 337,
+    "timestamp": "2026-04-15T21:37:56.712Z"
+  },
+  {
+    "user_id": "u_8e",
+    "workout_type": "run",
+    "duration_min": 82,
+    "calories": 380,
+    "timestamp": "2026-04-24T08:10:40.313Z"
+  },
+  {
+    "user_id": "u_5g",
+    "workout_type": "swim",
+    "duration_min": 41,
+    "calories": 355,
+    "timestamp": "2026-05-08T01:14:57.649Z"
+  },
+  {
+    "user_id": "u_51",
+    "workout_type": "run",
+    "duration_min": 67,
+    "calories": 460,
+    "timestamp": "2026-05-07T08:42:30.143Z"
+  },
+  {
+    "user_id": "u_1",
+    "workout_type": "yoga",
+    "duration_min": 74,
+    "calories": 540,
+    "timestamp": "2026-05-06T20:19:46.928Z"
+  },
+  {
+    "user_id": "u_5h",
+    "workout_type": "lift",
+    "duration_min": 41,
+    "calories": 169,
+    "timestamp": "2026-04-18T04:56:59.303Z"
+  },
+  {
+    "user_id": "u_1z",
+    "workout_type": "lift",
+    "duration_min": 84,
+    "calories": 560,
+    "timestamp": "2026-04-16T23:22:16.488Z"
+  },
+  {
+    "user_id": "u_4b",
+    "workout_type": "swim",
+    "duration_min": 16,
+    "calories": 121,
+    "timestamp": "2026-04-20T07:24:42.917Z"
+  },
+  {
+    "user_id": "u_47",
+    "workout_type": "yoga",
+    "duration_min": 32,
+    "calories": 165,
+    "timestamp": "2026-04-29T18:32:08.426Z"
+  },
+  {
+    "user_id": "u_2m",
+    "workout_type": "cycle",
+    "duration_min": 33,
+    "calories": 229,
+    "timestamp": "2026-05-05T23:58:53.564Z"
+  },
+  {
+    "user_id": "u_84",
+    "workout_type": "swim",
+    "duration_min": 70,
+    "calories": 564,
+    "timestamp": "2026-05-02T17:47:35.134Z"
+  },
+  {
+    "user_id": "u_29",
+    "workout_type": "swim",
+    "duration_min": 86,
+    "calories": 442,
+    "timestamp": "2026-05-02T21:16:35.036Z"
+  },
+  {
+    "user_id": "u_6z",
+    "workout_type": "run",
+    "duration_min": 75,
+    "calories": 703,
+    "timestamp": "2026-04-27T06:15:33.629Z"
+  },
+  {
+    "user_id": "u_3e",
+    "workout_type": "cycle",
+    "duration_min": 68,
+    "calories": 581,
+    "timestamp": "2026-04-20T16:58:09.454Z"
+  },
+  {
+    "user_id": "u_2l",
+    "workout_type": "lift",
+    "duration_min": 87,
+    "calories": 671,
+    "timestamp": "2026-04-22T05:24:29.340Z"
+  },
+  {
+    "user_id": "u_6k",
+    "workout_type": "yoga",
+    "duration_min": 37,
+    "calories": 262,
+    "timestamp": "2026-05-01T12:05:05.687Z"
+  },
+  {
+    "user_id": "u_22",
+    "workout_type": "lift",
+    "duration_min": 61,
+    "calories": 304,
+    "timestamp": "2026-05-11T11:22:27.330Z"
+  },
+  {
+    "user_id": "u_33",
+    "workout_type": "yoga",
+    "duration_min": 15,
+    "calories": 127,
+    "timestamp": "2026-04-24T08:53:54.075Z"
+  },
+  {
+    "user_id": "u_7f",
+    "workout_type": "yoga",
+    "duration_min": 77,
+    "calories": 479,
+    "timestamp": "2026-04-16T09:00:04.347Z"
+  },
+  {
+    "user_id": "u_j",
+    "workout_type": "cycle",
+    "duration_min": 59,
+    "calories": 411,
+    "timestamp": "2026-05-09T07:08:06.660Z"
+  },
+  {
+    "user_id": "u_2s",
+    "workout_type": "swim",
+    "duration_min": 58,
+    "calories": 513,
+    "timestamp": "2026-05-11T01:28:46.298Z"
+  },
+  {
+    "user_id": "u_7r",
+    "workout_type": "cycle",
+    "duration_min": 51,
+    "calories": 504,
+    "timestamp": "2026-05-06T13:10:08.832Z"
+  },
+  {
+    "user_id": "u_1o",
+    "workout_type": "yoga",
+    "duration_min": 16,
+    "calories": 119,
+    "timestamp": "2026-05-10T22:26:34.542Z"
+  },
+  {
+    "user_id": "u_3j",
+    "workout_type": "run",
+    "duration_min": 51,
+    "calories": 505,
+    "timestamp": "2026-04-25T05:15:02.281Z"
+  },
+  {
+    "user_id": "u_7a",
+    "workout_type": "run",
+    "duration_min": 45,
+    "calories": 404,
+    "timestamp": "2026-04-28T00:46:16.908Z"
+  },
+  {
+    "user_id": "u_u",
+    "workout_type": "run",
+    "duration_min": 26,
+    "calories": 169,
+    "timestamp": "2026-04-22T01:23:30.766Z"
+  },
+  {
+    "user_id": "u_2o",
+    "workout_type": "cycle",
+    "duration_min": 34,
+    "calories": 328,
+    "timestamp": "2026-04-22T22:12:06.428Z"
+  },
+  {
+    "user_id": "u_84",
+    "workout_type": "swim",
+    "duration_min": 34,
+    "calories": 216,
+    "timestamp": "2026-05-07T16:29:50.147Z"
+  },
+  {
+    "user_id": "u_5l",
+    "workout_type": "yoga",
+    "duration_min": 59,
+    "calories": 323,
+    "timestamp": "2026-04-29T21:05:26.214Z"
+  },
+  {
+    "user_id": "u_2q",
+    "workout_type": "run",
+    "duration_min": 47,
+    "calories": 332,
+    "timestamp": "2026-05-09T06:14:18.105Z"
+  },
+  {
+    "user_id": "u_3j",
+    "workout_type": "run",
+    "duration_min": 35,
+    "calories": 336,
+    "timestamp": "2026-05-02T02:02:14.949Z"
+  },
+  {
+    "user_id": "u_f",
+    "workout_type": "run",
+    "duration_min": 56,
+    "calories": 526,
+    "timestamp": "2026-05-07T21:14:24.272Z"
+  },
+  {
+    "user_id": "u_u",
+    "workout_type": "lift",
+    "duration_min": 43,
+    "calories": 360,
+    "timestamp": "2026-04-18T00:38:09.574Z"
+  },
+  {
+    "user_id": "u_8",
+    "workout_type": "lift",
+    "duration_min": 80,
+    "calories": 420,
+    "timestamp": "2026-04-26T07:59:03.225Z"
+  },
+  {
+    "user_id": "u_60",
+    "workout_type": "run",
+    "duration_min": 32,
+    "calories": 207,
+    "timestamp": "2026-05-10T15:46:40.879Z"
+  },
+  {
+    "user_id": "u_4g",
+    "workout_type": "cycle",
+    "duration_min": 39,
+    "calories": 365,
+    "timestamp": "2026-05-12T20:06:43.220Z"
+  },
+  {
+    "user_id": "u_2k",
+    "workout_type": "lift",
+    "duration_min": 85,
+    "calories": 525,
+    "timestamp": "2026-04-25T12:45:46.513Z"
+  },
+  {
+    "user_id": "u_4i",
+    "workout_type": "lift",
+    "duration_min": 69,
+    "calories": 598,
+    "timestamp": "2026-04-29T18:08:09.022Z"
+  },
+  {
+    "user_id": "u_2j",
+    "workout_type": "lift",
+    "duration_min": 20,
+    "calories": 125,
+    "timestamp": "2026-05-11T08:59:48.193Z"
+  },
+  {
+    "user_id": "u_70",
+    "workout_type": "lift",
+    "duration_min": 15,
+    "calories": 134,
+    "timestamp": "2026-04-22T10:45:07.504Z"
+  },
+  {
+    "user_id": "u_3l",
+    "workout_type": "run",
+    "duration_min": 83,
+    "calories": 451,
+    "timestamp": "2026-05-06T00:36:22.712Z"
+  },
+  {
+    "user_id": "u_7",
+    "workout_type": "run",
+    "duration_min": 30,
+    "calories": 281,
+    "timestamp": "2026-05-08T19:27:26.986Z"
+  },
+  {
+    "user_id": "u_60",
+    "workout_type": "lift",
+    "duration_min": 79,
+    "calories": 476,
+    "timestamp": "2026-05-06T20:45:56.649Z"
+  },
+  {
+    "user_id": "u_83",
+    "workout_type": "swim",
+    "duration_min": 43,
+    "calories": 256,
+    "timestamp": "2026-05-03T06:28:23.708Z"
+  },
+  {
+    "user_id": "u_3w",
+    "workout_type": "cycle",
+    "duration_min": 76,
+    "calories": 541,
+    "timestamp": "2026-04-30T14:06:34.697Z"
+  },
+  {
+    "user_id": "u_5l",
+    "workout_type": "lift",
+    "duration_min": 79,
+    "calories": 627,
+    "timestamp": "2026-04-25T07:01:54.445Z"
+  },
+  {
+    "user_id": "u_1z",
+    "workout_type": "yoga",
+    "duration_min": 27,
+    "calories": 157,
+    "timestamp": "2026-05-10T08:34:14.331Z"
+  },
+  {
+    "user_id": "u_o",
+    "workout_type": "run",
+    "duration_min": 85,
+    "calories": 431,
+    "timestamp": "2026-05-05T16:14:15.977Z"
+  },
+  {
+    "user_id": "u_20",
+    "workout_type": "swim",
+    "duration_min": 63,
+    "calories": 570,
+    "timestamp": "2026-05-08T02:55:44.792Z"
+  },
+  {
+    "user_id": "u_1y",
+    "workout_type": "swim",
+    "duration_min": 15,
+    "calories": 149,
+    "timestamp": "2026-04-26T22:32:40.019Z"
+  },
+  {
+    "user_id": "u_42",
+    "workout_type": "lift",
+    "duration_min": 31,
+    "calories": 130,
+    "timestamp": "2026-05-02T08:30:46.497Z"
+  },
+  {
+    "user_id": "u_8l",
+    "workout_type": "swim",
+    "duration_min": 55,
+    "calories": 244,
+    "timestamp": "2026-05-10T17:42:07.971Z"
+  },
+  {
+    "user_id": "u_7c",
+    "workout_type": "run",
+    "duration_min": 44,
+    "calories": 428,
+    "timestamp": "2026-04-15T00:16:33.474Z"
+  },
+  {
+    "user_id": "u_65",
+    "workout_type": "run",
+    "duration_min": 64,
+    "calories": 333,
+    "timestamp": "2026-05-07T09:50:27.711Z"
+  },
+  {
+    "user_id": "u_3h",
+    "workout_type": "cycle",
+    "duration_min": 54,
+    "calories": 240,
+    "timestamp": "2026-05-07T06:23:45.420Z"
+  },
+  {
+    "user_id": "u_f",
+    "workout_type": "lift",
+    "duration_min": 74,
+    "calories": 383,
+    "timestamp": "2026-04-28T02:04:25.979Z"
+  },
+  {
+    "user_id": "u_57",
+    "workout_type": "run",
+    "duration_min": 38,
+    "calories": 352,
+    "timestamp": "2026-04-24T03:49:45.484Z"
+  },
+  {
+    "user_id": "u_t",
+    "workout_type": "cycle",
+    "duration_min": 65,
+    "calories": 612,
+    "timestamp": "2026-04-21T04:42:07.880Z"
+  },
+  {
+    "user_id": "u_7b",
+    "workout_type": "yoga",
+    "duration_min": 66,
+    "calories": 603,
+    "timestamp": "2026-04-28T05:24:14.387Z"
+  },
+  {
+    "user_id": "u_2n",
+    "workout_type": "lift",
+    "duration_min": 47,
+    "calories": 432,
+    "timestamp": "2026-04-17T02:38:03.118Z"
+  },
+  {
+    "user_id": "u_7",
+    "workout_type": "yoga",
+    "duration_min": 81,
+    "calories": 578,
+    "timestamp": "2026-04-28T02:56:44.852Z"
+  },
+  {
+    "user_id": "u_7p",
+    "workout_type": "run",
+    "duration_min": 44,
+    "calories": 202,
+    "timestamp": "2026-05-09T11:43:48.823Z"
+  },
+  {
+    "user_id": "u_4y",
+    "workout_type": "lift",
+    "duration_min": 25,
+    "calories": 122,
+    "timestamp": "2026-04-19T06:48:50.893Z"
+  },
+  {
+    "user_id": "u_4s",
+    "workout_type": "swim",
+    "duration_min": 46,
+    "calories": 367,
+    "timestamp": "2026-05-08T10:28:02.349Z"
+  },
+  {
+    "user_id": "u_4k",
+    "workout_type": "cycle",
+    "duration_min": 16,
+    "calories": 97,
+    "timestamp": "2026-04-18T03:06:28.070Z"
+  },
+  {
+    "user_id": "u_4u",
+    "workout_type": "yoga",
+    "duration_min": 35,
+    "calories": 155,
+    "timestamp": "2026-05-08T04:13:06.081Z"
+  },
+  {
+    "user_id": "u_7p",
+    "workout_type": "yoga",
+    "duration_min": 60,
+    "calories": 564,
+    "timestamp": "2026-04-27T04:11:48.359Z"
+  },
+  {
+    "user_id": "u_n",
+    "workout_type": "lift",
+    "duration_min": 87,
+    "calories": 348,
+    "timestamp": "2026-04-15T10:41:25.099Z"
+  },
+  {
+    "user_id": "u_41",
+    "workout_type": "swim",
+    "duration_min": 47,
+    "calories": 415,
+    "timestamp": "2026-05-10T10:01:16.411Z"
+  },
+  {
+    "user_id": "u_7m",
+    "workout_type": "lift",
+    "duration_min": 72,
+    "calories": 472,
+    "timestamp": "2026-04-16T10:32:15.981Z"
+  },
+  {
+    "user_id": "u_8h",
+    "workout_type": "lift",
+    "duration_min": 80,
+    "calories": 356,
+    "timestamp": "2026-05-04T11:07:47.971Z"
+  },
+  {
+    "user_id": "u_1h",
+    "workout_type": "cycle",
+    "duration_min": 24,
+    "calories": 172,
+    "timestamp": "2026-04-16T07:40:28.362Z"
+  },
+  {
+    "user_id": "u_8e",
+    "workout_type": "run",
+    "duration_min": 19,
+    "calories": 144,
+    "timestamp": "2026-04-15T11:22:42.022Z"
+  },
+  {
+    "user_id": "u_6u",
+    "workout_type": "yoga",
+    "duration_min": 16,
+    "calories": 153,
+    "timestamp": "2026-04-27T22:52:05.282Z"
+  },
+  {
+    "user_id": "u_6k",
+    "workout_type": "run",
+    "duration_min": 39,
+    "calories": 248,
+    "timestamp": "2026-05-03T21:53:00.214Z"
+  },
+  {
+    "user_id": "u_3h",
+    "workout_type": "lift",
+    "duration_min": 78,
+    "calories": 734,
+    "timestamp": "2026-04-21T10:47:14.637Z"
+  },
+  {
+    "user_id": "u_5g",
+    "workout_type": "run",
+    "duration_min": 61,
+    "calories": 278,
+    "timestamp": "2026-04-27T04:02:54.419Z"
+  },
+  {
+    "user_id": "u_6",
+    "workout_type": "yoga",
+    "duration_min": 51,
+    "calories": 434,
+    "timestamp": "2026-04-28T16:10:43.986Z"
+  },
+  {
+    "user_id": "u_2d",
+    "workout_type": "lift",
+    "duration_min": 72,
+    "calories": 501,
+    "timestamp": "2026-05-08T10:16:26.971Z"
+  },
+  {
+    "user_id": "u_v",
+    "workout_type": "lift",
+    "duration_min": 25,
+    "calories": 204,
+    "timestamp": "2026-05-05T20:01:56.229Z"
+  },
+  {
+    "user_id": "u_6w",
+    "workout_type": "cycle",
+    "duration_min": 75,
+    "calories": 644,
+    "timestamp": "2026-04-18T00:55:30.879Z"
+  },
+  {
+    "user_id": "u_5h",
+    "workout_type": "lift",
+    "duration_min": 28,
+    "calories": 184,
+    "timestamp": "2026-04-23T23:31:39.560Z"
+  },
+  {
+    "user_id": "u_44",
+    "workout_type": "yoga",
+    "duration_min": 20,
+    "calories": 129,
+    "timestamp": "2026-05-09T10:41:53.727Z"
+  },
+  {
+    "user_id": "u_5e",
+    "workout_type": "lift",
+    "duration_min": 65,
+    "calories": 623,
+    "timestamp": "2026-04-17T16:38:08.996Z"
+  },
+  {
+    "user_id": "u_70",
+    "workout_type": "yoga",
+    "duration_min": 19,
+    "calories": 137,
+    "timestamp": "2026-05-10T08:34:55.436Z"
+  },
+  {
+    "user_id": "u_u",
+    "workout_type": "lift",
+    "duration_min": 34,
+    "calories": 337,
+    "timestamp": "2026-05-06T18:56:19.678Z"
+  },
+  {
+    "user_id": "u_l",
+    "workout_type": "swim",
+    "duration_min": 22,
+    "calories": 172,
+    "timestamp": "2026-05-11T12:32:46.255Z"
+  },
+  {
+    "user_id": "u_y",
+    "workout_type": "yoga",
+    "duration_min": 72,
+    "calories": 632,
+    "timestamp": "2026-05-05T13:51:39.331Z"
+  },
+  {
+    "user_id": "u_3n",
+    "workout_type": "yoga",
+    "duration_min": 29,
+    "calories": 160,
+    "timestamp": "2026-05-12T04:39:34.641Z"
+  },
+  {
+    "user_id": "u_27",
+    "workout_type": "run",
+    "duration_min": 60,
+    "calories": 368,
+    "timestamp": "2026-05-02T23:54:25.116Z"
+  },
+  {
+    "user_id": "u_6c",
+    "workout_type": "run",
+    "duration_min": 74,
+    "calories": 433,
+    "timestamp": "2026-05-05T11:03:21.636Z"
+  },
+  {
+    "user_id": "u_34",
+    "workout_type": "yoga",
+    "duration_min": 70,
+    "calories": 684,
+    "timestamp": "2026-05-02T15:14:17.051Z"
+  },
+  {
+    "user_id": "u_5z",
+    "workout_type": "yoga",
+    "duration_min": 35,
+    "calories": 347,
+    "timestamp": "2026-05-10T05:42:39.626Z"
+  },
+  {
+    "user_id": "u_2m",
+    "workout_type": "run",
+    "duration_min": 49,
+    "calories": 377,
+    "timestamp": "2026-04-16T12:37:58.300Z"
+  },
+  {
+    "user_id": "u_2d",
+    "workout_type": "lift",
+    "duration_min": 45,
+    "calories": 337,
+    "timestamp": "2026-05-10T21:04:55.160Z"
+  },
+  {
+    "user_id": "u_89",
+    "workout_type": "yoga",
+    "duration_min": 86,
+    "calories": 396,
+    "timestamp": "2026-05-04T23:35:03.457Z"
+  },
+  {
+    "user_id": "u_89",
+    "workout_type": "swim",
+    "duration_min": 49,
+    "calories": 244,
+    "timestamp": "2026-05-06T14:59:14.757Z"
+  },
+  {
+    "user_id": "u_7",
+    "workout_type": "lift",
+    "duration_min": 46,
+    "calories": 231,
+    "timestamp": "2026-04-15T18:07:54.367Z"
+  },
+  {
+    "user_id": "u_54",
+    "workout_type": "run",
+    "duration_min": 89,
+    "calories": 387,
+    "timestamp": "2026-05-01T19:25:55.122Z"
+  },
+  {
+    "user_id": "u_t",
+    "workout_type": "run",
+    "duration_min": 87,
+    "calories": 375,
+    "timestamp": "2026-05-10T02:51:04.128Z"
+  },
+  {
+    "user_id": "u_7o",
+    "workout_type": "yoga",
+    "duration_min": 30,
+    "calories": 202,
+    "timestamp": "2026-04-21T04:49:16.596Z"
+  },
+  {
+    "user_id": "u_c",
+    "workout_type": "cycle",
+    "duration_min": 85,
+    "calories": 720,
+    "timestamp": "2026-04-22T08:36:17.192Z"
+  },
+  {
+    "user_id": "u_2j",
+    "workout_type": "cycle",
+    "duration_min": 62,
+    "calories": 607,
+    "timestamp": "2026-04-27T19:44:39.448Z"
+  },
+  {
+    "user_id": "u_1c",
+    "workout_type": "swim",
+    "duration_min": 27,
+    "calories": 250,
+    "timestamp": "2026-04-27T14:45:00.613Z"
+  },
+  {
+    "user_id": "u_77",
+    "workout_type": "lift",
+    "duration_min": 77,
+    "calories": 340,
+    "timestamp": "2026-04-18T23:22:22.324Z"
+  },
+  {
+    "user_id": "u_1m",
+    "workout_type": "yoga",
+    "duration_min": 26,
+    "calories": 141,
+    "timestamp": "2026-04-26T22:58:53.349Z"
+  },
+  {
+    "user_id": "u_50",
+    "workout_type": "lift",
+    "duration_min": 78,
+    "calories": 770,
+    "timestamp": "2026-04-28T03:36:32.540Z"
+  },
+  {
+    "user_id": "u_3k",
+    "workout_type": "yoga",
+    "duration_min": 87,
+    "calories": 714,
+    "timestamp": "2026-05-09T01:54:43.405Z"
+  },
+  {
+    "user_id": "u_52",
+    "workout_type": "lift",
+    "duration_min": 30,
+    "calories": 229,
+    "timestamp": "2026-04-18T06:25:57.035Z"
+  },
+  {
+    "user_id": "u_o",
+    "workout_type": "yoga",
+    "duration_min": 64,
+    "calories": 562,
+    "timestamp": "2026-05-10T23:39:51.268Z"
+  },
+  {
+    "user_id": "u_3c",
+    "workout_type": "swim",
+    "duration_min": 57,
+    "calories": 546,
+    "timestamp": "2026-05-10T22:59:40.366Z"
+  },
+  {
+    "user_id": "u_9",
+    "workout_type": "cycle",
+    "duration_min": 56,
+    "calories": 249,
+    "timestamp": "2026-04-30T02:15:27.432Z"
+  },
+  {
+    "user_id": "u_4x",
+    "workout_type": "cycle",
+    "duration_min": 52,
+    "calories": 416,
+    "timestamp": "2026-05-09T16:23:45.288Z"
+  },
+  {
+    "user_id": "u_2n",
+    "workout_type": "run",
+    "duration_min": 51,
+    "calories": 448,
+    "timestamp": "2026-05-02T01:58:03.494Z"
+  },
+  {
+    "user_id": "u_6g",
+    "workout_type": "run",
+    "duration_min": 32,
+    "calories": 180,
+    "timestamp": "2026-04-18T05:13:58.540Z"
+  },
+  {
+    "user_id": "u_3m",
+    "workout_type": "swim",
+    "duration_min": 43,
+    "calories": 379,
+    "timestamp": "2026-05-06T08:16:04.720Z"
+  },
+  {
+    "user_id": "u_1p",
+    "workout_type": "swim",
+    "duration_min": 83,
+    "calories": 726,
+    "timestamp": "2026-04-30T13:13:38.076Z"
+  },
+  {
+    "user_id": "u_5c",
+    "workout_type": "swim",
+    "duration_min": 31,
+    "calories": 201,
+    "timestamp": "2026-05-06T18:38:26.882Z"
+  },
+  {
+    "user_id": "u_p",
+    "workout_type": "cycle",
+    "duration_min": 72,
+    "calories": 339,
+    "timestamp": "2026-05-04T14:32:43.774Z"
+  },
+  {
+    "user_id": "u_5z",
+    "workout_type": "cycle",
+    "duration_min": 44,
+    "calories": 251,
+    "timestamp": "2026-04-22T20:09:36.556Z"
+  },
+  {
+    "user_id": "u_q",
+    "workout_type": "cycle",
+    "duration_min": 32,
+    "calories": 177,
+    "timestamp": "2026-05-02T23:38:03.236Z"
+  },
+  {
+    "user_id": "u_7c",
+    "workout_type": "cycle",
+    "duration_min": 75,
+    "calories": 663,
+    "timestamp": "2026-05-02T23:52:05.657Z"
+  },
+  {
+    "user_id": "u_82",
+    "workout_type": "cycle",
+    "duration_min": 26,
+    "calories": 151,
+    "timestamp": "2026-04-17T11:22:13.057Z"
+  },
+  {
+    "user_id": "u_3",
+    "workout_type": "swim",
+    "duration_min": 25,
+    "calories": 110,
+    "timestamp": "2026-04-18T01:54:12.099Z"
+  },
+  {
+    "user_id": "u_11",
+    "workout_type": "cycle",
+    "duration_min": 31,
+    "calories": 245,
+    "timestamp": "2026-05-11T10:43:05.681Z"
+  },
+  {
+    "user_id": "u_5y",
+    "workout_type": "yoga",
+    "duration_min": 30,
+    "calories": 242,
+    "timestamp": "2026-05-07T09:07:12.516Z"
+  },
+  {
+    "user_id": "u_2",
+    "workout_type": "yoga",
+    "duration_min": 25,
+    "calories": 123,
+    "timestamp": "2026-05-08T03:21:42.646Z"
+  },
+  {
+    "user_id": "u_6q",
+    "workout_type": "run",
+    "duration_min": 74,
+    "calories": 343,
+    "timestamp": "2026-04-17T07:52:33.886Z"
+  },
+  {
+    "user_id": "u_2o",
+    "workout_type": "lift",
+    "duration_min": 69,
+    "calories": 522,
+    "timestamp": "2026-05-09T19:51:15.846Z"
+  },
+  {
+    "user_id": "u_4d",
+    "workout_type": "cycle",
+    "duration_min": 48,
+    "calories": 285,
+    "timestamp": "2026-05-02T16:42:18.323Z"
+  },
+  {
+    "user_id": "u_5h",
+    "workout_type": "run",
+    "duration_min": 76,
+    "calories": 426,
+    "timestamp": "2026-04-24T16:25:51.768Z"
+  },
+  {
+    "user_id": "u_29",
+    "workout_type": "yoga",
+    "duration_min": 18,
+    "calories": 111,
+    "timestamp": "2026-04-29T19:35:25.321Z"
+  },
+  {
+    "user_id": "u_2l",
+    "workout_type": "swim",
+    "duration_min": 74,
+    "calories": 464,
+    "timestamp": "2026-05-03T06:05:39.601Z"
+  },
+  {
+    "user_id": "u_23",
+    "workout_type": "yoga",
+    "duration_min": 69,
+    "calories": 625,
+    "timestamp": "2026-04-17T05:30:02.340Z"
+  },
+  {
+    "user_id": "u_6m",
+    "workout_type": "swim",
+    "duration_min": 47,
+    "calories": 453,
+    "timestamp": "2026-04-29T11:06:17.530Z"
+  },
+  {
+    "user_id": "u_3z",
+    "workout_type": "lift",
+    "duration_min": 18,
+    "calories": 79,
+    "timestamp": "2026-04-28T02:19:46.731Z"
+  },
+  {
+    "user_id": "u_5z",
+    "workout_type": "cycle",
+    "duration_min": 80,
+    "calories": 352,
+    "timestamp": "2026-04-19T03:36:59.103Z"
+  },
+  {
+    "user_id": "u_76",
+    "workout_type": "yoga",
+    "duration_min": 58,
+    "calories": 242,
+    "timestamp": "2026-04-21T18:10:52.413Z"
+  },
+  {
+    "user_id": "u_4n",
+    "workout_type": "yoga",
+    "duration_min": 51,
+    "calories": 376,
+    "timestamp": "2026-04-24T19:52:58.855Z"
+  },
+  {
+    "user_id": "u_2c",
+    "workout_type": "swim",
+    "duration_min": 44,
+    "calories": 427,
+    "timestamp": "2026-05-01T04:16:08.294Z"
+  },
+  {
+    "user_id": "u_1w",
+    "workout_type": "swim",
+    "duration_min": 52,
+    "calories": 443,
+    "timestamp": "2026-04-27T15:41:50.415Z"
+  },
+  {
+    "user_id": "u_5g",
+    "workout_type": "lift",
+    "duration_min": 29,
+    "calories": 251,
+    "timestamp": "2026-05-12T07:25:57.291Z"
+  },
+  {
+    "user_id": "u_50",
+    "workout_type": "yoga",
+    "duration_min": 85,
+    "calories": 551,
+    "timestamp": "2026-04-24T04:41:49.660Z"
+  },
+  {
+    "user_id": "u_3",
+    "workout_type": "cycle",
+    "duration_min": 49,
+    "calories": 369,
+    "timestamp": "2026-04-27T04:18:30.837Z"
+  },
+  {
+    "user_id": "u_w",
+    "workout_type": "swim",
+    "duration_min": 82,
+    "calories": 686,
+    "timestamp": "2026-04-22T12:41:00.835Z"
+  },
+  {
+    "user_id": "u_8g",
+    "workout_type": "lift",
+    "duration_min": 68,
+    "calories": 664,
+    "timestamp": "2026-04-22T14:08:21.471Z"
+  },
+  {
+    "user_id": "u_1b",
+    "workout_type": "yoga",
+    "duration_min": 33,
+    "calories": 228,
+    "timestamp": "2026-05-08T19:14:20.367Z"
+  },
+  {
+    "user_id": "u_2q",
+    "workout_type": "lift",
+    "duration_min": 27,
+    "calories": 132,
+    "timestamp": "2026-05-09T10:36:56.097Z"
+  },
+  {
+    "user_id": "u_4i",
+    "workout_type": "lift",
+    "duration_min": 60,
+    "calories": 374,
+    "timestamp": "2026-04-30T15:32:14.872Z"
+  },
+  {
+    "user_id": "u_7l",
+    "workout_type": "lift",
+    "duration_min": 47,
+    "calories": 227,
+    "timestamp": "2026-05-06T16:17:19.623Z"
+  },
+  {
+    "user_id": "u_37",
+    "workout_type": "run",
+    "duration_min": 57,
+    "calories": 527,
+    "timestamp": "2026-04-17T13:47:38.257Z"
+  },
+  {
+    "user_id": "u_6y",
+    "workout_type": "yoga",
+    "duration_min": 78,
+    "calories": 616,
+    "timestamp": "2026-04-22T23:37:00.219Z"
+  },
+  {
+    "user_id": "u_4d",
+    "workout_type": "lift",
+    "duration_min": 88,
+    "calories": 681,
+    "timestamp": "2026-05-01T06:09:42.781Z"
+  },
+  {
+    "user_id": "u_6d",
+    "workout_type": "yoga",
+    "duration_min": 62,
+    "calories": 419,
+    "timestamp": "2026-04-29T12:13:00.641Z"
+  },
+  {
+    "user_id": "u_60",
+    "workout_type": "swim",
+    "duration_min": 64,
+    "calories": 447,
+    "timestamp": "2026-04-17T15:21:26.891Z"
+  },
+  {
+    "user_id": "u_4p",
+    "workout_type": "cycle",
+    "duration_min": 79,
+    "calories": 690,
+    "timestamp": "2026-05-08T02:39:26.002Z"
+  },
+  {
+    "user_id": "u_1m",
+    "workout_type": "yoga",
+    "duration_min": 75,
+    "calories": 648,
+    "timestamp": "2026-04-22T15:24:51.837Z"
+  },
+  {
+    "user_id": "u_74",
+    "workout_type": "run",
+    "duration_min": 22,
+    "calories": 210,
+    "timestamp": "2026-04-17T19:00:54.391Z"
+  },
+  {
+    "user_id": "u_43",
+    "workout_type": "lift",
+    "duration_min": 30,
+    "calories": 143,
+    "timestamp": "2026-04-17T08:27:23.663Z"
+  },
+  {
+    "user_id": "u_8b",
+    "workout_type": "swim",
+    "duration_min": 77,
+    "calories": 443,
+    "timestamp": "2026-04-16T16:23:34.902Z"
+  },
+  {
+    "user_id": "u_n",
+    "workout_type": "cycle",
+    "duration_min": 40,
+    "calories": 319,
+    "timestamp": "2026-05-08T22:57:36.953Z"
+  },
+  {
+    "user_id": "u_68",
+    "workout_type": "yoga",
+    "duration_min": 62,
+    "calories": 446,
+    "timestamp": "2026-04-17T17:48:40.575Z"
+  },
+  {
+    "user_id": "u_17",
+    "workout_type": "swim",
+    "duration_min": 28,
+    "calories": 174,
+    "timestamp": "2026-05-10T02:45:06.517Z"
+  },
+  {
+    "user_id": "u_65",
+    "workout_type": "cycle",
+    "duration_min": 42,
+    "calories": 336,
+    "timestamp": "2026-04-16T21:16:49.943Z"
+  },
+  {
+    "user_id": "u_x",
+    "workout_type": "swim",
+    "duration_min": 88,
+    "calories": 535,
+    "timestamp": "2026-04-28T01:16:21.176Z"
+  },
+  {
+    "user_id": "u_4h",
+    "workout_type": "swim",
+    "duration_min": 20,
+    "calories": 126,
+    "timestamp": "2026-04-22T10:46:36.970Z"
+  },
+  {
+    "user_id": "u_w",
+    "workout_type": "yoga",
+    "duration_min": 27,
+    "calories": 148,
+    "timestamp": "2026-04-21T20:09:35.754Z"
+  },
+  {
+    "user_id": "u_3f",
+    "workout_type": "yoga",
+    "duration_min": 77,
+    "calories": 683,
+    "timestamp": "2026-05-04T02:35:12.371Z"
+  },
+  {
+    "user_id": "u_6h",
+    "workout_type": "lift",
+    "duration_min": 81,
+    "calories": 793,
+    "timestamp": "2026-04-20T04:34:17.311Z"
+  },
+  {
+    "user_id": "u_66",
+    "workout_type": "yoga",
+    "duration_min": 19,
+    "calories": 178,
+    "timestamp": "2026-05-02T07:11:46.069Z"
+  },
+  {
+    "user_id": "u_u",
+    "workout_type": "lift",
+    "duration_min": 24,
+    "calories": 232,
+    "timestamp": "2026-04-17T10:44:07.672Z"
+  },
+  {
+    "user_id": "u_1t",
+    "workout_type": "cycle",
+    "duration_min": 71,
+    "calories": 330,
+    "timestamp": "2026-05-12T23:16:27.494Z"
+  },
+  {
+    "user_id": "u_7p",
+    "workout_type": "lift",
+    "duration_min": 78,
+    "calories": 643,
+    "timestamp": "2026-04-20T13:31:03.279Z"
+  },
+  {
+    "user_id": "u_6v",
+    "workout_type": "swim",
+    "duration_min": 67,
+    "calories": 559,
+    "timestamp": "2026-05-08T06:56:22.403Z"
+  },
+  {
+    "user_id": "u_4x",
+    "workout_type": "run",
+    "duration_min": 79,
+    "calories": 512,
+    "timestamp": "2026-04-24T10:07:45.957Z"
+  },
+  {
+    "user_id": "u_4x",
+    "workout_type": "lift",
+    "duration_min": 38,
+    "calories": 342,
+    "timestamp": "2026-05-11T17:22:56.711Z"
+  },
+  {
+    "user_id": "u_3t",
+    "workout_type": "lift",
+    "duration_min": 53,
+    "calories": 454,
+    "timestamp": "2026-04-21T15:27:10.638Z"
+  },
+  {
+    "user_id": "u_6x",
+    "workout_type": "run",
+    "duration_min": 47,
+    "calories": 299,
+    "timestamp": "2026-04-29T22:01:10.458Z"
+  },
+  {
+    "user_id": "u_28",
+    "workout_type": "lift",
+    "duration_min": 65,
+    "calories": 614,
+    "timestamp": "2026-05-02T06:02:58.872Z"
+  },
+  {
+    "user_id": "u_1u",
+    "workout_type": "cycle",
+    "duration_min": 54,
+    "calories": 419,
+    "timestamp": "2026-04-21T07:09:52.015Z"
+  },
+  {
+    "user_id": "u_7l",
+    "workout_type": "yoga",
+    "duration_min": 43,
+    "calories": 187,
+    "timestamp": "2026-04-26T16:45:56.699Z"
+  },
+  {
+    "user_id": "u_2u",
+    "workout_type": "swim",
+    "duration_min": 17,
+    "calories": 106,
+    "timestamp": "2026-05-06T00:02:28.185Z"
+  },
+  {
+    "user_id": "u_8d",
+    "workout_type": "swim",
+    "duration_min": 30,
+    "calories": 211,
+    "timestamp": "2026-05-08T03:51:08.685Z"
+  },
+  {
+    "user_id": "u_1g",
+    "workout_type": "run",
+    "duration_min": 89,
+    "calories": 548,
+    "timestamp": "2026-04-28T19:14:09.187Z"
+  },
+  {
+    "user_id": "u_6p",
+    "workout_type": "yoga",
+    "duration_min": 41,
+    "calories": 357,
+    "timestamp": "2026-04-21T05:48:57.347Z"
+  },
+  {
+    "user_id": "u_4x",
+    "workout_type": "run",
+    "duration_min": 55,
+    "calories": 483,
+    "timestamp": "2026-05-03T05:21:13.550Z"
+  },
+  {
+    "user_id": "u_2v",
+    "workout_type": "yoga",
+    "duration_min": 33,
+    "calories": 153,
+    "timestamp": "2026-04-18T06:31:32.221Z"
+  },
+  {
+    "user_id": "u_6m",
+    "workout_type": "lift",
+    "duration_min": 56,
+    "calories": 354,
+    "timestamp": "2026-05-09T20:00:35.291Z"
+  },
+  {
+    "user_id": "u_2i",
+    "workout_type": "lift",
+    "duration_min": 63,
+    "calories": 309,
+    "timestamp": "2026-04-30T03:02:42.426Z"
+  },
+  {
+    "user_id": "u_6e",
+    "workout_type": "run",
+    "duration_min": 35,
+    "calories": 294,
+    "timestamp": "2026-04-28T06:18:05.261Z"
+  },
+  {
+    "user_id": "u_3k",
+    "workout_type": "cycle",
+    "duration_min": 60,
+    "calories": 357,
+    "timestamp": "2026-04-28T03:38:04.897Z"
+  },
+  {
+    "user_id": "u_2i",
+    "workout_type": "cycle",
+    "duration_min": 84,
+    "calories": 676,
+    "timestamp": "2026-04-16T03:49:49.281Z"
+  },
+  {
+    "user_id": "u_4v",
+    "workout_type": "lift",
+    "duration_min": 86,
+    "calories": 427,
+    "timestamp": "2026-05-11T02:16:28.180Z"
+  },
+  {
+    "user_id": "u_m",
+    "workout_type": "cycle",
+    "duration_min": 31,
+    "calories": 230,
+    "timestamp": "2026-04-23T14:40:58.460Z"
+  },
+  {
+    "user_id": "u_8n",
+    "workout_type": "cycle",
+    "duration_min": 25,
+    "calories": 132,
+    "timestamp": "2026-04-15T16:32:38.383Z"
+  },
+  {
+    "user_id": "u_5d",
+    "workout_type": "run",
+    "duration_min": 50,
+    "calories": 262,
+    "timestamp": "2026-04-19T18:52:47.055Z"
+  },
+  {
+    "user_id": "u_q",
+    "workout_type": "lift",
+    "duration_min": 39,
+    "calories": 338,
+    "timestamp": "2026-04-27T09:05:46.382Z"
+  },
+  {
+    "user_id": "u_7k",
+    "workout_type": "swim",
+    "duration_min": 34,
+    "calories": 273,
+    "timestamp": "2026-04-22T18:45:45.565Z"
+  },
+  {
+    "user_id": "u_5x",
+    "workout_type": "lift",
+    "duration_min": 52,
+    "calories": 352,
+    "timestamp": "2026-05-03T06:45:09.570Z"
+  },
+  {
+    "user_id": "u_6i",
+    "workout_type": "lift",
+    "duration_min": 34,
+    "calories": 309,
+    "timestamp": "2026-04-21T05:07:02.919Z"
+  },
+  {
+    "user_id": "u_3y",
+    "workout_type": "run",
+    "duration_min": 26,
+    "calories": 118,
+    "timestamp": "2026-04-24T11:41:46.511Z"
+  },
+  {
+    "user_id": "u_1z",
+    "workout_type": "lift",
+    "duration_min": 17,
+    "calories": 126,
+    "timestamp": "2026-05-01T11:45:31.476Z"
+  },
+  {
+    "user_id": "u_2",
+    "workout_type": "cycle",
+    "duration_min": 71,
+    "calories": 481,
+    "timestamp": "2026-04-28T15:46:56.600Z"
+  },
+  {
+    "user_id": "u_27",
+    "workout_type": "yoga",
+    "duration_min": 76,
+    "calories": 455,
+    "timestamp": "2026-05-12T19:30:41.150Z"
+  },
+  {
+    "user_id": "u_4x",
+    "workout_type": "lift",
+    "duration_min": 50,
+    "calories": 480,
+    "timestamp": "2026-05-06T16:21:13.578Z"
+  },
+  {
+    "user_id": "u_3f",
+    "workout_type": "swim",
+    "duration_min": 39,
+    "calories": 348,
+    "timestamp": "2026-04-29T15:07:27.554Z"
+  },
+  {
+    "user_id": "u_z",
+    "workout_type": "swim",
+    "duration_min": 70,
+    "calories": 591,
+    "timestamp": "2026-05-12T19:58:23.004Z"
+  },
+  {
+    "user_id": "u_30",
+    "workout_type": "run",
+    "duration_min": 67,
+    "calories": 287,
+    "timestamp": "2026-04-21T17:12:01.561Z"
+  },
+  {
+    "user_id": "u_7a",
+    "workout_type": "lift",
+    "duration_min": 46,
+    "calories": 350,
+    "timestamp": "2026-04-18T12:11:16.358Z"
+  },
+  {
+    "user_id": "u_2q",
+    "workout_type": "cycle",
+    "duration_min": 64,
+    "calories": 570,
+    "timestamp": "2026-05-04T11:11:18.773Z"
+  },
+  {
+    "user_id": "u_3i",
+    "workout_type": "run",
+    "duration_min": 85,
+    "calories": 368,
+    "timestamp": "2026-05-12T21:37:59.352Z"
+  },
+  {
+    "user_id": "u_5s",
+    "workout_type": "yoga",
+    "duration_min": 76,
+    "calories": 534,
+    "timestamp": "2026-05-12T23:50:23.124Z"
+  },
+  {
+    "user_id": "u_j",
+    "workout_type": "yoga",
+    "duration_min": 18,
+    "calories": 72,
+    "timestamp": "2026-04-22T06:08:24.190Z"
+  },
+  {
+    "user_id": "u_22",
+    "workout_type": "cycle",
+    "duration_min": 83,
+    "calories": 445,
+    "timestamp": "2026-05-10T12:57:05.835Z"
+  },
+  {
+    "user_id": "u_x",
+    "workout_type": "lift",
+    "duration_min": 78,
+    "calories": 506,
+    "timestamp": "2026-05-02T12:46:06.545Z"
+  },
+  {
+    "user_id": "u_x",
+    "workout_type": "cycle",
+    "duration_min": 25,
+    "calories": 127,
+    "timestamp": "2026-05-03T08:54:17.311Z"
+  },
+  {
+    "user_id": "u_1",
+    "workout_type": "yoga",
+    "duration_min": 40,
+    "calories": 338,
+    "timestamp": "2026-04-22T19:48:37.233Z"
+  },
+  {
+    "user_id": "u_7k",
+    "workout_type": "run",
+    "duration_min": 86,
+    "calories": 613,
+    "timestamp": "2026-05-11T20:50:33.184Z"
+  },
+  {
+    "user_id": "u_1u",
+    "workout_type": "lift",
+    "duration_min": 29,
+    "calories": 250,
+    "timestamp": "2026-05-03T14:21:17.136Z"
+  },
+  {
+    "user_id": "u_4o",
+    "workout_type": "run",
+    "duration_min": 25,
+    "calories": 157,
+    "timestamp": "2026-04-30T12:41:30.916Z"
+  },
+  {
+    "user_id": "u_59",
+    "workout_type": "yoga",
+    "duration_min": 47,
+    "calories": 294,
+    "timestamp": "2026-04-20T10:02:43.316Z"
+  },
+  {
+    "user_id": "u_3h",
+    "workout_type": "cycle",
+    "duration_min": 63,
+    "calories": 535,
+    "timestamp": "2026-05-06T20:22:05.028Z"
+  },
+  {
+    "user_id": "u_51",
+    "workout_type": "lift",
+    "duration_min": 60,
+    "calories": 409,
+    "timestamp": "2026-04-15T05:41:34.643Z"
+  },
+  {
+    "user_id": "u_3",
+    "workout_type": "run",
+    "duration_min": 47,
+    "calories": 359,
+    "timestamp": "2026-04-24T08:57:39.223Z"
+  },
+  {
+    "user_id": "u_4",
+    "workout_type": "run",
+    "duration_min": 63,
+    "calories": 374,
+    "timestamp": "2026-04-29T13:12:01.508Z"
+  },
+  {
+    "user_id": "u_6q",
+    "workout_type": "swim",
+    "duration_min": 41,
+    "calories": 224,
+    "timestamp": "2026-05-08T02:16:26.160Z"
+  },
+  {
+    "user_id": "u_71",
+    "workout_type": "run",
+    "duration_min": 81,
+    "calories": 486,
+    "timestamp": "2026-04-17T00:02:44.473Z"
+  },
+  {
+    "user_id": "u_3d",
+    "workout_type": "yoga",
+    "duration_min": 56,
+    "calories": 526,
+    "timestamp": "2026-05-09T01:00:29.996Z"
+  },
+  {
+    "user_id": "u_18",
+    "workout_type": "swim",
+    "duration_min": 75,
+    "calories": 596,
+    "timestamp": "2026-05-08T11:40:59.230Z"
+  },
+  {
+    "user_id": "u_4e",
+    "workout_type": "run",
+    "duration_min": 68,
+    "calories": 304,
+    "timestamp": "2026-05-04T06:28:33.188Z"
+  },
+  {
+    "user_id": "u_2",
+    "workout_type": "cycle",
+    "duration_min": 17,
+    "calories": 105,
+    "timestamp": "2026-04-25T12:35:10.410Z"
+  },
+  {
+    "user_id": "u_57",
+    "workout_type": "swim",
+    "duration_min": 20,
+    "calories": 186,
+    "timestamp": "2026-04-25T04:49:20.594Z"
+  },
+  {
+    "user_id": "u_0",
+    "workout_type": "cycle",
+    "duration_min": 80,
+    "calories": 691,
+    "timestamp": "2026-04-30T03:09:01.630Z"
+  },
+  {
+    "user_id": "u_27",
+    "workout_type": "cycle",
+    "duration_min": 26,
+    "calories": 136,
+    "timestamp": "2026-05-01T14:46:34.498Z"
+  },
+  {
+    "user_id": "u_2w",
+    "workout_type": "cycle",
+    "duration_min": 78,
+    "calories": 456,
+    "timestamp": "2026-05-07T22:31:48.873Z"
+  },
+  {
+    "user_id": "u_6k",
+    "workout_type": "lift",
+    "duration_min": 82,
+    "calories": 661,
+    "timestamp": "2026-05-07T03:32:48.262Z"
+  },
+  {
+    "user_id": "u_6d",
+    "workout_type": "cycle",
+    "duration_min": 50,
+    "calories": 254,
+    "timestamp": "2026-04-15T10:24:13.425Z"
+  },
+  {
+    "user_id": "u_3",
+    "workout_type": "run",
+    "duration_min": 35,
+    "calories": 230,
+    "timestamp": "2026-04-27T07:43:17.995Z"
+  },
+  {
+    "user_id": "u_5g",
+    "workout_type": "lift",
+    "duration_min": 88,
+    "calories": 626,
+    "timestamp": "2026-05-11T13:59:30.923Z"
+  },
+  {
+    "user_id": "u_1n",
+    "workout_type": "cycle",
+    "duration_min": 77,
+    "calories": 336,
+    "timestamp": "2026-04-21T06:46:57.092Z"
+  },
+  {
+    "user_id": "u_48",
+    "workout_type": "yoga",
+    "duration_min": 60,
+    "calories": 357,
+    "timestamp": "2026-05-10T18:35:18.601Z"
+  },
+  {
+    "user_id": "u_4r",
+    "workout_type": "lift",
+    "duration_min": 78,
+    "calories": 635,
+    "timestamp": "2026-04-19T21:58:55.380Z"
+  },
+  {
+    "user_id": "u_22",
+    "workout_type": "lift",
+    "duration_min": 78,
+    "calories": 646,
+    "timestamp": "2026-05-02T07:45:22.712Z"
+  },
+  {
+    "user_id": "u_7q",
+    "workout_type": "run",
+    "duration_min": 28,
+    "calories": 249,
+    "timestamp": "2026-05-08T23:39:59.124Z"
+  },
+  {
+    "user_id": "u_4p",
+    "workout_type": "lift",
+    "duration_min": 47,
+    "calories": 268,
+    "timestamp": "2026-05-07T19:04:50.555Z"
+  },
+  {
+    "user_id": "u_3t",
+    "workout_type": "cycle",
+    "duration_min": 36,
+    "calories": 354,
+    "timestamp": "2026-04-22T20:14:44.389Z"
+  },
+  {
+    "user_id": "u_3u",
+    "workout_type": "swim",
+    "duration_min": 39,
+    "calories": 290,
+    "timestamp": "2026-04-28T14:37:40.072Z"
+  },
+  {
+    "user_id": "u_6r",
+    "workout_type": "run",
+    "duration_min": 75,
+    "calories": 736,
+    "timestamp": "2026-05-03T13:43:53.646Z"
+  },
+  {
+    "user_id": "u_15",
+    "workout_type": "yoga",
+    "duration_min": 27,
+    "calories": 251,
+    "timestamp": "2026-04-21T08:36:35.959Z"
+  },
+  {
+    "user_id": "u_4q",
+    "workout_type": "cycle",
+    "duration_min": 74,
+    "calories": 723,
+    "timestamp": "2026-05-11T03:53:47.208Z"
+  },
+  {
+    "user_id": "u_2y",
+    "workout_type": "lift",
+    "duration_min": 56,
+    "calories": 400,
+    "timestamp": "2026-04-27T08:31:27.695Z"
+  },
+  {
+    "user_id": "u_1u",
+    "workout_type": "yoga",
+    "duration_min": 41,
+    "calories": 390,
+    "timestamp": "2026-05-07T07:32:44.248Z"
+  },
+  {
+    "user_id": "u_3e",
+    "workout_type": "lift",
+    "duration_min": 76,
+    "calories": 419,
+    "timestamp": "2026-04-18T10:13:25.121Z"
+  },
+  {
+    "user_id": "u_2j",
+    "workout_type": "run",
+    "duration_min": 65,
+    "calories": 446,
+    "timestamp": "2026-04-17T22:32:36.709Z"
+  },
+  {
+    "user_id": "u_1g",
+    "workout_type": "yoga",
+    "duration_min": 62,
+    "calories": 325,
+    "timestamp": "2026-05-11T22:36:33.850Z"
+  },
+  {
+    "user_id": "u_82",
+    "workout_type": "yoga",
+    "duration_min": 36,
+    "calories": 244,
+    "timestamp": "2026-05-10T17:18:35.030Z"
+  },
+  {
+    "user_id": "u_5z",
+    "workout_type": "yoga",
+    "duration_min": 79,
+    "calories": 346,
+    "timestamp": "2026-04-18T02:23:25.909Z"
+  },
+  {
+    "user_id": "u_3z",
+    "workout_type": "yoga",
+    "duration_min": 86,
+    "calories": 552,
+    "timestamp": "2026-05-05T10:31:05.938Z"
+  },
+  {
+    "user_id": "u_6c",
+    "workout_type": "cycle",
+    "duration_min": 32,
+    "calories": 147,
+    "timestamp": "2026-04-19T10:27:06.854Z"
+  },
+  {
+    "user_id": "u_7h",
+    "workout_type": "swim",
+    "duration_min": 42,
+    "calories": 285,
+    "timestamp": "2026-04-28T14:25:39.665Z"
+  },
+  {
+    "user_id": "u_27",
+    "workout_type": "cycle",
+    "duration_min": 27,
+    "calories": 208,
+    "timestamp": "2026-05-01T12:32:27.908Z"
+  },
+  {
+    "user_id": "u_6v",
+    "workout_type": "swim",
+    "duration_min": 80,
+    "calories": 521,
+    "timestamp": "2026-05-07T20:17:24.914Z"
+  },
+  {
+    "user_id": "u_5w",
+    "workout_type": "yoga",
+    "duration_min": 60,
+    "calories": 458,
+    "timestamp": "2026-04-21T15:05:41.233Z"
+  },
+  {
+    "user_id": "u_5w",
+    "workout_type": "yoga",
+    "duration_min": 85,
+    "calories": 421,
+    "timestamp": "2026-04-17T16:06:50.883Z"
+  },
+  {
+    "user_id": "u_1x",
+    "workout_type": "lift",
+    "duration_min": 73,
+    "calories": 307,
+    "timestamp": "2026-05-04T21:55:48.162Z"
+  },
+  {
+    "user_id": "u_w",
+    "workout_type": "swim",
+    "duration_min": 89,
+    "calories": 889,
+    "timestamp": "2026-04-19T09:20:06.698Z"
+  },
+  {
+    "user_id": "u_6l",
+    "workout_type": "swim",
+    "duration_min": 47,
+    "calories": 314,
+    "timestamp": "2026-04-15T23:19:13.544Z"
+  },
+  {
+    "user_id": "u_2m",
+    "workout_type": "cycle",
+    "duration_min": 16,
+    "calories": 131,
+    "timestamp": "2026-04-27T21:47:47.867Z"
+  },
+  {
+    "user_id": "u_6e",
+    "workout_type": "lift",
+    "duration_min": 65,
+    "calories": 458,
+    "timestamp": "2026-05-06T00:05:08.981Z"
+  },
+  {
+    "user_id": "u_81",
+    "workout_type": "cycle",
+    "duration_min": 66,
+    "calories": 430,
+    "timestamp": "2026-04-25T09:39:01.107Z"
+  },
+  {
+    "user_id": "u_g",
+    "workout_type": "cycle",
+    "duration_min": 45,
+    "calories": 253,
+    "timestamp": "2026-04-15T22:11:16.488Z"
+  },
+  {
+    "user_id": "u_4q",
+    "workout_type": "yoga",
+    "duration_min": 59,
+    "calories": 465,
+    "timestamp": "2026-05-11T07:22:57.871Z"
+  },
+  {
+    "user_id": "u_20",
+    "workout_type": "cycle",
+    "duration_min": 75,
+    "calories": 516,
+    "timestamp": "2026-04-24T19:23:46.261Z"
+  },
+  {
+    "user_id": "u_5",
+    "workout_type": "lift",
+    "duration_min": 74,
+    "calories": 637,
+    "timestamp": "2026-04-27T12:20:42.230Z"
+  },
+  {
+    "user_id": "u_76",
+    "workout_type": "yoga",
+    "duration_min": 43,
+    "calories": 401,
+    "timestamp": "2026-05-12T12:50:27.331Z"
+  },
+  {
+    "user_id": "u_5v",
+    "workout_type": "lift",
+    "duration_min": 54,
+    "calories": 256,
+    "timestamp": "2026-04-30T23:24:35.345Z"
+  },
+  {
+    "user_id": "u_81",
+    "workout_type": "yoga",
+    "duration_min": 82,
+    "calories": 686,
+    "timestamp": "2026-04-24T11:02:34.524Z"
+  },
+  {
+    "user_id": "u_3w",
+    "workout_type": "run",
+    "duration_min": 32,
+    "calories": 222,
+    "timestamp": "2026-05-01T16:48:03.208Z"
+  },
+  {
+    "user_id": "u_6j",
+    "workout_type": "lift",
+    "duration_min": 63,
+    "calories": 584,
+    "timestamp": "2026-04-16T00:28:56.213Z"
+  },
+  {
+    "user_id": "u_2m",
+    "workout_type": "swim",
+    "duration_min": 21,
+    "calories": 140,
+    "timestamp": "2026-05-03T02:32:42.409Z"
+  },
+  {
+    "user_id": "u_4v",
+    "workout_type": "run",
+    "duration_min": 30,
+    "calories": 142,
+    "timestamp": "2026-04-23T22:20:38.844Z"
+  },
+  {
+    "user_id": "u_q",
+    "workout_type": "cycle",
+    "duration_min": 57,
+    "calories": 533,
+    "timestamp": "2026-04-16T16:43:59.595Z"
+  },
+  {
+    "user_id": "u_5y",
+    "workout_type": "yoga",
+    "duration_min": 31,
+    "calories": 262,
+    "timestamp": "2026-05-06T11:58:10.254Z"
+  },
+  {
+    "user_id": "u_5a",
+    "workout_type": "yoga",
+    "duration_min": 58,
+    "calories": 418,
+    "timestamp": "2026-04-27T12:55:05.572Z"
+  },
+  {
+    "user_id": "u_5h",
+    "workout_type": "run",
+    "duration_min": 78,
+    "calories": 753,
+    "timestamp": "2026-04-27T12:19:37.601Z"
+  },
+  {
+    "user_id": "u_z",
+    "workout_type": "lift",
+    "duration_min": 33,
+    "calories": 158,
+    "timestamp": "2026-04-29T14:25:48.310Z"
+  },
+  {
+    "user_id": "u_72",
+    "workout_type": "cycle",
+    "duration_min": 42,
+    "calories": 312,
+    "timestamp": "2026-05-04T17:13:34.318Z"
+  },
+  {
+    "user_id": "u_3u",
+    "workout_type": "swim",
+    "duration_min": 28,
+    "calories": 149,
+    "timestamp": "2026-04-24T07:24:58.296Z"
+  },
+  {
+    "user_id": "u_33",
+    "workout_type": "cycle",
+    "duration_min": 57,
+    "calories": 280,
+    "timestamp": "2026-04-30T17:14:55.603Z"
+  },
+  {
+    "user_id": "u_5a",
+    "workout_type": "swim",
+    "duration_min": 84,
+    "calories": 759,
+    "timestamp": "2026-05-02T01:21:25.432Z"
+  },
+  {
+    "user_id": "u_4t",
+    "workout_type": "swim",
+    "duration_min": 77,
+    "calories": 341,
+    "timestamp": "2026-04-18T11:36:37.272Z"
+  },
+  {
+    "user_id": "u_24",
+    "workout_type": "run",
+    "duration_min": 32,
+    "calories": 281,
+    "timestamp": "2026-04-19T11:44:12.657Z"
+  },
+  {
+    "user_id": "u_46",
+    "workout_type": "cycle",
+    "duration_min": 51,
+    "calories": 266,
+    "timestamp": "2026-05-05T04:51:02.624Z"
+  },
+  {
+    "user_id": "u_2q",
+    "workout_type": "lift",
+    "duration_min": 69,
+    "calories": 510,
+    "timestamp": "2026-04-24T23:33:17.585Z"
+  },
+  {
+    "user_id": "u_4d",
+    "workout_type": "run",
+    "duration_min": 58,
+    "calories": 367,
+    "timestamp": "2026-05-11T03:28:44.382Z"
+  },
+  {
+    "user_id": "u_c",
+    "workout_type": "yoga",
+    "duration_min": 59,
+    "calories": 280,
+    "timestamp": "2026-04-28T20:00:55.061Z"
+  },
+  {
+    "user_id": "u_4d",
+    "workout_type": "cycle",
+    "duration_min": 23,
+    "calories": 105,
+    "timestamp": "2026-04-25T07:15:05.531Z"
+  },
+  {
+    "user_id": "u_3l",
+    "workout_type": "lift",
+    "duration_min": 17,
+    "calories": 168,
+    "timestamp": "2026-05-08T17:35:38.861Z"
+  },
+  {
+    "user_id": "u_8i",
+    "workout_type": "lift",
+    "duration_min": 78,
+    "calories": 317,
+    "timestamp": "2026-05-11T14:25:27.805Z"
+  },
+  {
+    "user_id": "u_7z",
+    "workout_type": "cycle",
+    "duration_min": 83,
+    "calories": 532,
+    "timestamp": "2026-05-12T08:58:47.250Z"
+  },
+  {
+    "user_id": "u_2h",
+    "workout_type": "lift",
+    "duration_min": 69,
+    "calories": 674,
+    "timestamp": "2026-04-20T13:38:21.277Z"
+  },
+  {
+    "user_id": "u_5h",
+    "workout_type": "swim",
+    "duration_min": 70,
+    "calories": 350,
+    "timestamp": "2026-04-29T12:44:09.344Z"
+  },
+  {
+    "user_id": "u_1",
+    "workout_type": "swim",
+    "duration_min": 79,
+    "calories": 565,
+    "timestamp": "2026-04-24T02:40:09.728Z"
+  },
+  {
+    "user_id": "u_4f",
+    "workout_type": "lift",
+    "duration_min": 81,
+    "calories": 494,
+    "timestamp": "2026-05-12T01:46:04.716Z"
+  },
+  {
+    "user_id": "u_35",
+    "workout_type": "swim",
+    "duration_min": 34,
+    "calories": 138,
+    "timestamp": "2026-04-22T08:29:43.480Z"
+  },
+  {
+    "user_id": "u_1x",
+    "workout_type": "lift",
+    "duration_min": 25,
+    "calories": 172,
+    "timestamp": "2026-04-25T05:13:12.989Z"
+  },
+  {
+    "user_id": "u_v",
+    "workout_type": "run",
+    "duration_min": 77,
+    "calories": 328,
+    "timestamp": "2026-05-09T18:53:13.073Z"
+  },
+  {
+    "user_id": "u_58",
+    "workout_type": "yoga",
+    "duration_min": 17,
+    "calories": 74,
+    "timestamp": "2026-05-08T08:08:49.118Z"
+  },
+  {
+    "user_id": "u_3p",
+    "workout_type": "cycle",
+    "duration_min": 39,
+    "calories": 376,
+    "timestamp": "2026-04-23T05:40:40.317Z"
+  },
+  {
+    "user_id": "u_5z",
+    "workout_type": "yoga",
+    "duration_min": 36,
+    "calories": 217,
+    "timestamp": "2026-05-10T19:12:28.221Z"
+  },
+  {
+    "user_id": "u_2p",
+    "workout_type": "cycle",
+    "duration_min": 49,
+    "calories": 450,
+    "timestamp": "2026-04-27T08:29:33.945Z"
+  },
+  {
+    "user_id": "u_8k",
+    "workout_type": "cycle",
+    "duration_min": 47,
+    "calories": 363,
+    "timestamp": "2026-05-11T03:29:33.143Z"
+  },
+  {
+    "user_id": "u_4q",
+    "workout_type": "lift",
+    "duration_min": 75,
+    "calories": 316,
+    "timestamp": "2026-05-02T12:48:48.310Z"
+  },
+  {
+    "user_id": "u_5g",
+    "workout_type": "run",
+    "duration_min": 44,
+    "calories": 214,
+    "timestamp": "2026-05-08T22:53:37.474Z"
+  },
+  {
+    "user_id": "u_6y",
+    "workout_type": "cycle",
+    "duration_min": 54,
+    "calories": 246,
+    "timestamp": "2026-05-10T09:48:02.310Z"
+  },
+  {
+    "user_id": "u_1f",
+    "workout_type": "swim",
+    "duration_min": 38,
+    "calories": 350,
+    "timestamp": "2026-04-21T08:18:11.349Z"
+  },
+  {
+    "user_id": "u_4z",
+    "workout_type": "run",
+    "duration_min": 65,
+    "calories": 461,
+    "timestamp": "2026-05-04T09:46:00.085Z"
+  },
+  {
+    "user_id": "u_50",
+    "workout_type": "swim",
+    "duration_min": 54,
+    "calories": 233,
+    "timestamp": "2026-04-28T04:23:39.636Z"
+  },
+  {
+    "user_id": "u_1e",
+    "workout_type": "swim",
+    "duration_min": 67,
+    "calories": 661,
+    "timestamp": "2026-05-07T05:59:27.162Z"
+  },
+  {
+    "user_id": "u_8",
+    "workout_type": "yoga",
+    "duration_min": 15,
+    "calories": 120,
+    "timestamp": "2026-04-23T10:36:08.784Z"
+  },
+  {
+    "user_id": "u_5t",
+    "workout_type": "run",
+    "duration_min": 29,
+    "calories": 126,
+    "timestamp": "2026-04-15T17:48:51.508Z"
+  },
+  {
+    "user_id": "u_17",
+    "workout_type": "swim",
+    "duration_min": 46,
+    "calories": 304,
+    "timestamp": "2026-05-02T22:28:07.645Z"
+  },
+  {
+    "user_id": "u_5y",
+    "workout_type": "cycle",
+    "duration_min": 80,
+    "calories": 775,
+    "timestamp": "2026-05-07T22:25:57.613Z"
+  },
+  {
+    "user_id": "u_3o",
+    "workout_type": "lift",
+    "duration_min": 48,
+    "calories": 233,
+    "timestamp": "2026-04-23T10:07:53.013Z"
+  },
+  {
+    "user_id": "u_6i",
+    "workout_type": "yoga",
+    "duration_min": 62,
+    "calories": 270,
+    "timestamp": "2026-04-24T03:57:32.711Z"
+  },
+  {
+    "user_id": "u_7w",
+    "workout_type": "lift",
+    "duration_min": 88,
+    "calories": 699,
+    "timestamp": "2026-04-24T07:35:45.415Z"
+  },
+  {
+    "user_id": "u_2o",
+    "workout_type": "run",
+    "duration_min": 50,
+    "calories": 247,
+    "timestamp": "2026-04-16T15:49:08.576Z"
+  },
+  {
+    "user_id": "u_2y",
+    "workout_type": "yoga",
+    "duration_min": 71,
+    "calories": 557,
+    "timestamp": "2026-05-09T06:28:53.125Z"
+  },
+  {
+    "user_id": "u_48",
+    "workout_type": "yoga",
+    "duration_min": 46,
+    "calories": 436,
+    "timestamp": "2026-05-12T16:29:46.624Z"
+  },
+  {
+    "user_id": "u_1p",
+    "workout_type": "cycle",
+    "duration_min": 60,
+    "calories": 288,
+    "timestamp": "2026-04-21T15:25:06.100Z"
+  },
+  {
+    "user_id": "u_3n",
+    "workout_type": "lift",
+    "duration_min": 54,
+    "calories": 261,
+    "timestamp": "2026-04-20T20:58:30.906Z"
+  },
+  {
+    "user_id": "u_6j",
+    "workout_type": "lift",
+    "duration_min": 37,
+    "calories": 265,
+    "timestamp": "2026-04-18T11:32:45.803Z"
+  },
+  {
+    "user_id": "u_8g",
+    "workout_type": "lift",
+    "duration_min": 25,
+    "calories": 219,
+    "timestamp": "2026-04-30T10:03:16.834Z"
+  },
+  {
+    "user_id": "u_43",
+    "workout_type": "run",
+    "duration_min": 74,
+    "calories": 571,
+    "timestamp": "2026-05-03T11:06:36.498Z"
+  },
+  {
+    "user_id": "u_7e",
+    "workout_type": "yoga",
+    "duration_min": 19,
+    "calories": 147,
+    "timestamp": "2026-05-06T03:57:08.642Z"
+  },
+  {
+    "user_id": "u_6e",
+    "workout_type": "yoga",
+    "duration_min": 68,
+    "calories": 317,
+    "timestamp": "2026-05-06T12:28:42.795Z"
+  },
+  {
+    "user_id": "u_4y",
+    "workout_type": "lift",
+    "duration_min": 40,
+    "calories": 385,
+    "timestamp": "2026-04-28T03:25:47.246Z"
+  },
+  {
+    "user_id": "u_70",
+    "workout_type": "yoga",
+    "duration_min": 23,
+    "calories": 188,
+    "timestamp": "2026-05-11T01:03:19.247Z"
+  },
+  {
+    "user_id": "u_s",
+    "workout_type": "yoga",
+    "duration_min": 51,
+    "calories": 315,
+    "timestamp": "2026-05-01T20:08:27.834Z"
+  },
+  {
+    "user_id": "u_7c",
+    "workout_type": "lift",
+    "duration_min": 87,
+    "calories": 590,
+    "timestamp": "2026-04-29T14:22:24.132Z"
+  },
+  {
+    "user_id": "u_c",
+    "workout_type": "yoga",
+    "duration_min": 45,
+    "calories": 440,
+    "timestamp": "2026-04-30T13:49:09.344Z"
+  },
+  {
+    "user_id": "u_29",
+    "workout_type": "run",
+    "duration_min": 66,
+    "calories": 650,
+    "timestamp": "2026-04-25T14:51:35.630Z"
+  },
+  {
+    "user_id": "u_15",
+    "workout_type": "yoga",
+    "duration_min": 60,
+    "calories": 309,
+    "timestamp": "2026-05-05T21:16:39.987Z"
+  },
+  {
+    "user_id": "u_3l",
+    "workout_type": "yoga",
+    "duration_min": 86,
+    "calories": 433,
+    "timestamp": "2026-05-01T21:16:38.260Z"
+  },
+  {
+    "user_id": "u_1f",
+    "workout_type": "run",
+    "duration_min": 62,
+    "calories": 601,
+    "timestamp": "2026-04-22T03:17:16.645Z"
+  },
+  {
+    "user_id": "u_49",
+    "workout_type": "run",
+    "duration_min": 50,
+    "calories": 352,
+    "timestamp": "2026-04-25T13:08:48.285Z"
+  },
+  {
+    "user_id": "u_6h",
+    "workout_type": "cycle",
+    "duration_min": 68,
+    "calories": 333,
+    "timestamp": "2026-04-16T04:36:05.773Z"
+  },
+  {
+    "user_id": "u_64",
+    "workout_type": "run",
+    "duration_min": 37,
+    "calories": 170,
+    "timestamp": "2026-04-18T04:16:15.950Z"
+  },
+  {
+    "user_id": "u_6m",
+    "workout_type": "run",
+    "duration_min": 49,
+    "calories": 223,
+    "timestamp": "2026-05-05T14:41:03.195Z"
+  },
+  {
+    "user_id": "u_5g",
+    "workout_type": "cycle",
+    "duration_min": 35,
+    "calories": 227,
+    "timestamp": "2026-04-28T12:56:14.928Z"
+  },
+  {
+    "user_id": "u_6",
+    "workout_type": "run",
+    "duration_min": 34,
+    "calories": 220,
+    "timestamp": "2026-04-17T04:17:27.629Z"
+  },
+  {
+    "user_id": "u_1j",
+    "workout_type": "cycle",
+    "duration_min": 36,
+    "calories": 268,
+    "timestamp": "2026-04-26T22:24:32.434Z"
+  },
+  {
+    "user_id": "u_3n",
+    "workout_type": "cycle",
+    "duration_min": 33,
+    "calories": 228,
+    "timestamp": "2026-04-29T00:29:53.891Z"
+  },
+  {
+    "user_id": "u_8a",
+    "workout_type": "swim",
+    "duration_min": 47,
+    "calories": 368,
+    "timestamp": "2026-05-02T22:11:17.058Z"
+  },
+  {
+    "user_id": "u_3o",
+    "workout_type": "cycle",
+    "duration_min": 33,
+    "calories": 264,
+    "timestamp": "2026-04-26T12:46:21.845Z"
+  },
+  {
+    "user_id": "u_5q",
+    "workout_type": "run",
+    "duration_min": 33,
+    "calories": 246,
+    "timestamp": "2026-05-04T15:59:21.631Z"
+  },
+  {
+    "user_id": "u_6i",
+    "workout_type": "cycle",
+    "duration_min": 55,
+    "calories": 245,
+    "timestamp": "2026-04-26T09:50:46.031Z"
+  },
+  {
+    "user_id": "u_7k",
+    "workout_type": "lift",
+    "duration_min": 74,
+    "calories": 472,
+    "timestamp": "2026-04-29T21:59:21.713Z"
+  },
+  {
+    "user_id": "u_4i",
+    "workout_type": "cycle",
+    "duration_min": 83,
+    "calories": 409,
+    "timestamp": "2026-05-01T06:31:34.833Z"
+  },
+  {
+    "user_id": "u_82",
+    "workout_type": "run",
+    "duration_min": 38,
+    "calories": 331,
+    "timestamp": "2026-05-12T23:33:51.962Z"
+  },
+  {
+    "user_id": "u_5f",
+    "workout_type": "cycle",
+    "duration_min": 89,
+    "calories": 866,
+    "timestamp": "2026-05-02T01:19:58.215Z"
+  },
+  {
+    "user_id": "u_1h",
+    "workout_type": "swim",
+    "duration_min": 62,
+    "calories": 503,
+    "timestamp": "2026-04-28T13:54:30.052Z"
+  },
+  {
+    "user_id": "u_g",
+    "workout_type": "swim",
+    "duration_min": 59,
+    "calories": 448,
+    "timestamp": "2026-04-22T02:28:11.569Z"
+  },
+  {
+    "user_id": "u_5n",
+    "workout_type": "run",
+    "duration_min": 84,
+    "calories": 552,
+    "timestamp": "2026-05-07T10:18:47.405Z"
+  },
+  {
+    "user_id": "u_3a",
+    "workout_type": "swim",
+    "duration_min": 62,
+    "calories": 572,
+    "timestamp": "2026-05-05T16:09:09.537Z"
+  },
+  {
+    "user_id": "u_60",
+    "workout_type": "run",
+    "duration_min": 41,
+    "calories": 380,
+    "timestamp": "2026-04-21T18:14:01.461Z"
+  },
+  {
+    "user_id": "u_1s",
+    "workout_type": "lift",
+    "duration_min": 82,
+    "calories": 586,
+    "timestamp": "2026-05-02T01:22:51.133Z"
+  },
+  {
+    "user_id": "u_4s",
+    "workout_type": "swim",
+    "duration_min": 36,
+    "calories": 291,
+    "timestamp": "2026-05-10T15:07:16.782Z"
+  },
+  {
+    "user_id": "u_8k",
+    "workout_type": "yoga",
+    "duration_min": 44,
+    "calories": 305,
+    "timestamp": "2026-05-08T11:34:44.170Z"
+  },
+  {
+    "user_id": "u_4m",
+    "workout_type": "lift",
+    "duration_min": 22,
+    "calories": 96,
+    "timestamp": "2026-04-20T18:31:49.610Z"
+  },
+  {
+    "user_id": "u_6x",
+    "workout_type": "lift",
+    "duration_min": 40,
+    "calories": 263,
+    "timestamp": "2026-05-11T19:12:52.232Z"
+  },
+  {
+    "user_id": "u_3u",
+    "workout_type": "run",
+    "duration_min": 22,
+    "calories": 192,
+    "timestamp": "2026-05-08T21:49:29.217Z"
+  },
+  {
+    "user_id": "u_7r",
+    "workout_type": "lift",
+    "duration_min": 66,
+    "calories": 477,
+    "timestamp": "2026-05-04T22:38:56.783Z"
+  },
+  {
+    "user_id": "u_28",
+    "workout_type": "lift",
+    "duration_min": 21,
+    "calories": 131,
+    "timestamp": "2026-05-08T18:14:24.569Z"
+  },
+  {
+    "user_id": "u_45",
+    "workout_type": "lift",
+    "duration_min": 81,
+    "calories": 571,
+    "timestamp": "2026-04-23T20:27:27.589Z"
+  },
+  {
+    "user_id": "u_31",
+    "workout_type": "run",
+    "duration_min": 68,
+    "calories": 393,
+    "timestamp": "2026-05-05T04:31:15.295Z"
+  },
+  {
+    "user_id": "u_6x",
+    "workout_type": "lift",
+    "duration_min": 19,
+    "calories": 161,
+    "timestamp": "2026-05-01T12:58:20.629Z"
+  },
+  {
+    "user_id": "u_8h",
+    "workout_type": "yoga",
+    "duration_min": 25,
+    "calories": 156,
+    "timestamp": "2026-05-04T01:06:12.473Z"
+  },
+  {
+    "user_id": "u_a",
+    "workout_type": "lift",
+    "duration_min": 62,
+    "calories": 260,
+    "timestamp": "2026-04-20T10:38:38.544Z"
+  },
+  {
+    "user_id": "u_2j",
+    "workout_type": "lift",
+    "duration_min": 22,
+    "calories": 174,
+    "timestamp": "2026-04-16T15:44:34.383Z"
+  },
+  {
+    "user_id": "u_27",
+    "workout_type": "swim",
+    "duration_min": 64,
+    "calories": 532,
+    "timestamp": "2026-05-05T07:46:11.820Z"
+  },
+  {
+    "user_id": "u_6m",
+    "workout_type": "cycle",
+    "duration_min": 82,
+    "calories": 527,
+    "timestamp": "2026-04-16T04:13:35.724Z"
+  },
+  {
+    "user_id": "u_3n",
+    "workout_type": "yoga",
+    "duration_min": 58,
+    "calories": 475,
+    "timestamp": "2026-05-10T23:14:26.185Z"
+  },
+  {
+    "user_id": "u_4l",
+    "workout_type": "run",
+    "duration_min": 73,
+    "calories": 535,
+    "timestamp": "2026-04-21T14:50:24.074Z"
+  },
+  {
+    "user_id": "u_3o",
+    "workout_type": "run",
+    "duration_min": 60,
+    "calories": 397,
+    "timestamp": "2026-05-02T19:50:22.748Z"
+  },
+  {
+    "user_id": "u_56",
+    "workout_type": "cycle",
+    "duration_min": 41,
+    "calories": 296,
+    "timestamp": "2026-04-22T06:20:41.193Z"
+  },
+  {
+    "user_id": "u_7n",
+    "workout_type": "run",
+    "duration_min": 84,
+    "calories": 377,
+    "timestamp": "2026-04-17T20:00:58.701Z"
+  },
+  {
+    "user_id": "u_6x",
+    "workout_type": "lift",
+    "duration_min": 43,
+    "calories": 365,
+    "timestamp": "2026-04-29T19:50:04.278Z"
+  },
+  {
+    "user_id": "u_d",
+    "workout_type": "cycle",
+    "duration_min": 83,
+    "calories": 342,
+    "timestamp": "2026-04-21T22:12:24.105Z"
+  },
+  {
+    "user_id": "u_63",
+    "workout_type": "run",
+    "duration_min": 63,
+    "calories": 500,
+    "timestamp": "2026-05-04T01:55:00.999Z"
+  },
+  {
+    "user_id": "u_5e",
+    "workout_type": "cycle",
+    "duration_min": 84,
+    "calories": 600,
+    "timestamp": "2026-04-27T11:31:00.222Z"
+  },
+  {
+    "user_id": "u_6m",
+    "workout_type": "yoga",
+    "duration_min": 58,
+    "calories": 474,
+    "timestamp": "2026-04-17T11:54:17.782Z"
+  },
+  {
+    "user_id": "u_4z",
+    "workout_type": "lift",
+    "duration_min": 32,
+    "calories": 197,
+    "timestamp": "2026-04-30T20:59:37.126Z"
+  },
+  {
+    "user_id": "u_2t",
+    "workout_type": "cycle",
+    "duration_min": 58,
+    "calories": 473,
+    "timestamp": "2026-04-23T03:21:59.587Z"
+  },
+  {
+    "user_id": "u_44",
+    "workout_type": "swim",
+    "duration_min": 87,
+    "calories": 587,
+    "timestamp": "2026-05-11T16:00:11.837Z"
+  },
+  {
+    "user_id": "u_5o",
+    "workout_type": "yoga",
+    "duration_min": 45,
+    "calories": 372,
+    "timestamp": "2026-04-18T04:13:34.648Z"
+  },
+  {
+    "user_id": "u_6p",
+    "workout_type": "yoga",
+    "duration_min": 23,
+    "calories": 224,
+    "timestamp": "2026-04-26T00:56:51.596Z"
+  },
+  {
+    "user_id": "u_7u",
+    "workout_type": "swim",
+    "duration_min": 39,
+    "calories": 264,
+    "timestamp": "2026-04-30T08:26:51.731Z"
+  },
+  {
+    "user_id": "u_50",
+    "workout_type": "cycle",
+    "duration_min": 78,
+    "calories": 613,
+    "timestamp": "2026-05-08T19:12:17.591Z"
+  },
+  {
+    "user_id": "u_4s",
+    "workout_type": "cycle",
+    "duration_min": 26,
+    "calories": 252,
+    "timestamp": "2026-04-25T13:37:37.519Z"
+  },
+  {
+    "user_id": "u_3s",
+    "workout_type": "cycle",
+    "duration_min": 16,
+    "calories": 70,
+    "timestamp": "2026-04-22T04:05:00.047Z"
+  },
+  {
+    "user_id": "u_64",
+    "workout_type": "yoga",
+    "duration_min": 87,
+    "calories": 579,
+    "timestamp": "2026-05-10T05:59:11.180Z"
+  },
+  {
+    "user_id": "u_7r",
+    "workout_type": "yoga",
+    "duration_min": 22,
+    "calories": 184,
+    "timestamp": "2026-05-09T20:08:24.434Z"
+  },
+  {
+    "user_id": "u_87",
+    "workout_type": "lift",
+    "duration_min": 28,
+    "calories": 186,
+    "timestamp": "2026-05-09T00:25:43.156Z"
+  },
+  {
+    "user_id": "u_a",
+    "workout_type": "lift",
+    "duration_min": 40,
+    "calories": 334,
+    "timestamp": "2026-05-06T14:52:04.241Z"
+  },
+  {
+    "user_id": "u_17",
+    "workout_type": "lift",
+    "duration_min": 57,
+    "calories": 417,
+    "timestamp": "2026-04-22T21:03:08.492Z"
+  },
+  {
+    "user_id": "u_1u",
+    "workout_type": "yoga",
+    "duration_min": 81,
+    "calories": 474,
+    "timestamp": "2026-05-03T08:36:43.283Z"
+  },
+  {
+    "user_id": "u_88",
+    "workout_type": "yoga",
+    "duration_min": 72,
+    "calories": 571,
+    "timestamp": "2026-04-25T10:31:26.327Z"
+  },
+  {
+    "user_id": "u_5h",
+    "workout_type": "swim",
+    "duration_min": 75,
+    "calories": 421,
+    "timestamp": "2026-04-25T21:48:02.604Z"
+  },
+  {
+    "user_id": "u_c",
+    "workout_type": "yoga",
+    "duration_min": 56,
+    "calories": 297,
+    "timestamp": "2026-05-04T05:36:18.398Z"
+  },
+  {
+    "user_id": "u_5z",
+    "workout_type": "yoga",
+    "duration_min": 76,
+    "calories": 559,
+    "timestamp": "2026-04-19T22:49:07.449Z"
+  },
+  {
+    "user_id": "u_50",
+    "workout_type": "swim",
+    "duration_min": 66,
+    "calories": 601,
+    "timestamp": "2026-04-18T00:50:24.930Z"
+  },
+  {
+    "user_id": "u_6m",
+    "workout_type": "lift",
+    "duration_min": 87,
+    "calories": 411,
+    "timestamp": "2026-05-09T18:30:56.903Z"
+  },
+  {
+    "user_id": "u_51",
+    "workout_type": "swim",
+    "duration_min": 16,
+    "calories": 146,
+    "timestamp": "2026-04-27T08:40:23.582Z"
+  },
+  {
+    "user_id": "u_1w",
+    "workout_type": "lift",
+    "duration_min": 82,
+    "calories": 758,
+    "timestamp": "2026-05-12T14:10:46.289Z"
+  },
+  {
+    "user_id": "u_7i",
+    "workout_type": "cycle",
+    "duration_min": 65,
+    "calories": 347,
+    "timestamp": "2026-05-09T15:28:26.734Z"
+  },
+  {
+    "user_id": "u_y",
+    "workout_type": "lift",
+    "duration_min": 75,
+    "calories": 551,
+    "timestamp": "2026-05-09T09:21:32.723Z"
+  },
+  {
+    "user_id": "u_43",
+    "workout_type": "run",
+    "duration_min": 41,
+    "calories": 230,
+    "timestamp": "2026-05-12T08:14:30.978Z"
+  },
+  {
+    "user_id": "u_2r",
+    "workout_type": "yoga",
+    "duration_min": 71,
+    "calories": 641,
+    "timestamp": "2026-05-01T00:23:04.824Z"
+  },
+  {
+    "user_id": "u_80",
+    "workout_type": "run",
+    "duration_min": 30,
+    "calories": 277,
+    "timestamp": "2026-04-19T01:57:10.892Z"
+  },
+  {
+    "user_id": "u_3m",
+    "workout_type": "run",
+    "duration_min": 59,
+    "calories": 420,
+    "timestamp": "2026-04-24T09:11:15.037Z"
+  },
+  {
+    "user_id": "u_u",
+    "workout_type": "yoga",
+    "duration_min": 72,
+    "calories": 502,
+    "timestamp": "2026-05-05T18:49:47.817Z"
+  },
+  {
+    "user_id": "u_3v",
+    "workout_type": "lift",
+    "duration_min": 23,
+    "calories": 197,
+    "timestamp": "2026-04-23T21:17:42.951Z"
+  },
+  {
+    "user_id": "u_9",
+    "workout_type": "lift",
+    "duration_min": 53,
+    "calories": 219,
+    "timestamp": "2026-04-24T06:29:34.526Z"
+  },
+  {
+    "user_id": "u_5x",
+    "workout_type": "run",
+    "duration_min": 78,
+    "calories": 530,
+    "timestamp": "2026-04-20T10:39:11.483Z"
+  },
+  {
+    "user_id": "u_5o",
+    "workout_type": "run",
+    "duration_min": 46,
+    "calories": 326,
+    "timestamp": "2026-05-11T17:18:04.852Z"
+  },
+  {
+    "user_id": "u_1p",
+    "workout_type": "yoga",
+    "duration_min": 50,
+    "calories": 373,
+    "timestamp": "2026-05-04T06:59:40.552Z"
+  },
+  {
+    "user_id": "u_6t",
+    "workout_type": "lift",
+    "duration_min": 49,
+    "calories": 237,
+    "timestamp": "2026-05-01T04:01:30.423Z"
+  },
+  {
+    "user_id": "u_51",
+    "workout_type": "yoga",
+    "duration_min": 47,
+    "calories": 262,
+    "timestamp": "2026-04-18T05:14:36.894Z"
+  },
+  {
+    "user_id": "u_35",
+    "workout_type": "lift",
+    "duration_min": 38,
+    "calories": 156,
+    "timestamp": "2026-04-15T01:53:35.319Z"
+  },
+  {
+    "user_id": "u_3y",
+    "workout_type": "yoga",
+    "duration_min": 56,
+    "calories": 542,
+    "timestamp": "2026-05-02T15:53:48.941Z"
+  },
+  {
+    "user_id": "u_7d",
+    "workout_type": "swim",
+    "duration_min": 31,
+    "calories": 304,
+    "timestamp": "2026-04-18T12:45:42.346Z"
+  },
+  {
+    "user_id": "u_7k",
+    "workout_type": "yoga",
+    "duration_min": 52,
+    "calories": 418,
+    "timestamp": "2026-04-29T12:38:29.317Z"
+  },
+  {
+    "user_id": "u_l",
+    "workout_type": "cycle",
+    "duration_min": 67,
+    "calories": 543,
+    "timestamp": "2026-04-28T19:12:49.194Z"
+  },
+  {
+    "user_id": "u_4b",
+    "workout_type": "lift",
+    "duration_min": 49,
+    "calories": 316,
+    "timestamp": "2026-04-22T08:28:40.026Z"
+  },
+  {
+    "user_id": "u_3h",
+    "workout_type": "lift",
+    "duration_min": 87,
+    "calories": 575,
+    "timestamp": "2026-05-10T08:17:32.643Z"
+  },
+  {
+    "user_id": "u_38",
+    "workout_type": "swim",
+    "duration_min": 35,
+    "calories": 229,
+    "timestamp": "2026-05-04T05:27:14.391Z"
+  },
+  {
+    "user_id": "u_46",
+    "workout_type": "swim",
+    "duration_min": 34,
+    "calories": 333,
+    "timestamp": "2026-05-01T13:02:18.555Z"
+  },
+  {
+    "user_id": "u_0",
+    "workout_type": "cycle",
+    "duration_min": 44,
+    "calories": 221,
+    "timestamp": "2026-04-28T19:10:18.089Z"
+  },
+  {
+    "user_id": "u_51",
+    "workout_type": "swim",
+    "duration_min": 67,
+    "calories": 303,
+    "timestamp": "2026-04-16T16:10:19.924Z"
+  },
+  {
+    "user_id": "u_4d",
+    "workout_type": "yoga",
+    "duration_min": 27,
+    "calories": 261,
+    "timestamp": "2026-04-24T12:55:10.770Z"
+  },
+  {
+    "user_id": "u_79",
+    "workout_type": "swim",
+    "duration_min": 40,
+    "calories": 316,
+    "timestamp": "2026-05-05T11:17:33.766Z"
+  },
+  {
+    "user_id": "u_7g",
+    "workout_type": "run",
+    "duration_min": 16,
+    "calories": 131,
+    "timestamp": "2026-05-05T19:19:27.600Z"
+  },
+  {
+    "user_id": "u_6k",
+    "workout_type": "yoga",
+    "duration_min": 45,
+    "calories": 274,
+    "timestamp": "2026-04-15T15:19:28.720Z"
+  },
+  {
+    "user_id": "u_y",
+    "workout_type": "yoga",
+    "duration_min": 22,
+    "calories": 168,
+    "timestamp": "2026-04-24T23:23:46.032Z"
+  },
+  {
+    "user_id": "u_4q",
+    "workout_type": "run",
+    "duration_min": 49,
+    "calories": 392,
+    "timestamp": "2026-05-06T12:42:35.394Z"
+  },
+  {
+    "user_id": "u_8c",
+    "workout_type": "yoga",
+    "duration_min": 44,
+    "calories": 371,
+    "timestamp": "2026-05-12T09:47:16.347Z"
+  },
+  {
+    "user_id": "u_3e",
+    "workout_type": "run",
+    "duration_min": 26,
+    "calories": 185,
+    "timestamp": "2026-05-12T20:57:52.246Z"
+  },
+  {
+    "user_id": "u_7z",
+    "workout_type": "yoga",
+    "duration_min": 22,
+    "calories": 128,
+    "timestamp": "2026-05-12T05:00:39.235Z"
+  },
+  {
+    "user_id": "u_81",
+    "workout_type": "lift",
+    "duration_min": 75,
+    "calories": 725,
+    "timestamp": "2026-05-04T23:26:54.164Z"
+  },
+  {
+    "user_id": "u_4p",
+    "workout_type": "cycle",
+    "duration_min": 89,
+    "calories": 385,
+    "timestamp": "2026-05-09T03:38:57.246Z"
+  },
+  {
+    "user_id": "u_6d",
+    "workout_type": "cycle",
+    "duration_min": 40,
+    "calories": 258,
+    "timestamp": "2026-05-11T20:11:58.086Z"
+  },
+  {
+    "user_id": "u_5",
+    "workout_type": "yoga",
+    "duration_min": 85,
+    "calories": 604,
+    "timestamp": "2026-04-19T13:59:23.943Z"
+  },
+  {
+    "user_id": "u_1r",
+    "workout_type": "swim",
+    "duration_min": 56,
+    "calories": 555,
+    "timestamp": "2026-05-07T21:29:59.049Z"
+  },
+  {
+    "user_id": "u_72",
+    "workout_type": "yoga",
+    "duration_min": 25,
+    "calories": 149,
+    "timestamp": "2026-04-23T07:47:37.790Z"
+  },
+  {
+    "user_id": "u_7r",
+    "workout_type": "swim",
+    "duration_min": 53,
+    "calories": 473,
+    "timestamp": "2026-05-10T17:17:28.933Z"
+  },
+  {
+    "user_id": "u_3w",
+    "workout_type": "run",
+    "duration_min": 41,
+    "calories": 347,
+    "timestamp": "2026-05-03T11:00:39.461Z"
+  },
+  {
+    "user_id": "u_4i",
+    "workout_type": "swim",
+    "duration_min": 42,
+    "calories": 338,
+    "timestamp": "2026-05-05T04:11:36.176Z"
+  },
+  {
+    "user_id": "u_2w",
+    "workout_type": "run",
+    "duration_min": 29,
+    "calories": 259,
+    "timestamp": "2026-05-04T15:20:26.994Z"
+  },
+  {
+    "user_id": "u_4s",
+    "workout_type": "cycle",
+    "duration_min": 52,
+    "calories": 473,
+    "timestamp": "2026-04-30T21:05:35.450Z"
+  },
+  {
+    "user_id": "u_55",
+    "workout_type": "run",
+    "duration_min": 44,
+    "calories": 184,
+    "timestamp": "2026-05-05T20:40:51.223Z"
+  },
+  {
+    "user_id": "u_8d",
+    "workout_type": "swim",
+    "duration_min": 35,
+    "calories": 267,
+    "timestamp": "2026-04-15T21:11:26.759Z"
+  },
+  {
+    "user_id": "u_1z",
+    "workout_type": "run",
+    "duration_min": 86,
+    "calories": 772,
+    "timestamp": "2026-05-04T11:39:43.291Z"
+  },
+  {
+    "user_id": "u_l",
+    "workout_type": "lift",
+    "duration_min": 44,
+    "calories": 251,
+    "timestamp": "2026-05-05T01:21:41.051Z"
+  },
+  {
+    "user_id": "u_47",
+    "workout_type": "yoga",
+    "duration_min": 56,
+    "calories": 485,
+    "timestamp": "2026-04-22T22:12:02.828Z"
+  },
+  {
+    "user_id": "u_1x",
+    "workout_type": "cycle",
+    "duration_min": 70,
+    "calories": 588,
+    "timestamp": "2026-04-22T00:32:59.869Z"
+  },
+  {
+    "user_id": "u_43",
+    "workout_type": "yoga",
+    "duration_min": 64,
+    "calories": 458,
+    "timestamp": "2026-04-21T09:10:55.714Z"
+  },
+  {
+    "user_id": "u_7s",
+    "workout_type": "yoga",
+    "duration_min": 35,
+    "calories": 191,
+    "timestamp": "2026-05-01T15:51:56.067Z"
+  },
+  {
+    "user_id": "u_5p",
+    "workout_type": "run",
+    "duration_min": 56,
+    "calories": 470,
+    "timestamp": "2026-05-04T16:40:24.801Z"
+  },
+  {
+    "user_id": "u_7z",
+    "workout_type": "lift",
+    "duration_min": 36,
+    "calories": 176,
+    "timestamp": "2026-05-08T11:51:30.586Z"
+  },
+  {
+    "user_id": "u_6c",
+    "workout_type": "cycle",
+    "duration_min": 32,
+    "calories": 220,
+    "timestamp": "2026-04-28T08:04:53.854Z"
+  },
+  {
+    "user_id": "u_6w",
+    "workout_type": "lift",
+    "duration_min": 46,
+    "calories": 207,
+    "timestamp": "2026-05-12T15:04:37.368Z"
+  },
+  {
+    "user_id": "u_3y",
+    "workout_type": "cycle",
+    "duration_min": 57,
+    "calories": 555,
+    "timestamp": "2026-04-28T02:52:45.205Z"
+  },
+  {
+    "user_id": "u_a",
+    "workout_type": "cycle",
+    "duration_min": 86,
+    "calories": 821,
+    "timestamp": "2026-04-29T07:55:16.544Z"
+  },
+  {
+    "user_id": "u_84",
+    "workout_type": "swim",
+    "duration_min": 75,
+    "calories": 635,
+    "timestamp": "2026-05-07T09:58:02.714Z"
+  },
+  {
+    "user_id": "u_4s",
+    "workout_type": "yoga",
+    "duration_min": 61,
+    "calories": 526,
+    "timestamp": "2026-04-27T08:07:01.174Z"
+  },
+  {
+    "user_id": "u_7y",
+    "workout_type": "cycle",
+    "duration_min": 36,
+    "calories": 291,
+    "timestamp": "2026-05-12T09:00:39.949Z"
+  },
+  {
+    "user_id": "u_5",
+    "workout_type": "cycle",
+    "duration_min": 23,
+    "calories": 186,
+    "timestamp": "2026-05-06T05:02:45.897Z"
+  },
+  {
+    "user_id": "u_1r",
+    "workout_type": "run",
+    "duration_min": 77,
+    "calories": 487,
+    "timestamp": "2026-05-12T07:35:28.110Z"
+  },
+  {
+    "user_id": "u_4d",
+    "workout_type": "cycle",
+    "duration_min": 30,
+    "calories": 185,
+    "timestamp": "2026-04-21T16:51:15.206Z"
+  },
+  {
+    "user_id": "u_z",
+    "workout_type": "cycle",
+    "duration_min": 15,
+    "calories": 92,
+    "timestamp": "2026-04-20T09:03:18.657Z"
+  },
+  {
+    "user_id": "u_3v",
+    "workout_type": "lift",
+    "duration_min": 61,
+    "calories": 276,
+    "timestamp": "2026-04-16T05:57:33.846Z"
+  },
+  {
+    "user_id": "u_5u",
+    "workout_type": "run",
+    "duration_min": 39,
+    "calories": 353,
+    "timestamp": "2026-04-16T11:25:09.787Z"
+  },
+  {
+    "user_id": "u_5n",
+    "workout_type": "cycle",
+    "duration_min": 69,
+    "calories": 372,
+    "timestamp": "2026-05-10T10:36:34.984Z"
+  },
+  {
+    "user_id": "u_4h",
+    "workout_type": "yoga",
+    "duration_min": 87,
+    "calories": 714,
+    "timestamp": "2026-05-08T10:33:10.934Z"
+  },
+  {
+    "user_id": "u_7q",
+    "workout_type": "swim",
+    "duration_min": 58,
+    "calories": 544,
+    "timestamp": "2026-05-06T02:59:03.606Z"
+  },
+  {
+    "user_id": "u_6p",
+    "workout_type": "swim",
+    "duration_min": 26,
+    "calories": 105,
+    "timestamp": "2026-05-03T14:46:26.406Z"
+  },
+  {
+    "user_id": "u_2g",
+    "workout_type": "run",
+    "duration_min": 43,
+    "calories": 247,
+    "timestamp": "2026-05-10T10:04:36.062Z"
+  },
+  {
+    "user_id": "u_4q",
+    "workout_type": "yoga",
+    "duration_min": 74,
+    "calories": 328,
+    "timestamp": "2026-05-05T08:51:59.089Z"
+  },
+  {
+    "user_id": "u_5i",
+    "workout_type": "lift",
+    "duration_min": 31,
+    "calories": 276,
+    "timestamp": "2026-05-11T10:00:46.324Z"
+  },
+  {
+    "user_id": "u_57",
+    "workout_type": "yoga",
+    "duration_min": 78,
+    "calories": 779,
+    "timestamp": "2026-04-18T02:20:07.940Z"
+  },
+  {
+    "user_id": "u_6m",
+    "workout_type": "run",
+    "duration_min": 63,
+    "calories": 299,
+    "timestamp": "2026-04-23T18:08:03.006Z"
+  },
+  {
+    "user_id": "u_7t",
+    "workout_type": "yoga",
+    "duration_min": 28,
+    "calories": 188,
+    "timestamp": "2026-05-06T10:08:54.097Z"
+  },
+  {
+    "user_id": "u_45",
+    "workout_type": "swim",
+    "duration_min": 75,
+    "calories": 395,
+    "timestamp": "2026-04-26T00:34:56.358Z"
+  },
+  {
+    "user_id": "u_6k",
+    "workout_type": "yoga",
+    "duration_min": 52,
+    "calories": 308,
+    "timestamp": "2026-04-19T03:35:00.528Z"
+  },
+  {
+    "user_id": "u_6h",
+    "workout_type": "run",
+    "duration_min": 23,
+    "calories": 207,
+    "timestamp": "2026-05-06T03:34:26.887Z"
+  },
+  {
+    "user_id": "u_6e",
+    "workout_type": "yoga",
+    "duration_min": 76,
+    "calories": 639,
+    "timestamp": "2026-05-03T15:59:07.695Z"
+  },
+  {
+    "user_id": "u_1e",
+    "workout_type": "run",
+    "duration_min": 31,
+    "calories": 259,
+    "timestamp": "2026-05-01T18:56:28.434Z"
+  },
+  {
+    "user_id": "u_23",
+    "workout_type": "lift",
+    "duration_min": 42,
+    "calories": 292,
+    "timestamp": "2026-05-07T05:56:12.885Z"
+  },
+  {
+    "user_id": "u_5t",
+    "workout_type": "run",
+    "duration_min": 33,
+    "calories": 221,
+    "timestamp": "2026-05-08T04:14:13.648Z"
+  },
+  {
+    "user_id": "u_7r",
+    "workout_type": "yoga",
+    "duration_min": 39,
+    "calories": 373,
+    "timestamp": "2026-04-19T00:12:32.824Z"
+  },
+  {
+    "user_id": "u_n",
+    "workout_type": "cycle",
+    "duration_min": 62,
+    "calories": 459,
+    "timestamp": "2026-04-25T14:51:35.666Z"
+  },
+  {
+    "user_id": "u_4n",
+    "workout_type": "swim",
+    "duration_min": 37,
+    "calories": 167,
+    "timestamp": "2026-05-01T15:44:25.777Z"
+  },
+  {
+    "user_id": "u_7o",
+    "workout_type": "swim",
+    "duration_min": 39,
+    "calories": 156,
+    "timestamp": "2026-04-25T11:32:37.223Z"
+  },
+  {
+    "user_id": "u_88",
+    "workout_type": "yoga",
+    "duration_min": 77,
+    "calories": 448,
+    "timestamp": "2026-05-05T04:09:10.492Z"
+  },
+  {
+    "user_id": "u_1p",
+    "workout_type": "cycle",
+    "duration_min": 79,
+    "calories": 490,
+    "timestamp": "2026-05-08T00:24:14.147Z"
+  },
+  {
+    "user_id": "u_24",
+    "workout_type": "run",
+    "duration_min": 38,
+    "calories": 153,
+    "timestamp": "2026-05-11T16:27:16.979Z"
+  },
+  {
+    "user_id": "u_6f",
+    "workout_type": "yoga",
+    "duration_min": 26,
+    "calories": 141,
+    "timestamp": "2026-05-07T02:51:56.048Z"
+  },
+  {
+    "user_id": "u_3t",
+    "workout_type": "run",
+    "duration_min": 40,
+    "calories": 194,
+    "timestamp": "2026-04-23T09:47:22.920Z"
+  },
+  {
+    "user_id": "u_5b",
+    "workout_type": "lift",
+    "duration_min": 24,
+    "calories": 143,
+    "timestamp": "2026-05-10T13:43:43.532Z"
+  },
+  {
+    "user_id": "u_89",
+    "workout_type": "yoga",
+    "duration_min": 38,
+    "calories": 236,
+    "timestamp": "2026-04-30T09:52:52.124Z"
+  },
+  {
+    "user_id": "u_61",
+    "workout_type": "yoga",
+    "duration_min": 62,
+    "calories": 332,
+    "timestamp": "2026-05-12T06:33:13.054Z"
+  },
+  {
+    "user_id": "u_2",
+    "workout_type": "swim",
+    "duration_min": 41,
+    "calories": 212,
+    "timestamp": "2026-04-18T10:24:58.719Z"
+  },
+  {
+    "user_id": "u_6o",
+    "workout_type": "lift",
+    "duration_min": 54,
+    "calories": 469,
+    "timestamp": "2026-04-22T02:16:59.124Z"
+  },
+  {
+    "user_id": "u_3o",
+    "workout_type": "lift",
+    "duration_min": 46,
+    "calories": 375,
+    "timestamp": "2026-05-10T21:13:25.537Z"
+  },
+  {
+    "user_id": "u_3x",
+    "workout_type": "swim",
+    "duration_min": 19,
+    "calories": 130,
+    "timestamp": "2026-05-08T16:10:22.151Z"
+  },
+  {
+    "user_id": "u_1v",
+    "workout_type": "run",
+    "duration_min": 29,
+    "calories": 257,
+    "timestamp": "2026-04-23T15:44:24.210Z"
+  },
+  {
+    "user_id": "u_h",
+    "workout_type": "lift",
+    "duration_min": 19,
+    "calories": 143,
+    "timestamp": "2026-05-03T12:42:59.656Z"
+  },
+  {
+    "user_id": "u_1p",
+    "workout_type": "lift",
+    "duration_min": 57,
+    "calories": 519,
+    "timestamp": "2026-04-16T06:30:47.840Z"
+  },
+  {
+    "user_id": "u_4a",
+    "workout_type": "cycle",
+    "duration_min": 69,
+    "calories": 572,
+    "timestamp": "2026-05-08T16:01:40.444Z"
+  },
+  {
+    "user_id": "u_53",
+    "workout_type": "swim",
+    "duration_min": 20,
+    "calories": 186,
+    "timestamp": "2026-05-09T23:33:44.786Z"
+  },
+  {
+    "user_id": "u_38",
+    "workout_type": "lift",
+    "duration_min": 79,
+    "calories": 731,
+    "timestamp": "2026-05-02T14:55:24.002Z"
+  },
+  {
+    "user_id": "u_7n",
+    "workout_type": "swim",
+    "duration_min": 27,
+    "calories": 115,
+    "timestamp": "2026-05-06T15:21:07.848Z"
+  },
+  {
+    "user_id": "u_7",
+    "workout_type": "yoga",
+    "duration_min": 33,
+    "calories": 197,
+    "timestamp": "2026-04-23T08:10:43.957Z"
+  },
+  {
+    "user_id": "u_2b",
+    "workout_type": "lift",
+    "duration_min": 33,
+    "calories": 139,
+    "timestamp": "2026-05-09T12:30:12.096Z"
+  },
+  {
+    "user_id": "u_55",
+    "workout_type": "cycle",
+    "duration_min": 59,
+    "calories": 387,
+    "timestamp": "2026-04-24T00:21:18.924Z"
+  },
+  {
+    "user_id": "u_5a",
+    "workout_type": "swim",
+    "duration_min": 48,
+    "calories": 355,
+    "timestamp": "2026-05-12T00:59:39.853Z"
+  },
+  {
+    "user_id": "u_78",
+    "workout_type": "swim",
+    "duration_min": 58,
+    "calories": 575,
+    "timestamp": "2026-04-27T21:47:03.249Z"
+  },
+  {
+    "user_id": "u_7a",
+    "workout_type": "cycle",
+    "duration_min": 15,
+    "calories": 81,
+    "timestamp": "2026-05-10T19:04:19.765Z"
+  },
+  {
+    "user_id": "u_2k",
+    "workout_type": "yoga",
+    "duration_min": 31,
+    "calories": 244,
+    "timestamp": "2026-04-29T09:00:25.427Z"
+  },
+  {
+    "user_id": "u_7u",
+    "workout_type": "yoga",
+    "duration_min": 29,
+    "calories": 181,
+    "timestamp": "2026-04-29T17:55:53.131Z"
+  },
+  {
+    "user_id": "u_30",
+    "workout_type": "cycle",
+    "duration_min": 85,
+    "calories": 604,
+    "timestamp": "2026-05-12T18:06:55.862Z"
+  },
+  {
+    "user_id": "u_2k",
+    "workout_type": "swim",
+    "duration_min": 71,
+    "calories": 479,
+    "timestamp": "2026-04-28T18:31:54.678Z"
+  },
+  {
+    "user_id": "u_4p",
+    "workout_type": "lift",
+    "duration_min": 52,
+    "calories": 281,
+    "timestamp": "2026-04-26T07:21:55.931Z"
+  },
+  {
+    "user_id": "u_15",
+    "workout_type": "cycle",
+    "duration_min": 35,
+    "calories": 194,
+    "timestamp": "2026-05-10T04:28:22.059Z"
+  },
+  {
+    "user_id": "u_1g",
+    "workout_type": "swim",
+    "duration_min": 57,
+    "calories": 564,
+    "timestamp": "2026-04-28T01:02:18.358Z"
+  },
+  {
+    "user_id": "u_26",
+    "workout_type": "lift",
+    "duration_min": 30,
+    "calories": 182,
+    "timestamp": "2026-04-22T10:18:55.601Z"
+  },
+  {
+    "user_id": "u_4b",
+    "workout_type": "run",
+    "duration_min": 65,
+    "calories": 350,
+    "timestamp": "2026-05-06T16:46:25.498Z"
+  },
+  {
+    "user_id": "u_6n",
+    "workout_type": "run",
+    "duration_min": 17,
+    "calories": 71,
+    "timestamp": "2026-04-25T07:20:23.128Z"
+  },
+  {
+    "user_id": "u_7o",
+    "workout_type": "swim",
+    "duration_min": 17,
+    "calories": 116,
+    "timestamp": "2026-05-04T16:50:49.712Z"
+  },
+  {
+    "user_id": "u_4i",
+    "workout_type": "lift",
+    "duration_min": 83,
+    "calories": 694,
+    "timestamp": "2026-05-11T11:47:17.544Z"
+  },
+  {
+    "user_id": "u_88",
+    "workout_type": "swim",
+    "duration_min": 31,
+    "calories": 257,
+    "timestamp": "2026-05-07T18:19:26.722Z"
+  },
+  {
+    "user_id": "u_4g",
+    "workout_type": "lift",
+    "duration_min": 21,
+    "calories": 139,
+    "timestamp": "2026-04-24T09:13:45.550Z"
+  },
+  {
+    "user_id": "u_4y",
+    "workout_type": "lift",
+    "duration_min": 58,
+    "calories": 574,
+    "timestamp": "2026-05-10T12:04:23.570Z"
+  },
+  {
+    "user_id": "u_6p",
+    "workout_type": "swim",
+    "duration_min": 55,
+    "calories": 262,
+    "timestamp": "2026-05-09T20:37:24.945Z"
+  },
+  {
+    "user_id": "u_2f",
+    "workout_type": "yoga",
+    "duration_min": 52,
+    "calories": 451,
+    "timestamp": "2026-05-05T00:01:49.334Z"
+  },
+  {
+    "user_id": "u_e",
+    "workout_type": "run",
+    "duration_min": 65,
+    "calories": 634,
+    "timestamp": "2026-05-05T21:35:34.679Z"
+  },
+  {
+    "user_id": "u_7g",
+    "workout_type": "swim",
+    "duration_min": 43,
+    "calories": 174,
+    "timestamp": "2026-05-01T22:06:08.539Z"
+  },
+  {
+    "user_id": "u_f",
+    "workout_type": "run",
+    "duration_min": 44,
+    "calories": 250,
+    "timestamp": "2026-04-27T19:17:45.313Z"
+  },
+  {
+    "user_id": "u_89",
+    "workout_type": "run",
+    "duration_min": 73,
+    "calories": 362,
+    "timestamp": "2026-05-07T00:35:37.901Z"
+  },
+  {
+    "user_id": "u_7m",
+    "workout_type": "swim",
+    "duration_min": 56,
+    "calories": 346,
+    "timestamp": "2026-05-01T02:47:07.808Z"
+  },
+  {
+    "user_id": "u_6w",
+    "workout_type": "cycle",
+    "duration_min": 35,
+    "calories": 335,
+    "timestamp": "2026-04-19T01:37:01.175Z"
+  },
+  {
+    "user_id": "u_2x",
+    "workout_type": "cycle",
+    "duration_min": 62,
+    "calories": 318,
+    "timestamp": "2026-04-25T19:38:08.153Z"
+  },
+  {
+    "user_id": "u_5h",
+    "workout_type": "cycle",
+    "duration_min": 42,
+    "calories": 329,
+    "timestamp": "2026-04-17T22:14:40.651Z"
+  },
+  {
+    "user_id": "u_1m",
+    "workout_type": "swim",
+    "duration_min": 19,
+    "calories": 189,
+    "timestamp": "2026-04-17T20:57:40.949Z"
+  },
+  {
+    "user_id": "u_5d",
+    "workout_type": "yoga",
+    "duration_min": 19,
+    "calories": 122,
+    "timestamp": "2026-04-16T15:30:42.129Z"
+  },
+  {
+    "user_id": "u_6b",
+    "workout_type": "run",
+    "duration_min": 54,
+    "calories": 272,
+    "timestamp": "2026-04-15T05:59:34.673Z"
+  },
+  {
+    "user_id": "u_4d",
+    "workout_type": "yoga",
+    "duration_min": 39,
+    "calories": 335,
+    "timestamp": "2026-05-06T03:26:41.134Z"
+  },
+  {
+    "user_id": "u_6k",
+    "workout_type": "swim",
+    "duration_min": 34,
+    "calories": 259,
+    "timestamp": "2026-04-15T10:52:23.912Z"
+  },
+  {
+    "user_id": "u_36",
+    "workout_type": "run",
+    "duration_min": 43,
+    "calories": 216,
+    "timestamp": "2026-04-28T22:24:29.271Z"
+  },
+  {
+    "user_id": "u_3",
+    "workout_type": "cycle",
+    "duration_min": 83,
+    "calories": 715,
+    "timestamp": "2026-04-26T08:39:43.530Z"
+  },
+  {
+    "user_id": "u_1y",
+    "workout_type": "cycle",
+    "duration_min": 28,
+    "calories": 242,
+    "timestamp": "2026-04-26T00:50:55.758Z"
+  },
+  {
+    "user_id": "u_3q",
+    "workout_type": "yoga",
+    "duration_min": 23,
+    "calories": 171,
+    "timestamp": "2026-05-10T21:08:11.441Z"
+  },
+  {
+    "user_id": "u_2b",
+    "workout_type": "yoga",
+    "duration_min": 71,
+    "calories": 476,
+    "timestamp": "2026-04-17T10:41:24.762Z"
+  },
+  {
+    "user_id": "u_1h",
+    "workout_type": "yoga",
+    "duration_min": 78,
+    "calories": 505,
+    "timestamp": "2026-05-03T18:28:57.367Z"
+  },
+  {
+    "user_id": "u_8b",
+    "workout_type": "lift",
+    "duration_min": 31,
+    "calories": 214,
+    "timestamp": "2026-04-16T20:59:37.851Z"
+  },
+  {
+    "user_id": "u_3r",
+    "workout_type": "yoga",
+    "duration_min": 21,
+    "calories": 104,
+    "timestamp": "2026-05-05T08:57:05.962Z"
+  },
+  {
+    "user_id": "u_34",
+    "workout_type": "yoga",
+    "duration_min": 27,
+    "calories": 240,
+    "timestamp": "2026-05-06T15:39:50.753Z"
+  },
+  {
+    "user_id": "u_2n",
+    "workout_type": "cycle",
+    "duration_min": 70,
+    "calories": 599,
+    "timestamp": "2026-05-08T07:26:34.344Z"
+  },
+  {
+    "user_id": "u_7c",
+    "workout_type": "run",
+    "duration_min": 25,
+    "calories": 240,
+    "timestamp": "2026-04-16T23:14:23.276Z"
+  },
+  {
+    "user_id": "u_7a",
+    "workout_type": "run",
+    "duration_min": 69,
+    "calories": 632,
+    "timestamp": "2026-04-22T11:04:37.909Z"
+  },
+  {
+    "user_id": "u_88",
+    "workout_type": "cycle",
+    "duration_min": 73,
+    "calories": 564,
+    "timestamp": "2026-05-09T05:52:47.940Z"
+  },
+  {
+    "user_id": "u_5a",
+    "workout_type": "yoga",
+    "duration_min": 26,
+    "calories": 241,
+    "timestamp": "2026-04-24T10:09:10.587Z"
+  },
+  {
+    "user_id": "u_5y",
+    "workout_type": "yoga",
+    "duration_min": 47,
+    "calories": 438,
+    "timestamp": "2026-05-05T13:28:18.461Z"
+  },
+  {
+    "user_id": "u_23",
+    "workout_type": "yoga",
+    "duration_min": 88,
+    "calories": 602,
+    "timestamp": "2026-05-01T00:12:30.248Z"
+  },
+  {
+    "user_id": "u_63",
+    "workout_type": "swim",
+    "duration_min": 69,
+    "calories": 359,
+    "timestamp": "2026-05-01T00:27:28.478Z"
+  },
+  {
+    "user_id": "u_2q",
+    "workout_type": "run",
+    "duration_min": 42,
+    "calories": 173,
+    "timestamp": "2026-04-29T06:44:19.625Z"
+  },
+  {
+    "user_id": "u_7a",
+    "workout_type": "run",
+    "duration_min": 84,
+    "calories": 434,
+    "timestamp": "2026-04-17T06:14:40.228Z"
+  },
+  {
+    "user_id": "u_67",
+    "workout_type": "swim",
+    "duration_min": 26,
+    "calories": 162,
+    "timestamp": "2026-05-04T22:27:49.315Z"
+  },
+  {
+    "user_id": "u_24",
+    "workout_type": "yoga",
+    "duration_min": 71,
+    "calories": 688,
+    "timestamp": "2026-04-26T04:22:49.230Z"
+  },
+  {
+    "user_id": "u_4r",
+    "workout_type": "run",
+    "duration_min": 39,
+    "calories": 177,
+    "timestamp": "2026-04-19T14:36:27.756Z"
+  },
+  {
+    "user_id": "u_3a",
+    "workout_type": "cycle",
+    "duration_min": 37,
+    "calories": 162,
+    "timestamp": "2026-04-17T06:53:40.980Z"
+  },
+  {
+    "user_id": "u_1z",
+    "workout_type": "cycle",
+    "duration_min": 47,
+    "calories": 458,
+    "timestamp": "2026-04-17T09:59:22.450Z"
+  },
+  {
+    "user_id": "u_74",
+    "workout_type": "yoga",
+    "duration_min": 64,
+    "calories": 358,
+    "timestamp": "2026-05-10T09:14:38.155Z"
+  },
+  {
+    "user_id": "u_6x",
+    "workout_type": "cycle",
+    "duration_min": 84,
+    "calories": 630,
+    "timestamp": "2026-05-12T10:00:45.689Z"
+  },
+  {
+    "user_id": "u_8h",
+    "workout_type": "lift",
+    "duration_min": 51,
+    "calories": 275,
+    "timestamp": "2026-04-29T03:56:01.168Z"
+  },
+  {
+    "user_id": "u_2o",
+    "workout_type": "lift",
+    "duration_min": 30,
+    "calories": 285,
+    "timestamp": "2026-04-16T22:30:04.314Z"
+  },
+  {
+    "user_id": "u_5x",
+    "workout_type": "yoga",
+    "duration_min": 78,
+    "calories": 501,
+    "timestamp": "2026-05-10T11:48:12.602Z"
+  },
+  {
+    "user_id": "u_6m",
+    "workout_type": "run",
+    "duration_min": 43,
+    "calories": 395,
+    "timestamp": "2026-04-25T13:00:57.617Z"
+  },
+  {
+    "user_id": "u_3k",
+    "workout_type": "run",
+    "duration_min": 25,
+    "calories": 121,
+    "timestamp": "2026-05-12T07:51:18.770Z"
+  },
+  {
+    "user_id": "u_4x",
+    "workout_type": "lift",
+    "duration_min": 62,
+    "calories": 461,
+    "timestamp": "2026-04-17T03:41:16.436Z"
+  },
+  {
+    "user_id": "u_6w",
+    "workout_type": "lift",
+    "duration_min": 62,
+    "calories": 461,
+    "timestamp": "2026-04-16T15:16:58.990Z"
+  },
+  {
+    "user_id": "u_7k",
+    "workout_type": "run",
+    "duration_min": 70,
+    "calories": 418,
+    "timestamp": "2026-05-03T02:03:40.510Z"
+  },
+  {
+    "user_id": "u_5m",
+    "workout_type": "yoga",
+    "duration_min": 27,
+    "calories": 243,
+    "timestamp": "2026-04-15T10:05:03.813Z"
+  },
+  {
+    "user_id": "u_6j",
+    "workout_type": "swim",
+    "duration_min": 24,
+    "calories": 100,
+    "timestamp": "2026-04-18T17:58:32.766Z"
+  },
+  {
+    "user_id": "u_28",
+    "workout_type": "swim",
+    "duration_min": 83,
+    "calories": 771,
+    "timestamp": "2026-04-29T12:53:07.970Z"
+  },
+  {
+    "user_id": "u_3v",
+    "workout_type": "lift",
+    "duration_min": 58,
+    "calories": 521,
+    "timestamp": "2026-05-02T06:00:52.569Z"
+  },
+  {
+    "user_id": "u_38",
+    "workout_type": "run",
+    "duration_min": 37,
+    "calories": 360,
+    "timestamp": "2026-05-04T13:11:36.060Z"
+  },
+  {
+    "user_id": "u_12",
+    "workout_type": "yoga",
+    "duration_min": 70,
+    "calories": 614,
+    "timestamp": "2026-05-09T19:32:12.195Z"
+  },
+  {
+    "user_id": "u_4s",
+    "workout_type": "run",
+    "duration_min": 33,
+    "calories": 245,
+    "timestamp": "2026-04-27T20:29:38.491Z"
+  },
+  {
+    "user_id": "u_1z",
+    "workout_type": "run",
+    "duration_min": 85,
+    "calories": 448,
+    "timestamp": "2026-05-07T04:19:43.100Z"
+  },
+  {
+    "user_id": "u_6g",
+    "workout_type": "cycle",
+    "duration_min": 61,
+    "calories": 525,
+    "timestamp": "2026-04-19T06:13:35.376Z"
+  },
+  {
+    "user_id": "u_81",
+    "workout_type": "swim",
+    "duration_min": 43,
+    "calories": 336,
+    "timestamp": "2026-04-23T01:24:39.805Z"
+  },
+  {
+    "user_id": "u_3p",
+    "workout_type": "lift",
+    "duration_min": 24,
+    "calories": 140,
+    "timestamp": "2026-05-09T20:55:28.654Z"
+  },
+  {
+    "user_id": "u_3j",
+    "workout_type": "cycle",
+    "duration_min": 19,
+    "calories": 162,
+    "timestamp": "2026-05-06T15:07:39.725Z"
+  },
+  {
+    "user_id": "u_n",
+    "workout_type": "yoga",
+    "duration_min": 82,
+    "calories": 516,
+    "timestamp": "2026-05-11T01:06:57.011Z"
+  },
+  {
+    "user_id": "u_3v",
+    "workout_type": "lift",
+    "duration_min": 53,
+    "calories": 497,
+    "timestamp": "2026-05-09T11:11:20.758Z"
+  },
+  {
+    "user_id": "u_1g",
+    "workout_type": "lift",
+    "duration_min": 16,
+    "calories": 115,
+    "timestamp": "2026-04-24T05:27:32.613Z"
+  },
+  {
+    "user_id": "u_5n",
+    "workout_type": "cycle",
+    "duration_min": 43,
+    "calories": 358,
+    "timestamp": "2026-04-17T07:31:26.737Z"
+  },
+  {
+    "user_id": "u_3d",
+    "workout_type": "lift",
+    "duration_min": 25,
+    "calories": 126,
+    "timestamp": "2026-04-20T09:33:52.291Z"
+  },
+  {
+    "user_id": "u_1b",
+    "workout_type": "run",
+    "duration_min": 76,
+    "calories": 754,
+    "timestamp": "2026-04-19T11:47:20.205Z"
+  },
+  {
+    "user_id": "u_2l",
+    "workout_type": "cycle",
+    "duration_min": 83,
+    "calories": 461,
+    "timestamp": "2026-05-11T23:35:09.626Z"
+  },
+  {
+    "user_id": "u_75",
+    "workout_type": "lift",
+    "duration_min": 28,
+    "calories": 204,
+    "timestamp": "2026-05-07T21:27:17.861Z"
+  },
+  {
+    "user_id": "u_4r",
+    "workout_type": "yoga",
+    "duration_min": 77,
+    "calories": 442,
+    "timestamp": "2026-04-27T00:45:51.000Z"
+  },
+  {
+    "user_id": "u_4h",
+    "workout_type": "swim",
+    "duration_min": 72,
+    "calories": 506,
+    "timestamp": "2026-04-22T15:22:35.905Z"
+  },
+  {
+    "user_id": "u_36",
+    "workout_type": "cycle",
+    "duration_min": 40,
+    "calories": 186,
+    "timestamp": "2026-04-29T13:55:47.725Z"
+  },
+  {
+    "user_id": "u_62",
+    "workout_type": "swim",
+    "duration_min": 36,
+    "calories": 260,
+    "timestamp": "2026-04-26T20:45:55.876Z"
+  },
+  {
+    "user_id": "u_6g",
+    "workout_type": "swim",
+    "duration_min": 49,
+    "calories": 326,
+    "timestamp": "2026-04-22T19:47:56.834Z"
+  },
+  {
+    "user_id": "u_42",
+    "workout_type": "lift",
+    "duration_min": 46,
+    "calories": 326,
+    "timestamp": "2026-04-29T18:14:41.393Z"
+  },
+  {
+    "user_id": "u_3z",
+    "workout_type": "run",
+    "duration_min": 67,
+    "calories": 648,
+    "timestamp": "2026-04-24T22:36:02.032Z"
+  },
+  {
+    "user_id": "u_60",
+    "workout_type": "lift",
+    "duration_min": 56,
+    "calories": 245,
+    "timestamp": "2026-04-28T06:50:05.583Z"
+  },
+  {
+    "user_id": "u_7x",
+    "workout_type": "cycle",
+    "duration_min": 66,
+    "calories": 563,
+    "timestamp": "2026-04-28T09:45:13.122Z"
+  },
+  {
+    "user_id": "u_17",
+    "workout_type": "run",
+    "duration_min": 36,
+    "calories": 305,
+    "timestamp": "2026-05-08T23:55:16.121Z"
+  },
+  {
+    "user_id": "u_1p",
+    "workout_type": "cycle",
+    "duration_min": 17,
+    "calories": 100,
+    "timestamp": "2026-04-24T16:35:45.404Z"
+  },
+  {
+    "user_id": "u_4k",
+    "workout_type": "cycle",
+    "duration_min": 79,
+    "calories": 634,
+    "timestamp": "2026-05-12T06:00:03.140Z"
+  },
+  {
+    "user_id": "u_5x",
+    "workout_type": "swim",
+    "duration_min": 67,
+    "calories": 474,
+    "timestamp": "2026-04-21T04:24:59.130Z"
+  },
+  {
+    "user_id": "u_7a",
+    "workout_type": "lift",
+    "duration_min": 54,
+    "calories": 355,
+    "timestamp": "2026-04-24T04:53:58.205Z"
+  },
+  {
+    "user_id": "u_60",
+    "workout_type": "swim",
+    "duration_min": 30,
+    "calories": 127,
+    "timestamp": "2026-05-07T17:24:03.998Z"
+  },
+  {
+    "user_id": "u_6y",
+    "workout_type": "swim",
+    "duration_min": 35,
+    "calories": 337,
+    "timestamp": "2026-04-24T11:59:26.363Z"
+  },
+  {
+    "user_id": "u_3o",
+    "workout_type": "swim",
+    "duration_min": 15,
+    "calories": 81,
+    "timestamp": "2026-05-02T06:04:38.535Z"
+  },
+  {
+    "user_id": "u_7c",
+    "workout_type": "swim",
+    "duration_min": 75,
+    "calories": 453,
+    "timestamp": "2026-04-29T11:28:36.019Z"
+  },
+  {
+    "user_id": "u_8k",
+    "workout_type": "yoga",
+    "duration_min": 39,
+    "calories": 277,
+    "timestamp": "2026-04-24T05:32:33.729Z"
+  },
+  {
+    "user_id": "u_6d",
+    "workout_type": "lift",
+    "duration_min": 49,
+    "calories": 251,
+    "timestamp": "2026-04-30T21:09:54.597Z"
+  },
+  {
+    "user_id": "u_3y",
+    "workout_type": "swim",
+    "duration_min": 77,
+    "calories": 309,
+    "timestamp": "2026-04-27T10:17:37.904Z"
+  },
+  {
+    "user_id": "u_2p",
+    "workout_type": "yoga",
+    "duration_min": 51,
+    "calories": 262,
+    "timestamp": "2026-04-17T14:52:57.294Z"
+  },
+  {
+    "user_id": "u_35",
+    "workout_type": "swim",
+    "duration_min": 61,
+    "calories": 468,
+    "timestamp": "2026-04-23T16:05:43.652Z"
+  },
+  {
+    "user_id": "u_24",
+    "workout_type": "run",
+    "duration_min": 21,
+    "calories": 139,
+    "timestamp": "2026-04-27T13:26:36.891Z"
+  },
+  {
+    "user_id": "u_6y",
+    "workout_type": "lift",
+    "duration_min": 26,
+    "calories": 114,
+    "timestamp": "2026-05-07T10:37:25.484Z"
+  },
+  {
+    "user_id": "u_g",
+    "workout_type": "swim",
+    "duration_min": 36,
+    "calories": 284,
+    "timestamp": "2026-04-22T07:13:14.494Z"
+  },
+  {
+    "user_id": "u_45",
+    "workout_type": "swim",
+    "duration_min": 82,
+    "calories": 642,
+    "timestamp": "2026-05-11T11:44:23.797Z"
+  },
+  {
+    "user_id": "u_5e",
+    "workout_type": "cycle",
+    "duration_min": 19,
+    "calories": 182,
+    "timestamp": "2026-05-08T22:00:17.633Z"
+  },
+  {
+    "user_id": "u_1j",
+    "workout_type": "lift",
+    "duration_min": 56,
+    "calories": 348,
+    "timestamp": "2026-04-19T06:19:48.239Z"
+  },
+  {
+    "user_id": "u_7l",
+    "workout_type": "lift",
+    "duration_min": 39,
+    "calories": 262,
+    "timestamp": "2026-05-07T04:30:08.637Z"
+  },
+  {
+    "user_id": "u_75",
+    "workout_type": "yoga",
+    "duration_min": 48,
+    "calories": 407,
+    "timestamp": "2026-05-01T02:04:51.230Z"
+  },
+  {
+    "user_id": "u_5v",
+    "workout_type": "run",
+    "duration_min": 84,
+    "calories": 543,
+    "timestamp": "2026-04-27T13:27:20.558Z"
+  },
+  {
+    "user_id": "u_q",
+    "workout_type": "run",
+    "duration_min": 22,
+    "calories": 108,
+    "timestamp": "2026-04-20T15:49:05.275Z"
+  },
+  {
+    "user_id": "u_1k",
+    "workout_type": "swim",
+    "duration_min": 56,
+    "calories": 445,
+    "timestamp": "2026-04-24T11:23:54.133Z"
+  },
+  {
+    "user_id": "u_5o",
+    "workout_type": "yoga",
+    "duration_min": 31,
+    "calories": 309,
+    "timestamp": "2026-04-19T05:18:05.565Z"
+  },
+  {
+    "user_id": "u_k",
+    "workout_type": "lift",
+    "duration_min": 40,
+    "calories": 399,
+    "timestamp": "2026-04-16T21:43:42.828Z"
+  },
+  {
+    "user_id": "u_o",
+    "workout_type": "swim",
+    "duration_min": 70,
+    "calories": 426,
+    "timestamp": "2026-05-09T06:15:17.092Z"
+  },
+  {
+    "user_id": "u_6h",
+    "workout_type": "cycle",
+    "duration_min": 62,
+    "calories": 422,
+    "timestamp": "2026-05-09T03:27:01.387Z"
+  },
+  {
+    "user_id": "u_b",
+    "workout_type": "swim",
+    "duration_min": 58,
+    "calories": 315,
+    "timestamp": "2026-05-11T18:50:10.747Z"
+  },
+  {
+    "user_id": "u_4w",
+    "workout_type": "swim",
+    "duration_min": 34,
+    "calories": 192,
+    "timestamp": "2026-04-30T16:35:41.532Z"
+  },
+  {
+    "user_id": "u_2d",
+    "workout_type": "swim",
+    "duration_min": 42,
+    "calories": 392,
+    "timestamp": "2026-05-06T06:05:22.704Z"
+  },
+  {
+    "user_id": "u_54",
+    "workout_type": "cycle",
+    "duration_min": 43,
+    "calories": 425,
+    "timestamp": "2026-05-06T22:19:20.447Z"
+  },
+  {
+    "user_id": "u_6r",
+    "workout_type": "lift",
+    "duration_min": 48,
+    "calories": 445,
+    "timestamp": "2026-04-26T23:49:23.777Z"
+  },
+  {
+    "user_id": "u_4e",
+    "workout_type": "lift",
+    "duration_min": 79,
+    "calories": 384,
+    "timestamp": "2026-05-06T16:19:51.392Z"
+  },
+  {
+    "user_id": "u_71",
+    "workout_type": "run",
+    "duration_min": 62,
+    "calories": 441,
+    "timestamp": "2026-05-05T14:26:28.955Z"
+  },
+  {
+    "user_id": "u_6v",
+    "workout_type": "yoga",
+    "duration_min": 38,
+    "calories": 295,
+    "timestamp": "2026-05-11T00:02:04.737Z"
+  },
+  {
+    "user_id": "u_3e",
+    "workout_type": "lift",
+    "duration_min": 89,
+    "calories": 716,
+    "timestamp": "2026-05-10T14:04:23.954Z"
+  },
+  {
+    "user_id": "u_3r",
+    "workout_type": "run",
+    "duration_min": 30,
+    "calories": 291,
+    "timestamp": "2026-04-21T18:55:48.354Z"
+  },
+  {
+    "user_id": "u_5t",
+    "workout_type": "swim",
+    "duration_min": 71,
+    "calories": 665,
+    "timestamp": "2026-04-17T16:26:35.258Z"
+  },
+  {
+    "user_id": "u_4m",
+    "workout_type": "lift",
+    "duration_min": 22,
+    "calories": 158,
+    "timestamp": "2026-05-03T09:14:40.816Z"
+  },
+  {
+    "user_id": "u_5f",
+    "workout_type": "yoga",
+    "duration_min": 40,
+    "calories": 353,
+    "timestamp": "2026-04-21T08:52:15.007Z"
+  },
+  {
+    "user_id": "u_6q",
+    "workout_type": "yoga",
+    "duration_min": 88,
+    "calories": 452,
+    "timestamp": "2026-04-15T09:03:57.028Z"
+  },
+  {
+    "user_id": "u_5e",
+    "workout_type": "lift",
+    "duration_min": 36,
+    "calories": 267,
+    "timestamp": "2026-04-26T19:23:51.692Z"
+  },
+  {
+    "user_id": "u_g",
+    "workout_type": "lift",
+    "duration_min": 86,
+    "calories": 450,
+    "timestamp": "2026-04-27T04:36:59.416Z"
+  },
+  {
+    "user_id": "u_2m",
+    "workout_type": "cycle",
+    "duration_min": 54,
+    "calories": 494,
+    "timestamp": "2026-04-24T14:28:00.706Z"
+  },
+  {
+    "user_id": "u_3t",
+    "workout_type": "lift",
+    "duration_min": 27,
+    "calories": 236,
+    "timestamp": "2026-04-26T01:37:11.195Z"
+  },
+  {
+    "user_id": "u_65",
+    "workout_type": "yoga",
+    "duration_min": 43,
+    "calories": 291,
+    "timestamp": "2026-05-01T09:01:37.913Z"
+  },
+  {
+    "user_id": "u_2p",
+    "workout_type": "run",
+    "duration_min": 70,
+    "calories": 405,
+    "timestamp": "2026-04-28T18:47:24.401Z"
+  },
+  {
+    "user_id": "u_6g",
+    "workout_type": "yoga",
+    "duration_min": 66,
+    "calories": 357,
+    "timestamp": "2026-05-08T02:27:23.504Z"
+  },
+  {
+    "user_id": "u_5h",
+    "workout_type": "run",
+    "duration_min": 48,
+    "calories": 271,
+    "timestamp": "2026-04-19T19:50:58.876Z"
+  },
+  {
+    "user_id": "u_2w",
+    "workout_type": "yoga",
+    "duration_min": 83,
+    "calories": 478,
+    "timestamp": "2026-05-10T07:07:43.910Z"
+  },
+  {
+    "user_id": "u_7v",
+    "workout_type": "swim",
+    "duration_min": 57,
+    "calories": 455,
+    "timestamp": "2026-05-10T08:42:28.754Z"
+  },
+  {
+    "user_id": "u_17",
+    "workout_type": "cycle",
+    "duration_min": 33,
+    "calories": 288,
+    "timestamp": "2026-05-12T15:00:22.008Z"
+  },
+  {
+    "user_id": "u_3a",
+    "workout_type": "cycle",
+    "duration_min": 42,
+    "calories": 323,
+    "timestamp": "2026-04-15T03:51:06.691Z"
+  },
+  {
+    "user_id": "u_69",
+    "workout_type": "lift",
+    "duration_min": 42,
+    "calories": 224,
+    "timestamp": "2026-04-28T10:38:04.507Z"
+  },
+  {
+    "user_id": "u_4q",
+    "workout_type": "yoga",
+    "duration_min": 74,
+    "calories": 726,
+    "timestamp": "2026-05-05T21:36:52.515Z"
+  },
+  {
+    "user_id": "u_7t",
+    "workout_type": "cycle",
+    "duration_min": 86,
+    "calories": 406,
+    "timestamp": "2026-05-08T22:06:49.934Z"
+  },
+  {
+    "user_id": "u_3z",
+    "workout_type": "swim",
+    "duration_min": 75,
+    "calories": 480,
+    "timestamp": "2026-04-17T03:53:10.611Z"
+  },
+  {
+    "user_id": "u_10",
+    "workout_type": "run",
+    "duration_min": 60,
+    "calories": 328,
+    "timestamp": "2026-05-04T21:12:35.042Z"
+  },
+  {
+    "user_id": "u_81",
+    "workout_type": "lift",
+    "duration_min": 23,
+    "calories": 100,
+    "timestamp": "2026-04-19T08:23:56.510Z"
+  },
+  {
+    "user_id": "u_d",
+    "workout_type": "swim",
+    "duration_min": 34,
+    "calories": 320,
+    "timestamp": "2026-04-16T03:43:32.902Z"
+  },
+  {
+    "user_id": "u_65",
+    "workout_type": "swim",
+    "duration_min": 40,
+    "calories": 321,
+    "timestamp": "2026-05-01T18:37:04.983Z"
+  },
+  {
+    "user_id": "u_8h",
+    "workout_type": "yoga",
+    "duration_min": 59,
+    "calories": 304,
+    "timestamp": "2026-04-28T04:48:40.971Z"
+  },
+  {
+    "user_id": "u_4p",
+    "workout_type": "lift",
+    "duration_min": 44,
+    "calories": 338,
+    "timestamp": "2026-05-03T19:57:11.285Z"
+  },
+  {
+    "user_id": "u_49",
+    "workout_type": "run",
+    "duration_min": 64,
+    "calories": 624,
+    "timestamp": "2026-05-12T18:30:03.867Z"
+  },
+  {
+    "user_id": "u_1z",
+    "workout_type": "lift",
+    "duration_min": 48,
+    "calories": 433,
+    "timestamp": "2026-04-21T01:16:07.059Z"
+  },
+  {
+    "user_id": "u_8g",
+    "workout_type": "run",
+    "duration_min": 19,
+    "calories": 93,
+    "timestamp": "2026-05-09T23:04:38.480Z"
+  },
+  {
+    "user_id": "u_7x",
+    "workout_type": "lift",
+    "duration_min": 47,
+    "calories": 442,
+    "timestamp": "2026-04-20T20:01:01.293Z"
+  },
+  {
+    "user_id": "u_2g",
+    "workout_type": "swim",
+    "duration_min": 20,
+    "calories": 91,
+    "timestamp": "2026-04-26T10:13:26.755Z"
+  },
+  {
+    "user_id": "u_3z",
+    "workout_type": "run",
+    "duration_min": 40,
+    "calories": 373,
+    "timestamp": "2026-04-26T03:24:43.079Z"
+  },
+  {
+    "user_id": "u_d",
+    "workout_type": "lift",
+    "duration_min": 86,
+    "calories": 853,
+    "timestamp": "2026-04-16T09:45:33.557Z"
+  },
+  {
+    "user_id": "u_2u",
+    "workout_type": "run",
+    "duration_min": 45,
+    "calories": 240,
+    "timestamp": "2026-04-16T21:58:57.654Z"
+  },
+  {
+    "user_id": "u_3y",
+    "workout_type": "lift",
+    "duration_min": 57,
+    "calories": 484,
+    "timestamp": "2026-05-04T14:17:28.739Z"
+  },
+  {
+    "user_id": "u_6s",
+    "workout_type": "run",
+    "duration_min": 20,
+    "calories": 159,
+    "timestamp": "2026-05-11T10:55:00.661Z"
+  },
+  {
+    "user_id": "u_2l",
+    "workout_type": "cycle",
+    "duration_min": 63,
+    "calories": 328,
+    "timestamp": "2026-04-30T07:03:04.283Z"
+  },
+  {
+    "user_id": "u_3h",
+    "workout_type": "cycle",
+    "duration_min": 57,
+    "calories": 296,
+    "timestamp": "2026-04-30T00:17:43.009Z"
+  },
+  {
+    "user_id": "u_7y",
+    "workout_type": "lift",
+    "duration_min": 85,
+    "calories": 691,
+    "timestamp": "2026-05-12T10:22:55.457Z"
+  },
+  {
+    "user_id": "u_5j",
+    "workout_type": "run",
+    "duration_min": 44,
+    "calories": 379,
+    "timestamp": "2026-04-21T01:23:00.246Z"
+  },
+  {
+    "user_id": "u_13",
+    "workout_type": "swim",
+    "duration_min": 31,
+    "calories": 153,
+    "timestamp": "2026-05-08T18:11:50.798Z"
+  },
+  {
+    "user_id": "u_1k",
+    "workout_type": "yoga",
+    "duration_min": 26,
+    "calories": 133,
+    "timestamp": "2026-05-02T23:03:10.918Z"
+  },
+  {
+    "user_id": "u_44",
+    "workout_type": "swim",
+    "duration_min": 35,
+    "calories": 277,
+    "timestamp": "2026-04-16T08:43:40.547Z"
+  },
+  {
+    "user_id": "u_3d",
+    "workout_type": "lift",
+    "duration_min": 67,
+    "calories": 543,
+    "timestamp": "2026-05-03T23:50:56.026Z"
+  },
+  {
+    "user_id": "u_3s",
+    "workout_type": "run",
+    "duration_min": 46,
+    "calories": 340,
+    "timestamp": "2026-04-21T02:34:50.261Z"
+  },
+  {
+    "user_id": "u_6t",
+    "workout_type": "swim",
+    "duration_min": 45,
+    "calories": 405,
+    "timestamp": "2026-04-30T08:08:44.143Z"
+  },
+  {
+    "user_id": "u_1k",
+    "workout_type": "run",
+    "duration_min": 54,
+    "calories": 430,
+    "timestamp": "2026-05-05T09:22:14.314Z"
+  },
+  {
+    "user_id": "u_75",
+    "workout_type": "lift",
+    "duration_min": 39,
+    "calories": 180,
+    "timestamp": "2026-04-17T18:08:17.262Z"
+  },
+  {
+    "user_id": "u_48",
+    "workout_type": "yoga",
+    "duration_min": 67,
+    "calories": 665,
+    "timestamp": "2026-04-30T08:41:26.154Z"
+  },
+  {
+    "user_id": "u_14",
+    "workout_type": "run",
+    "duration_min": 85,
+    "calories": 519,
+    "timestamp": "2026-04-20T11:54:08.206Z"
+  },
+  {
+    "user_id": "u_1o",
+    "workout_type": "cycle",
+    "duration_min": 87,
+    "calories": 707,
+    "timestamp": "2026-05-09T07:22:15.759Z"
+  },
+  {
+    "user_id": "u_6a",
+    "workout_type": "lift",
+    "duration_min": 86,
+    "calories": 632,
+    "timestamp": "2026-05-09T20:55:39.027Z"
+  },
+  {
+    "user_id": "u_5g",
+    "workout_type": "swim",
+    "duration_min": 45,
+    "calories": 413,
+    "timestamp": "2026-04-20T07:58:59.633Z"
+  },
+  {
+    "user_id": "u_35",
+    "workout_type": "run",
+    "duration_min": 87,
+    "calories": 567,
+    "timestamp": "2026-04-22T13:16:30.931Z"
+  },
+  {
+    "user_id": "u_4m",
+    "workout_type": "run",
+    "duration_min": 48,
+    "calories": 277,
+    "timestamp": "2026-04-29T12:42:49.788Z"
+  },
+  {
+    "user_id": "u_5k",
+    "workout_type": "swim",
+    "duration_min": 54,
+    "calories": 509,
+    "timestamp": "2026-04-30T10:37:41.500Z"
+  },
+  {
+    "user_id": "u_g",
+    "workout_type": "cycle",
+    "duration_min": 40,
+    "calories": 374,
+    "timestamp": "2026-05-04T08:10:56.070Z"
+  },
+  {
+    "user_id": "u_3n",
+    "workout_type": "cycle",
+    "duration_min": 86,
+    "calories": 357,
+    "timestamp": "2026-04-22T04:01:13.459Z"
+  },
+  {
+    "user_id": "u_5a",
+    "workout_type": "cycle",
+    "duration_min": 60,
+    "calories": 340,
+    "timestamp": "2026-05-02T20:51:59.913Z"
+  },
+  {
+    "user_id": "u_1v",
+    "workout_type": "lift",
+    "duration_min": 24,
+    "calories": 194,
+    "timestamp": "2026-05-07T01:11:55.369Z"
+  },
+  {
+    "user_id": "u_8j",
+    "workout_type": "swim",
+    "duration_min": 72,
+    "calories": 514,
+    "timestamp": "2026-04-21T07:47:22.763Z"
+  },
+  {
+    "user_id": "u_88",
+    "workout_type": "cycle",
+    "duration_min": 77,
+    "calories": 399,
+    "timestamp": "2026-05-11T06:15:21.392Z"
+  },
+  {
+    "user_id": "u_85",
+    "workout_type": "run",
+    "duration_min": 56,
+    "calories": 323,
+    "timestamp": "2026-04-19T09:48:28.926Z"
+  },
+  {
+    "user_id": "u_4g",
+    "workout_type": "lift",
+    "duration_min": 78,
+    "calories": 339,
+    "timestamp": "2026-04-22T16:32:04.711Z"
+  },
+  {
+    "user_id": "u_9",
+    "workout_type": "run",
+    "duration_min": 61,
+    "calories": 370,
+    "timestamp": "2026-04-28T08:41:39.998Z"
+  },
+  {
+    "user_id": "u_4a",
+    "workout_type": "run",
+    "duration_min": 62,
+    "calories": 396,
+    "timestamp": "2026-05-03T16:16:40.703Z"
+  },
+  {
+    "user_id": "u_2w",
+    "workout_type": "lift",
+    "duration_min": 36,
+    "calories": 277,
+    "timestamp": "2026-05-12T13:11:59.919Z"
+  },
+  {
+    "user_id": "u_52",
+    "workout_type": "run",
+    "duration_min": 30,
+    "calories": 205,
+    "timestamp": "2026-04-20T04:38:12.655Z"
+  },
+  {
+    "user_id": "u_8c",
+    "workout_type": "run",
+    "duration_min": 39,
+    "calories": 291,
+    "timestamp": "2026-04-23T14:28:07.299Z"
+  },
+  {
+    "user_id": "u_5r",
+    "workout_type": "run",
+    "duration_min": 70,
+    "calories": 589,
+    "timestamp": "2026-05-05T08:56:11.528Z"
+  },
+  {
+    "user_id": "u_80",
+    "workout_type": "yoga",
+    "duration_min": 43,
+    "calories": 196,
+    "timestamp": "2026-04-25T16:48:27.303Z"
+  },
+  {
+    "user_id": "u_4d",
+    "workout_type": "yoga",
+    "duration_min": 65,
+    "calories": 434,
+    "timestamp": "2026-04-21T17:06:40.847Z"
+  },
+  {
+    "user_id": "u_j",
+    "workout_type": "yoga",
+    "duration_min": 42,
+    "calories": 385,
+    "timestamp": "2026-04-24T03:03:22.346Z"
+  },
+  {
+    "user_id": "u_50",
+    "workout_type": "run",
+    "duration_min": 30,
+    "calories": 155,
+    "timestamp": "2026-04-16T03:29:38.249Z"
+  },
+  {
+    "user_id": "u_3w",
+    "workout_type": "yoga",
+    "duration_min": 45,
+    "calories": 227,
+    "timestamp": "2026-04-25T14:30:59.834Z"
+  },
+  {
+    "user_id": "u_84",
+    "workout_type": "run",
+    "duration_min": 78,
+    "calories": 440,
+    "timestamp": "2026-05-10T19:27:24.027Z"
+  },
+  {
+    "user_id": "u_6y",
+    "workout_type": "run",
+    "duration_min": 34,
+    "calories": 167,
+    "timestamp": "2026-05-03T11:36:16.591Z"
+  },
+  {
+    "user_id": "u_5h",
+    "workout_type": "lift",
+    "duration_min": 82,
+    "calories": 340,
+    "timestamp": "2026-04-21T07:02:11.882Z"
+  },
+  {
+    "user_id": "u_5b",
+    "workout_type": "cycle",
+    "duration_min": 48,
+    "calories": 277,
+    "timestamp": "2026-05-09T08:51:56.992Z"
+  },
+  {
+    "user_id": "u_3a",
+    "workout_type": "cycle",
+    "duration_min": 28,
+    "calories": 179,
+    "timestamp": "2026-04-21T10:27:09.488Z"
+  },
+  {
+    "user_id": "u_1c",
+    "workout_type": "swim",
+    "duration_min": 20,
+    "calories": 159,
+    "timestamp": "2026-04-16T12:50:06.244Z"
+  },
+  {
+    "user_id": "u_46",
+    "workout_type": "yoga",
+    "duration_min": 64,
+    "calories": 410,
+    "timestamp": "2026-04-30T10:27:26.500Z"
+  },
+  {
+    "user_id": "u_1d",
+    "workout_type": "yoga",
+    "duration_min": 21,
+    "calories": 160,
+    "timestamp": "2026-04-24T06:12:04.319Z"
+  },
+  {
+    "user_id": "u_2d",
+    "workout_type": "run",
+    "duration_min": 55,
+    "calories": 359,
+    "timestamp": "2026-05-06T04:15:38.462Z"
+  },
+  {
+    "user_id": "u_7m",
+    "workout_type": "cycle",
+    "duration_min": 82,
+    "calories": 790,
+    "timestamp": "2026-05-01T00:24:04.209Z"
+  },
+  {
+    "user_id": "u_8n",
+    "workout_type": "yoga",
+    "duration_min": 79,
+    "calories": 359,
+    "timestamp": "2026-05-04T09:51:23.592Z"
+  },
+  {
+    "user_id": "u_28",
+    "workout_type": "yoga",
+    "duration_min": 27,
+    "calories": 187,
+    "timestamp": "2026-04-30T05:28:45.497Z"
+  },
+  {
+    "user_id": "u_58",
+    "workout_type": "run",
+    "duration_min": 82,
+    "calories": 725,
+    "timestamp": "2026-05-03T20:45:21.254Z"
+  },
+  {
+    "user_id": "u_7r",
+    "workout_type": "cycle",
+    "duration_min": 46,
+    "calories": 450,
+    "timestamp": "2026-05-05T14:20:15.314Z"
+  },
+  {
+    "user_id": "u_1",
+    "workout_type": "cycle",
+    "duration_min": 81,
+    "calories": 803,
+    "timestamp": "2026-04-27T19:01:39.683Z"
+  },
+  {
+    "user_id": "u_7c",
+    "workout_type": "lift",
+    "duration_min": 46,
+    "calories": 278,
+    "timestamp": "2026-05-08T19:13:24.688Z"
+  },
+  {
+    "user_id": "u_11",
+    "workout_type": "swim",
+    "duration_min": 52,
+    "calories": 356,
+    "timestamp": "2026-05-08T05:28:13.628Z"
+  },
+  {
+    "user_id": "u_3d",
+    "workout_type": "swim",
+    "duration_min": 30,
+    "calories": 165,
+    "timestamp": "2026-05-02T01:11:13.799Z"
+  },
+  {
+    "user_id": "u_83",
+    "workout_type": "cycle",
+    "duration_min": 65,
+    "calories": 414,
+    "timestamp": "2026-04-21T04:56:40.616Z"
+  },
+  {
+    "user_id": "u_8g",
+    "workout_type": "cycle",
+    "duration_min": 77,
+    "calories": 604,
+    "timestamp": "2026-04-25T01:42:12.732Z"
+  },
+  {
+    "user_id": "u_26",
+    "workout_type": "cycle",
+    "duration_min": 76,
+    "calories": 648,
+    "timestamp": "2026-05-08T01:16:20.351Z"
+  },
+  {
+    "user_id": "u_46",
+    "workout_type": "cycle",
+    "duration_min": 22,
+    "calories": 140,
+    "timestamp": "2026-04-30T05:02:48.949Z"
+  },
+  {
+    "user_id": "u_8n",
+    "workout_type": "yoga",
+    "duration_min": 70,
+    "calories": 632,
+    "timestamp": "2026-05-04T08:43:55.132Z"
+  },
+  {
+    "user_id": "u_6r",
+    "workout_type": "run",
+    "duration_min": 86,
+    "calories": 377,
+    "timestamp": "2026-05-03T12:09:52.922Z"
+  },
+  {
+    "user_id": "u_52",
+    "workout_type": "cycle",
+    "duration_min": 29,
+    "calories": 212,
+    "timestamp": "2026-04-24T22:02:25.336Z"
+  },
+  {
+    "user_id": "u_1v",
+    "workout_type": "lift",
+    "duration_min": 66,
+    "calories": 540,
+    "timestamp": "2026-04-19T18:38:17.351Z"
+  },
+  {
+    "user_id": "u_6p",
+    "workout_type": "cycle",
+    "duration_min": 76,
+    "calories": 531,
+    "timestamp": "2026-04-28T12:23:03.019Z"
+  },
+  {
+    "user_id": "u_7q",
+    "workout_type": "cycle",
+    "duration_min": 47,
+    "calories": 229,
+    "timestamp": "2026-05-10T02:35:53.492Z"
+  },
+  {
+    "user_id": "u_8i",
+    "workout_type": "swim",
+    "duration_min": 68,
+    "calories": 484,
+    "timestamp": "2026-04-28T00:31:58.141Z"
+  },
+  {
+    "user_id": "u_5f",
+    "workout_type": "cycle",
+    "duration_min": 24,
+    "calories": 153,
+    "timestamp": "2026-04-30T19:39:48.680Z"
+  },
+  {
+    "user_id": "u_2l",
+    "workout_type": "swim",
+    "duration_min": 50,
+    "calories": 490,
+    "timestamp": "2026-05-12T07:36:42.660Z"
+  },
+  {
+    "user_id": "u_11",
+    "workout_type": "yoga",
+    "duration_min": 49,
+    "calories": 299,
+    "timestamp": "2026-05-09T10:06:37.237Z"
+  },
+  {
+    "user_id": "u_4b",
+    "workout_type": "lift",
+    "duration_min": 61,
+    "calories": 344,
+    "timestamp": "2026-04-30T09:43:13.536Z"
+  },
+  {
+    "user_id": "u_38",
+    "workout_type": "swim",
+    "duration_min": 21,
+    "calories": 206,
+    "timestamp": "2026-04-18T10:33:29.692Z"
+  },
+  {
+    "user_id": "u_m",
+    "workout_type": "yoga",
+    "duration_min": 46,
+    "calories": 452,
+    "timestamp": "2026-04-17T17:10:41.825Z"
+  },
+  {
+    "user_id": "u_2d",
+    "workout_type": "lift",
+    "duration_min": 37,
+    "calories": 219,
+    "timestamp": "2026-05-12T20:04:28.830Z"
+  },
+  {
+    "user_id": "u_76",
+    "workout_type": "lift",
+    "duration_min": 15,
+    "calories": 77,
+    "timestamp": "2026-04-15T05:06:40.938Z"
+  },
+  {
+    "user_id": "u_8e",
+    "workout_type": "cycle",
+    "duration_min": 86,
+    "calories": 484,
+    "timestamp": "2026-04-30T00:17:54.300Z"
+  },
+  {
+    "user_id": "u_7r",
+    "workout_type": "lift",
+    "duration_min": 37,
+    "calories": 150,
+    "timestamp": "2026-04-28T11:59:12.099Z"
+  },
+  {
+    "user_id": "u_1u",
+    "workout_type": "swim",
+    "duration_min": 20,
+    "calories": 125,
+    "timestamp": "2026-05-10T23:41:52.926Z"
+  },
+  {
+    "user_id": "u_3g",
+    "workout_type": "cycle",
+    "duration_min": 19,
+    "calories": 179,
+    "timestamp": "2026-04-29T19:52:07.824Z"
+  },
+  {
+    "user_id": "u_77",
+    "workout_type": "swim",
+    "duration_min": 71,
+    "calories": 668,
+    "timestamp": "2026-04-15T08:28:20.600Z"
+  },
+  {
+    "user_id": "u_84",
+    "workout_type": "yoga",
+    "duration_min": 67,
+    "calories": 486,
+    "timestamp": "2026-05-03T15:39:47.435Z"
+  },
+  {
+    "user_id": "u_5i",
+    "workout_type": "swim",
+    "duration_min": 61,
+    "calories": 596,
+    "timestamp": "2026-04-20T04:27:31.498Z"
+  },
+  {
+    "user_id": "u_76",
+    "workout_type": "swim",
+    "duration_min": 29,
+    "calories": 223,
+    "timestamp": "2026-05-10T18:14:24.732Z"
+  },
+  {
+    "user_id": "u_6a",
+    "workout_type": "lift",
+    "duration_min": 78,
+    "calories": 400,
+    "timestamp": "2026-05-04T16:47:27.795Z"
+  },
+  {
+    "user_id": "u_6d",
+    "workout_type": "swim",
+    "duration_min": 16,
+    "calories": 154,
+    "timestamp": "2026-04-26T13:44:01.061Z"
+  },
+  {
+    "user_id": "u_65",
+    "workout_type": "yoga",
+    "duration_min": 74,
+    "calories": 337,
+    "timestamp": "2026-04-28T03:12:25.482Z"
+  },
+  {
+    "user_id": "u_6s",
+    "workout_type": "yoga",
+    "duration_min": 39,
+    "calories": 316,
+    "timestamp": "2026-04-28T06:56:20.627Z"
+  },
+  {
+    "user_id": "u_3c",
+    "workout_type": "lift",
+    "duration_min": 64,
+    "calories": 608,
+    "timestamp": "2026-05-05T08:18:57.660Z"
+  },
+  {
+    "user_id": "u_1r",
+    "workout_type": "cycle",
+    "duration_min": 64,
+    "calories": 607,
+    "timestamp": "2026-04-21T13:16:25.368Z"
+  },
+  {
+    "user_id": "u_3f",
+    "workout_type": "yoga",
+    "duration_min": 53,
+    "calories": 490,
+    "timestamp": "2026-05-12T14:05:06.054Z"
+  },
+  {
+    "user_id": "u_58",
+    "workout_type": "lift",
+    "duration_min": 15,
+    "calories": 82,
+    "timestamp": "2026-04-15T00:00:29.115Z"
+  },
+  {
+    "user_id": "u_31",
+    "workout_type": "cycle",
+    "duration_min": 24,
+    "calories": 114,
+    "timestamp": "2026-04-18T16:29:34.275Z"
+  },
+  {
+    "user_id": "u_1v",
+    "workout_type": "yoga",
+    "duration_min": 77,
+    "calories": 422,
+    "timestamp": "2026-05-11T18:12:10.766Z"
+  },
+  {
+    "user_id": "u_34",
+    "workout_type": "cycle",
+    "duration_min": 28,
+    "calories": 150,
+    "timestamp": "2026-05-06T22:19:44.394Z"
+  },
+  {
+    "user_id": "u_50",
+    "workout_type": "run",
+    "duration_min": 84,
+    "calories": 535,
+    "timestamp": "2026-05-01T23:15:55.453Z"
+  },
+  {
+    "user_id": "u_13",
+    "workout_type": "run",
+    "duration_min": 30,
+    "calories": 140,
+    "timestamp": "2026-05-09T00:57:49.495Z"
+  },
+  {
+    "user_id": "u_7n",
+    "workout_type": "yoga",
+    "duration_min": 49,
+    "calories": 432,
+    "timestamp": "2026-04-18T20:32:34.662Z"
+  },
+  {
+    "user_id": "u_5v",
+    "workout_type": "swim",
+    "duration_min": 72,
+    "calories": 325,
+    "timestamp": "2026-05-09T13:57:34.115Z"
+  },
+  {
+    "user_id": "u_2u",
+    "workout_type": "run",
+    "duration_min": 68,
+    "calories": 498,
+    "timestamp": "2026-04-30T07:41:51.956Z"
+  },
+  {
+    "user_id": "u_9",
+    "workout_type": "yoga",
+    "duration_min": 78,
+    "calories": 548,
+    "timestamp": "2026-05-02T15:22:47.443Z"
+  },
+  {
+    "user_id": "u_5o",
+    "workout_type": "yoga",
+    "duration_min": 45,
+    "calories": 204,
+    "timestamp": "2026-04-25T20:47:54.555Z"
+  },
+  {
+    "user_id": "u_4f",
+    "workout_type": "yoga",
+    "duration_min": 36,
+    "calories": 327,
+    "timestamp": "2026-04-17T17:33:39.010Z"
+  },
+  {
+    "user_id": "u_6v",
+    "workout_type": "swim",
+    "duration_min": 76,
+    "calories": 379,
+    "timestamp": "2026-05-03T12:35:25.649Z"
+  },
+  {
+    "user_id": "u_7i",
+    "workout_type": "yoga",
+    "duration_min": 26,
+    "calories": 132,
+    "timestamp": "2026-05-09T06:44:43.370Z"
+  },
+  {
+    "user_id": "u_3v",
+    "workout_type": "yoga",
+    "duration_min": 35,
+    "calories": 190,
+    "timestamp": "2026-05-02T05:02:39.650Z"
+  },
+  {
+    "user_id": "u_48",
+    "workout_type": "yoga",
+    "duration_min": 44,
+    "calories": 301,
+    "timestamp": "2026-04-15T12:39:13.212Z"
+  },
+  {
+    "user_id": "u_26",
+    "workout_type": "cycle",
+    "duration_min": 31,
+    "calories": 255,
+    "timestamp": "2026-05-04T14:31:14.727Z"
+  }
+]
