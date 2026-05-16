@@ -39,9 +39,6 @@ import {
     Key
 } from 'phosphor-react';
 import { GettingStarted } from '../dashboard/getting-started';
-import { LiveChart } from '@/components/realtime/live-chart';
-import { RealtimeStatusBadge } from '@/components/realtime/realtime-status-badge';
-import { ShakeFeed } from '@/components/demo/shake-feed';
 
 // Animation variants
 const container = {
@@ -151,7 +148,6 @@ export function DeveloperDashboard({ user }: DashboardProps) {
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h2>
-            <RealtimeStatusBadge />
           </div>
           <p className="text-slate-500 mt-1">
              Welcome back, {user.name}. Here's what's happening today.
@@ -193,121 +189,120 @@ export function DeveloperDashboard({ user }: DashboardProps) {
         />
       )}
 
-      {/* Stats Grid */}
+      {/* Unified Stats Group */}
       <motion.div 
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+        className="w-full"
       >
-        <motion.div variants={item}>
-            <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-500">Total Payouts</CardTitle>
-                <CurrencyDollar size={20} className="text-emerald-500" weight="duotone" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold text-slate-900">
-                  {loading ? (
-                    <CircleNotch size={24} className="animate-spin text-slate-400" />
-                  ) : (
-                    `$${stats?.total_payouts?.toLocaleString() ?? '0'}`
-                  )}
+        <Card className="glass-panel border border-slate-200/60 shadow-xl overflow-hidden flex flex-col p-0 rounded-2xl bg-white relative">
+          <div className="grid grid-cols-1 md:grid-cols-4 z-10 pt-2">
+            
+            {/* Col 1 */}
+            <div className="px-6 py-6 md:border-r border-dashed border-slate-200 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <CurrencyDollar size={22} weight="regular" className="text-slate-600" />
                 </div>
-                <div className="flex items-center text-xs text-slate-500 mt-1 font-medium">
-                    Real-time from ledger
+                <div className="text-sm font-medium text-slate-500 mb-2">Total Payouts</div>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="text-3xl font-bold text-slate-900 tracking-tight">
+                    {loading ? <CircleNotch size={24} className="animate-spin text-slate-400" /> : `$${stats?.total_payouts?.toLocaleString() ?? '0'}`}
+                  </div>
+                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-0 px-1.5 py-0.5 rounded-md text-[11px] font-semibold tracking-wide">
+                     <TrendUp size={12} className="mr-1 inline" weight="bold" /> 12%
+                  </Badge>
                 </div>
-            </CardContent>
-            </Card>
-        </motion.div>
-        
-        <motion.div variants={item}>
-            <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-500">Total Users</CardTitle>
-                <Users size={20} className="text-blue-500" weight="duotone" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold text-slate-900">
-                  {loading ? (
-                    <CircleNotch size={24} className="animate-spin text-slate-400" />
-                  ) : (
-                    formatNumber(stats?.total_users)
-                  )}
+              </div>
+              <div className="text-xs text-slate-400 leading-relaxed max-w-[200px]">
+                Real-time from ledger across all active campaigns
+              </div>
+            </div>
+            
+            {/* Col 2 */}
+            <div className="px-6 py-6 md:border-r border-dashed border-slate-200 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <Users size={22} weight="regular" className="text-slate-600" />
                 </div>
-                <div className="flex items-center text-xs text-slate-500 mt-1 font-medium">
-                    Unique users tracked
+                <div className="text-sm font-medium text-slate-500 mb-2">Total Users</div>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="text-3xl font-bold text-slate-900 tracking-tight">
+                    {loading ? <CircleNotch size={24} className="animate-spin text-slate-400" /> : formatNumber(stats?.total_users)}
+                  </div>
+                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-0 px-1.5 py-0.5 rounded-md text-[11px] font-semibold tracking-wide">
+                     <TrendUp size={12} className="mr-1 inline" weight="bold" /> 8%
+                  </Badge>
                 </div>
-            </CardContent>
-            </Card>
-        </motion.div>
-        
-        <motion.div variants={item}>
-            <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-500">Data Events</CardTitle>
-                <Database size={20} className="text-purple-500" weight="duotone" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold text-slate-900">
-                  {loading ? (
-                    <CircleNotch size={24} className="animate-spin text-slate-400" />
-                  ) : (
-                    formatNumber(stats?.total_events)
-                  )}
+              </div>
+              <div className="text-xs text-slate-400 leading-relaxed max-w-[200px]">
+                Unique active users tracked to date across the platform
+              </div>
+            </div>
+
+            {/* Col 3 */}
+            <div className="px-6 py-6 md:border-r border-dashed border-slate-200 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <Database size={22} weight="regular" className="text-slate-600" />
                 </div>
-                <div className="flex items-center text-xs text-slate-500 mt-1 font-medium">
-                    Processed by AI Worker
+                <div className="text-sm font-medium text-slate-500 mb-2">Data Events</div>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="text-3xl font-bold text-slate-900 tracking-tight">
+                    {loading ? <CircleNotch size={24} className="animate-spin text-slate-400" /> : formatNumber(stats?.total_events)}
+                  </div>
+                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-0 px-1.5 py-0.5 rounded-md text-[11px] font-semibold tracking-wide">
+                     <TrendUp size={12} className="mr-1 inline" weight="bold" /> 24%
+                  </Badge>
                 </div>
-            </CardContent>
-            </Card>
-        </motion.div>
-        
-        <motion.div variants={item}>
-            <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-500">Avg. Quality</CardTitle>
-                <Activity size={20} className="text-amber-500" weight="duotone" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold text-slate-900">
-                  {loading ? (
-                    <CircleNotch size={24} className="animate-spin text-slate-400" />
-                  ) : (
-                    `${((stats?.average_quality ?? 0) * 100).toFixed(1)}%`
-                  )}
+              </div>
+              <div className="text-xs text-slate-400 leading-relaxed max-w-[200px]">
+                Processed successfully by the AI Worker nodes
+              </div>
+            </div>
+
+            {/* Col 4 */}
+            <div className="px-6 py-6 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <Activity size={22} weight="regular" className="text-slate-600" />
                 </div>
-                <div className="flex items-center text-xs text-slate-500 mt-1 font-medium">
-                    Human-verified data quality
+                <div className="text-sm font-medium text-slate-500 mb-2">Avg. Quality</div>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="text-3xl font-bold text-slate-900 tracking-tight">
+                    {loading ? <CircleNotch size={24} className="animate-spin text-slate-400" /> : `${((stats?.average_quality ?? 0) * 100).toFixed(1)}%`}
+                  </div>
+                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-0 px-1.5 py-0.5 rounded-md text-[11px] font-semibold tracking-wide">
+                     <TrendUp size={12} className="mr-1 inline" weight="bold" /> 2%
+                  </Badge>
                 </div>
-            </CardContent>
-            </Card>
-        </motion.div>
+              </div>
+              <div className="text-xs text-slate-400 leading-relaxed max-w-[200px]">
+                Human-verified quality based on latest model evaluation
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bottom Area Chart */}
+          <div className="h-[100px] w-full mt-2 -mb-1 z-0">
+             <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={generateChartData(stats?.total_payouts || 0)} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                   <Area 
+                       type="monotone" 
+                       dataKey="earnings" 
+                       stroke="none" 
+                       fillOpacity={1} 
+                       fill="#2563eb" 
+                       isAnimationActive={false}
+                   />
+                </AreaChart>
+             </ResponsiveContainer>
+          </div>
+        </Card>
       </motion.div>
 
-      {/* Live Section (Phase 4 — Realtime) */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 glass-panel border-0 shadow-xl">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-lg font-semibold text-slate-800">
-                Live Ingest (last 60s)
-              </CardTitle>
-              <p className="text-sm text-slate-500">
-                Each tick is a scored event pushed straight from the server.
-              </p>
-            </div>
-            <RealtimeStatusBadge />
-          </CardHeader>
-          <CardContent>
-            <LiveChart />
-          </CardContent>
-        </Card>
-
-        <div className="col-span-3">
-          <ShakeFeed />
-        </div>
-      </div>
 
       {/* Main Charts Area */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">

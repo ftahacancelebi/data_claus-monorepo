@@ -7,5 +7,5 @@ export default registerAs('database', () => ({
   password: process.env.DATABASE_PASSWORD || 'postgres',
   database: process.env.DATABASE_NAME || 'dataclaus',
   synchronize: process.env.NODE_ENV !== 'production',
-  logging: process.env.NODE_ENV !== 'production',
+  logging: false,
 }));

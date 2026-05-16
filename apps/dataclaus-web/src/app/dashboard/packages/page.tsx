@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataclausScoreGauge } from '@/components/packages/score-gauge';
 import { ErrorPanel } from '@/components/layout/error-panel';
+import { Package, Database, Clock } from 'lucide-react';
 import type { DataPackage } from '@/lib/api';
 
 function statusVariant(status: DataPackage['status']) {
@@ -21,9 +22,9 @@ function statusVariant(status: DataPackage['status']) {
     case 'rejected':
       return 'bg-red-50 text-red-700 border-red-200';
     case 'delisted':
-      return 'bg-slate-100 text-slate-600 border-slate-200';
+      return 'bg-slate-50 text-slate-600 border-slate-200';
     default:
-      return 'bg-slate-100 text-slate-600 border-slate-200';
+      return 'bg-slate-50 text-slate-600 border-slate-200';
   }
 }
 
@@ -77,41 +78,56 @@ function PackagesContent() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {packages.map((pkg) => (
             <Link
               key={pkg.id}
               href={`/dashboard/packages/${pkg.id}`}
-              className="block"
+              className="block group"
             >
-              <Card className="glass-panel border-0 shadow-md hover:shadow-lg transition-shadow">
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-6">
-                    <DataclausScoreGauge value={pkg.dataclausScore} size="sm" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-semibold text-slate-900 truncate">
-                          {pkg.title}
-                        </h3>
-                        <Badge
-                          variant="outline"
-                          className={statusVariant(pkg.status)}
-                        >
-                          {pkg.status}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-slate-500 truncate">
-                        {pkg.category} · {pkg.claimedMetrics.row_count.toLocaleString()} rows ·{' '}
-                        {pkg.claimedMetrics.unique_users.toLocaleString()} users
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-slate-900">
-                        ${pkg.price.toFixed(2)}
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        submitted {new Date(pkg.createdAt).toLocaleDateString()}
-                      </p>
+              <Card className="glass-panel border-0 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl flex flex-col h-full bg-white">
+                {/* Top Illustration Area */}
+                <div className="relative h-48 bg-slate-50 border-b border-slate-100 flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] opacity-30" />
+                  
+                  {/* Top Right Icon */}
+                  <div className="absolute top-4 right-4 w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center shadow-md z-20">
+                    <Database className="w-4 h-4 text-white" />
+                  </div>
+                  
+                  {/* Center Content */}
+                  <div className="relative z-10 flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm p-4 rounded-full shadow-sm border border-white/60">
+                    <DataclausScoreGauge value={pkg.dataclausScore} size="lg" />
+                  </div>
+                </div>
+
+                {/* Bottom Content Area */}
+                <CardContent className="p-6 flex-1 flex flex-col">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-slate-900 mb-2 leading-tight line-clamp-1">
+                      {pkg.title}
+                    </h3>
+                    <p className="text-sm text-slate-500 mb-4 line-clamp-2">
+                      Premium {pkg.category.toLowerCase()} dataset. Contains {pkg.claimedMetrics.row_count.toLocaleString()} rows and over {pkg.claimedMetrics.unique_users.toLocaleString()} unique users.
+                    </p>
+                  </div>
+                  
+                  <hr className="border-slate-100 my-4" />
+                  
+                  <div className="flex items-center justify-between mt-auto">
+                    <Button variant="outline" size="sm" className="rounded-xl px-4 border-slate-200 hover:bg-slate-50 text-slate-700">
+                      View Details
+                    </Button>
+                    
+                    <div className="flex items-center">
+                      <Badge
+                        variant="secondary"
+                        className={`capitalize px-2.5 py-0.5 rounded-md font-medium text-xs ${statusVariant(pkg.status)}`}
+                      >
+                        {pkg.status === 'certified' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5" />}
+                        {pkg.status === 'evaluating' && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5 animate-pulse" />}
+                        {pkg.status}
+                      </Badge>
                     </div>
                   </div>
                 </CardContent>

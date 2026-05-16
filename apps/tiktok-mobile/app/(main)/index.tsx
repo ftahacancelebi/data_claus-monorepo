@@ -4,7 +4,7 @@
  * TikTok-style vertical scrolling video feed
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,6 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { api, Video as VideoType } from '../../services/api';
@@ -25,6 +24,16 @@ import { DataClausBannerAd } from '../../components/ads/BannerAd';
 
 const { width, height } = Dimensions.get('window');
 const PLAYER_HEIGHT = height - 85; // Subtract tab bar
+
+// commondatastorage.googleapis.com is unreliable from local sims (slow / reset).
+// Use a colorful Picsum image (proven reachable in this env) as the safe fallback.
+const PLACEHOLDER_THUMBNAIL = 'https://picsum.photos/seed/dataclaus-feed/800/1400';
+
+// Picsum proxy for any item — gives us a reliable "video frame" per item without
+// depending on the gtv-videos-bucket.
+function frameFor(item: { id: string; creator: { avatar?: string } }): string {
+  return `https://picsum.photos/seed/${encodeURIComponent(item.id)}/800/1400`;
+}
 
 interface FeedItem extends VideoType {
   type?: 'video' | 'ad';
@@ -44,19 +53,16 @@ function VideoItem({
   item: FeedItem; 
   isActive: boolean;
 }) {
-  const videoRef = useRef<Video>(null);
   const [isLiked, setIsLiked] = useState(item.isLiked || false);
   const [likesCount, setLikesCount] = useState(item.likesCount || item.likes || 0);
   const [isMuted, setIsMuted] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  // Skip the backend-provided thumbnail (commondatastorage bucket is flaky from
+  // simulators); use a per-item Picsum seed so every card has a distinct frame.
+  const [posterUri, setPosterUri] = useState<string>(frameFor(item));
 
   useEffect(() => {
     if (isActive) {
-      videoRef.current?.playAsync();
-      // Record view
       api.recordView(item.id, 0, false).catch(() => {});
-    } else {
-      videoRef.current?.pauseAsync();
     }
   }, [isActive, item.id]);
 
@@ -76,32 +82,37 @@ function VideoItem({
 
   return (
     <View style={styles.videoContainer}>
-      {/* Video Player */}
-      <TouchableOpacity 
-        activeOpacity={1} 
+      {/* Dark gradient as the last-resort visible layer if even the Image fails. */}
+      <LinearGradient
+        colors={['#1a1033', '#0b0b1f', '#000']}
+        style={StyleSheet.absoluteFillObject}
+        pointerEvents="none"
+      />
+      {/* Video Poster (expo-av broken on SDK 54 + new arch; Picsum frame instead) */}
+      <TouchableOpacity
+        activeOpacity={1}
         onPress={() => setIsMuted(!isMuted)}
         style={styles.videoTouchable}
       >
-        <Video
-          ref={videoRef}
-          source={{ uri: item.url }}
-          style={styles.video}
-          resizeMode={ResizeMode.COVER}
-          isLooping
-          isMuted={isMuted}
-          onLoadStart={() => setIsLoading(true)}
-          onLoad={() => setIsLoading(false)}
+        <Image
+          source={{ uri: posterUri }}
+          style={StyleSheet.absoluteFillObject}
+          resizeMode="cover"
+          onError={() => {
+            if (posterUri !== PLACEHOLDER_THUMBNAIL) {
+              setPosterUri(PLACEHOLDER_THUMBNAIL);
+            }
+          }}
         />
 
-        {/* Loading */}
-        {isLoading && (
-          <View style={styles.loading}>
-            <ActivityIndicator size="large" color="#fff" />
+        {/* Play indicator only when this card isn't the active one */}
+        {!isActive && (
+          <View style={styles.muteIndicator}>
+            <Ionicons name="play" size={24} color="#fff" />
           </View>
         )}
 
-        {/* Mute Indicator */}
-        {isMuted && !isLoading && (
+        {isMuted && isActive && (
           <View style={styles.muteIndicator}>
             <Ionicons name="volume-mute" size={24} color="#fff" />
           </View>
@@ -527,7 +538,7 @@ const styles = StyleSheet.create({
   },
   bannerContainer: {
     position: 'absolute',
-    bottom: 50, // Above tab bar
+    bottom: 0, // Flush with top of tab bar (FeedScreen content sits above tab bar)
     alignSelf: 'center',
     zIndex: 100,
   },
