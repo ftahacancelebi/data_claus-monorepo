@@ -13,12 +13,19 @@ import * as crypto from 'crypto';
 import { Wallet } from '../wallet/entities';
 import { FinancialTxService } from '../ledger/financial-tx.service';
 import {
-  PLATFORM_FEE_PERCENT,
   PackageStatus,
   SYSTEM_WALLET_IDS,
   TransactionType,
   WalletType,
 } from '../../common/constants';
+
+/**
+ * Marketplace platform fee = 10% (spec §12.2: dev +0.9X / platform +0.1X).
+ * Intentionally NOT the shared `PLATFORM_FEE_PERCENT` (=5%), which governs the
+ * unrelated ads/payout pipeline — changing that global would silently shift
+ * ad revenue splits. This rate is local to package sales by design.
+ */
+const PACKAGE_FEE_RATE = 0.1;
 import { DataPackage } from './entities/data-package.entity';
 import { PackagePurchase } from './entities/package-purchase.entity';
 import { CreatePackageDto, ListPackagesDto } from './dto';
@@ -225,7 +232,7 @@ export class DataPackagesService {
     }
 
     const price = Number(pkg.price);
-    const platformFee = Number(((price * PLATFORM_FEE_PERCENT) / 100).toFixed(2));
+    const platformFee = Number((price * PACKAGE_FEE_RATE).toFixed(2));
     const sellerCut = Number((price - platformFee).toFixed(2));
     const downloadToken = crypto.randomBytes(24).toString('base64url');
 

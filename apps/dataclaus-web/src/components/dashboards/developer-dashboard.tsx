@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
@@ -21,8 +21,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/lib/auth-context';
-import type { AuthUser, ApiKey } from '@/lib/types';
-import { getDashboard, DashboardStats, listApiKeys } from '@/lib/api';
+import type { AuthUser } from '@/lib/types';
+import { useQueryClient } from '@tanstack/react-query';
+import { useDashboardStats, useApiKeys } from '@/lib/api-hooks';
+import { queryKeys } from '@/lib/query-keys';
+import { useRealtime, type WalletCreditedEvent } from '@/lib/realtime';
 import { 
     TrendUp, 
     TrendDown, 
@@ -77,11 +80,15 @@ export function DeveloperDashboard({ user }: DashboardProps) {
   const [showGettingStarted, setShowGettingStarted] = useState(true);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   
-  // Real API state
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [apps, setApps] = useState<ApiKey[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Server state — single React Query cache layer. The previous
+  // useEffect+fetch+useState swallowed any error into fake zero stats and a
+  // stale "start the Go API" banner (Go API is gone). Forbidden pattern #3.
+  const qc = useQueryClient();
+  const statsQuery = useDashboardStats();
+  const appsQuery = useApiKeys(user?.id);
+  const stats = statsQuery.data ?? null;
+  const apps = appsQuery.data ?? [];
+  const loading = statsQuery.isLoading || appsQuery.isLoading;
 
   // Check completed steps on mount
   useEffect(() => {
@@ -91,43 +98,29 @@ export function DeveloperDashboard({ user }: DashboardProps) {
     }
   }, []);
 
-  // Fetch real data from API
+  // Realtime: a package sale credits this developer. Refetch the money
+  // surfaces so "Total Payouts" reflects the new ledger total in the same
+  // render the buyer purchases (spec §8 step 7 — on the main dashboard too,
+  // not only the wallet page).
+  const { on, status } = useRealtime();
   useEffect(() => {
-    async function fetchData() {
-      if (!user?.id) return;
-      
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // Fetch dashboard stats and apps in parallel
-        const [dashboardStats, apiKeys] = await Promise.all([
-          getDashboard(),
-          listApiKeys(user.id)
-        ]);
-        
-        setStats(dashboardStats);
-        setApps(apiKeys || []);
-      } catch (err) {
-        console.error('Failed to fetch dashboard data:', err);
-        setError('Backend not connected. Start the Go API to see real data.');
-        // Set default values for demo
-        setStats({
-          total_events: 0,
-          total_users: 0,
-          total_developers: 0,
-          average_quality: 0,
-          total_payouts: 0,
-          active_campaigns: 0,
-        });
-        setApps([]);
-      } finally {
-        setLoading(false);
-      }
+    const off = on<WalletCreditedEvent>('wallet:credited', () => {
+      qc.invalidateQueries({ queryKey: queryKeys.dashboard.stats() });
+      qc.invalidateQueries({ queryKey: queryKeys.earnings.all });
+    });
+    return off;
+  }, [on, qc]);
+
+  // Reconnect safety-net: a dropped socket may have missed a sale event.
+  const missedWhileDown = useRef(false);
+  useEffect(() => {
+    if (status === 'disconnected') missedWhileDown.current = true;
+    if (status === 'connected' && missedWhileDown.current) {
+      missedWhileDown.current = false;
+      qc.invalidateQueries({ queryKey: queryKeys.dashboard.stats() });
+      qc.invalidateQueries({ queryKey: queryKeys.earnings.all });
     }
-    
-    fetchData();
-  }, [user?.id]);
+  }, [status, qc]);
 
   const handleDismissGettingStarted = () => {
     setShowGettingStarted(false);
@@ -168,16 +161,28 @@ export function DeveloperDashboard({ user }: DashboardProps) {
         </div>
       </div>
 
-      {/* Error Banner */}
-      {error && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
-          <Warning size={20} className="text-amber-600 mt-0.5" />
-          <div>
-            <p className="font-medium text-amber-800">{error}</p>
-            <p className="text-sm text-amber-600 mt-1">
-              Run: <code className="bg-amber-100 px-1 rounded">docker-compose up -d</code> and <code className="bg-amber-100 px-1 rounded">go run apps/dataclaus-api/cmd/api</code>
+      {/* Error Banner — honest + retryable (no stale Go-API instructions) */}
+      {statsQuery.isError && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+          <Warning size={20} className="text-red-600 mt-0.5" />
+          <div className="flex-1">
+            <p className="font-medium text-red-800">
+              Couldn&apos;t load your earnings
+            </p>
+            <p className="text-sm text-red-600 mt-1">
+              {statsQuery.error instanceof Error
+                ? statsQuery.error.message
+                : 'The API is unreachable. Check that the API server is running.'}
             </p>
           </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => void statsQuery.refetch()}
+            disabled={statsQuery.isFetching}
+          >
+            {statsQuery.isFetching ? 'Retrying…' : 'Retry'}
+          </Button>
         </div>
       )}
 

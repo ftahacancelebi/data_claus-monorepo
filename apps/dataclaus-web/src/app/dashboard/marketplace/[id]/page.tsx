@@ -4,7 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { usePackage, usePurchasePackage } from '@/lib/api-hooks';
+import {
+  usePackage,
+  usePurchasePackage,
+  useMyPurchases,
+} from '@/lib/api-hooks';
 import { RequireAuth } from '@/lib/route-guards';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +25,7 @@ function MarketplaceDetailContent() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { data: pkg, isLoading, isError, error, refetch } = usePackage(id);
+  const { data: myPurchases } = useMyPurchases();
   const purchase = usePurchasePackage();
   const [confirming, setConfirming] = useState(false);
 
@@ -39,7 +44,13 @@ function MarketplaceDetailContent() {
   const isPurchasable =
     pkg.status === 'certified' || pkg.status === 'sold';
   const isOwner = user?.id === pkg.developerId;
-  const canBuy = isPurchasable && !isOwner;
+  // Server-truth (cache). `usePurchasePackage` invalidates `purchases.all`, so
+  // after a successful buy this refetches and `alreadyBought` flips → button
+  // disables in the same render. Stops the double-charge the jury would hit by
+  // clicking again or returning via Purchases → "View details".
+  const alreadyBought =
+    myPurchases?.some((p) => p.packageId === id) ?? false;
+  const canBuy = isPurchasable && !isOwner && !alreadyBought;
 
   async function handleBuy() {
     try {
@@ -108,12 +119,22 @@ function MarketplaceDetailContent() {
                   ? 'Settling…'
                   : isOwner
                   ? 'You own this package'
+                  : alreadyBought
+                  ? 'Already purchased'
                   : !isPurchasable
                   ? `Not available (${pkg.status})`
                   : confirming
                   ? `Confirm purchase for $${pkg.price.toFixed(2)}`
                   : 'Purchase'}
               </Button>
+              {alreadyBought && (
+                <Link
+                  href="/dashboard/purchases"
+                  className="block w-full mt-2 text-center text-xs text-slate-500 hover:text-slate-900"
+                >
+                  View in Purchases →
+                </Link>
+              )}
               {confirming && canBuy && !purchase.isPending && (
                 <button
                   type="button"

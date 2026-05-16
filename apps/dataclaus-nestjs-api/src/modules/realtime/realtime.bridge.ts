@@ -33,6 +33,16 @@ export interface PayoutCompletedPayload {
   method: string;
 }
 
+export interface PackagePurchasedPayload {
+  packageId: string;
+  purchaseId: string;
+  buyerId: string;
+  developerId: string;
+  amount: number;
+  sellerCut: number;
+  platformFee: number;
+}
+
 /**
  * EventEmitter2 → WebSocket bridge.
  *
@@ -87,5 +97,32 @@ export class RealtimeBridge {
   @OnEvent('payout.completed', { async: true })
   handlePayoutCompleted(payload: PayoutCompletedPayload): void {
     this.gateway.emitToUser(payload.userId, 'payout:completed', payload);
+  }
+
+  /**
+   * Marketplace sale → push a `wallet:credited` frame to the SELLER so their
+   * earnings/wallet UI updates in the same render cycle the buyer purchases
+   * (spec §8 step 7 — the "full loop closes on screen" moment).
+   *
+   * Reuses the existing `wallet:credited` event + frontend cache-patch listener
+   * (see web `dashboard/wallet/page.tsx`) deliberately: zero frontend change,
+   * the seller just needs an open session on a page that listens. `devShare`
+   * is what the listener credits; `adType` drives the toast copy.
+   */
+  @OnEvent('package.purchased', { async: true })
+  handlePackagePurchased(payload: PackagePurchasedPayload): void {
+    const walletEvent: WalletCreditedPayload = {
+      userId: '',
+      developerId: payload.developerId,
+      devShare: payload.sellerCut,
+      platformFee: payload.platformFee,
+      grossRevenue: payload.amount,
+      adType: 'Data package sale',
+    };
+    this.gateway.emitToDeveloper(
+      payload.developerId,
+      'wallet:credited',
+      walletEvent,
+    );
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
@@ -194,14 +194,17 @@ export default function WalletPage() {
     walletsQuery.isLoading ||
     revenueQuery.isLoading ||
     payoutsQuery.isLoading;
-  const error =
-    walletsQuery.error || transactionsQuery.error
-      ? 'Backend not connected. Start the Go API to see real data.'
-      : null;
+  const queryError =
+    walletsQuery.error || transactionsQuery.error || payoutsQuery.error;
+  const error = queryError
+    ? queryError instanceof Error
+      ? queryError.message
+      : 'Could not load your wallet. The API may be unreachable.'
+    : null;
 
   // Realtime: socket event → patch wallets cache. Other panels reading the
   // same wallets key (and the developer dashboard summary) update for free.
-  const { on } = useRealtime();
+  const { on, status } = useRealtime();
   useEffect(() => {
     if (!user?.id) return;
     const off = on<WalletCreditedEvent>('wallet:credited', (event) => {
@@ -230,6 +233,20 @@ export default function WalletPage() {
       off();
     };
   }, [on, qc, user?.id]);
+
+  // Reconnect safety-net: a dropped socket may have missed a credit event,
+  // so on reconnect refetch the visible money surfaces (senior-frontend-flow
+  // "reconnect = invalidate"). Skips the first connect (nothing missed yet).
+  const socketWasDown = useRef(false);
+  useEffect(() => {
+    if (status === 'disconnected') socketWasDown.current = true;
+    if (status === 'connected' && socketWasDown.current) {
+      socketWasDown.current = false;
+      qc.invalidateQueries({ queryKey: queryKeys.wallets.all });
+      qc.invalidateQueries({ queryKey: queryKeys.earnings.all });
+      qc.invalidateQueries({ queryKey: queryKeys.payouts.all });
+    }
+  }, [status, qc]);
 
   // Derived values
   const totalBalance = wallets.reduce((sum, w) => sum + w.balance, 0);
@@ -273,16 +290,27 @@ export default function WalletPage() {
           <RealtimeStatusBadge />
         </div>
 
-        {/* Error banner */}
+        {/* Error banner — honest + retryable (no stale Go-API copy) */}
         {error && (
-          <div className="mb-4 rounded-3xl bg-amber-50 border border-amber-200 px-5 py-4 flex items-start gap-3">
-            <Warning size={20} className="text-amber-600 mt-0.5" />
-            <div>
-              <p className="font-medium text-amber-800">{error}</p>
-              <p className="text-sm text-amber-600 mt-1">
-                Run the backend to see your real wallet balance and transactions.
+          <div className="mb-4 rounded-3xl bg-red-50 border border-red-200 px-5 py-4 flex items-start gap-3">
+            <Warning size={20} className="text-red-600 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-medium text-red-800">
+                Couldn&apos;t load your wallet
               </p>
+              <p className="text-sm text-red-600 mt-1">{error}</p>
             </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                void walletsQuery.refetch();
+                void transactionsQuery.refetch();
+                void payoutsQuery.refetch();
+              }}
+            >
+              Retry
+            </Button>
           </div>
         )}
 

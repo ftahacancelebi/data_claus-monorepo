@@ -19,7 +19,6 @@ import {
   CreditCard,
   SignOut,
   FileText,
-  TrendUp,
   User,
   Book,
   Question,
@@ -77,12 +76,9 @@ const navItems: NavItem[] = [
     icon: Question,
     roles: ['developer', 'buyer', 'user'],
   },
-  {
-    href: '/dashboard/campaigns',
-    label: 'Campaigns',
-    icon: TrendUp,
-    roles: ['buyer'],
-  },
+  // 'Campaigns' nav removed — belongs to the deprecated event-stream flow
+  // (spec 08 §12.6 / acceptance criterion #6: no nav reference to the old
+  // ingest/campaign/impression model). Route still exists, just unlinked.
   {
     href: '/dashboard/insights',
     label: 'AI Insights',

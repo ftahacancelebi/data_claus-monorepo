@@ -189,3 +189,113 @@ out-of-tolerance scenarios. Run BEFORE the jury demo.
 - Real Apple App Attest / Play Integrity backend (stub provider only).
 - Buyer portal UI (economics simulated via `campaign-matcher`).
 - Production observability (Sentry DSN env exists, wiring deferred).
+
+---
+
+## [2026-05-16] Data Package Marketplace Pivot — Demo Readiness
+
+**Current focus is the marketplace pivot** (`memory-bank/implementation/08-data-package-marketplace-pivot.md`),
+not the event-stream model above. The earlier "Revenue Sharing / event ingest"
+sections in this file are historical — the pivot supersedes them (Kafka / Python
+worker / per-event ingest are deprecated, not built).
+
+### Audit verdict (2026-05-16)
+Pipeline ~90% implemented and structurally sound. Demo steps 1–6 run end-to-end,
+wired to real endpoints (not mock). `usePackage` polls every 2 s while
+`evaluating` and self-stops on `certified` — the step-4 "wow" flip works.
+Tables auto-create via `synchronize:true` (NODE_ENV=development); migration
+`1715300000000-AddDataPackages.ts` is the backup. Seed produces 6 packages
+across score ranges with pre-computed LLM evals (no live API call needed).
+
+### Fixes applied (2026-05-16, commit pending)
+1. **[CRITICAL] Seller earnings now update live on sale (spec §8 step 7).**
+   `package.purchased` had no listener. Added `@OnEvent('package.purchased')`
+   in `realtime.bridge.ts` → emits `wallet:credited` to the seller's
+   `developer:` room (reuses the existing frontend cache-patch listener in
+   `dashboard/wallet/page.tsx`, zero frontend change). Seller must have an
+   open session on a page that listens (wallet page).
+2. **[HIGH] Fee split corrected 95/5 → 90/10** (spec §12.2). Added a local
+   `PACKAGE_FEE_RATE = 0.1` in `data-packages.service.ts`; removed the shared
+   `PLATFORM_FEE_PERCENT` import there. **Did NOT touch the global constant**
+   (=5%, governs the unrelated ads/payout pipeline).
+3. **[HIGH] Double-purchase blocked.** `marketplace/[id]/page.tsx` now reads
+   `useMyPurchases()`; `alreadyBought` disables the button + shows "Already
+   purchased / View in Purchases". The purchase mutation already invalidates
+   `purchases.all`, so the flip is in-render.
+4. **[HIGH] "Campaigns" nav removed** from `sidebar.tsx` (spec §12.6 /
+   acceptance #6 — no nav reference to the deprecated event flow). Route still
+   exists, just unlinked. Orphaned `TrendUp` import also removed.
+
+Both `apps/dataclaus-nestjs-api` and `apps/dataclaus-web` typecheck clean
+after the changes.
+
+### Still pending (owner: taiko)
+- **#3 ANTHROPIC_API_KEY not in `apps/dataclaus-nestjs-api/.env`** — to be
+  added LAST by taiko with the real key. Until then the live submission falls
+  back to the deterministic stub (summary literally says "Set ANTHROPIC_API_KEY
+  to enable the live AI auditor"). SDK installed, `LLM_MODEL` default OK, the
+  catch-fallback is correct — only the env line is missing. The 6 seeded
+  packages have hand-written evals, so the marketplace still looks populated;
+  only the live-submission "Claude wrote this" moment is hollow without the key.
+
+### Operational runbook note
+`scripts/demo-seed.ts` uses `synchronize:false` — **boot the API once
+(`pnpm run dev:api`, NODE_ENV=development auto-creates tables) BEFORE running
+`pnpm run demo:seed`**, else inserts fail with "relation data_packages does
+not exist". Not a code bug — a sequencing requirement.
+
+### Stale doc flag
+CLAUDE.md "Cookie auth + server-side middleware (now wired)" is **inaccurate**:
+`src/middleware.ts` is currently a no-op (matcher disabled to avoid the
+redirect loop). Client-side `<RequireAuth>`/`<RequireRole>` are the real gate.
+Demo-safe (presenter is always logged in); flagged so it isn't trusted as
+server-side protection.
+
+### Revenue-surface hardening pass (2026-05-16, commit pending)
+All money surfaces brought to senior-frontend-flow discipline + the
+purchase→earnings socket loop now closes on the **main dashboard**, not only
+the wallet page.
+
+1. **`developer-dashboard.tsx`** — was `useEffect`+`getDashboard()`+`useState`
+   with a catch that set fake zero stats + a dead *"Start the Go API"* banner
+   (forbidden pattern #3, silent-error→empty). Now: `useDashboardStats()` +
+   `useApiKeys()` hooks; honest error UI with a Retry button; a
+   `wallet:credited` socket listener that invalidates `dashboard.stats` +
+   `earnings.all` → seller's "Total Payouts" updates live on a sale
+   (spec §8 step 7 on the dashboard surface); reconnect safety-net.
+2. **`wallet/page.tsx`** — dead *"Backend not connected. Start the Go API"*
+   error string replaced with the real query error message + a Retry button
+   (also surfaces `payoutsQuery.error`); reconnect safety-net invalidates
+   wallets/earnings/payouts after a dropped socket.
+3. **Mutation onError — NOT added (intentional).** The approved design called
+   for it, but verification showed both call sites already do try/catch→toast
+   at the correct layer (`marketplace/[id]` purchase, `wallet` release-pending).
+   `api-hooks.ts` has no toast context — adding onError there would be worse,
+   not better. Connection points are already robust.
+
+`apps/dataclaus-web` typecheck clean; no orphaned imports after the refactor.
+Backend untouched this pass.
+
+### Demo completeness audit — all roles + SDK + mobile (2026-05-16)
+Web jury demo has **no CRITICAL/HIGH gap**. Verified role-readiness:
+- **Developer / End-user(client) / Admin** journeys fully demo-ready. `user.alice`
+  (role=user) lands on a dedicated, fully-wired `/u/*` portal with real seeded
+  `ad_impressions` earnings — NOT the dev dashboard or a blank page.
+- **Buyer landing is 100% mock** (`buyer-dashboard.tsx:29-140`): hardcoded zeros,
+  dead "Browse Marketplace"/"New Campaign" buttons (no Link/onClick), stale
+  "campaign" copy contradicting the pivot. Journey NOT blocked (buyer reaches
+  marketplace via sidebar) — MEDIUM cosmetic. Fix: wire button to
+  `/dashboard/marketplace`. Admin landing useEffect+fetch fragile = LOW
+  (demoable admin path `/dashboard/admin/packages` is solid).
+- **Mobile/SDK = deprecated side-showcase, OFF the jury critical path**
+  (spec 08 §1 "Does NOT touch: TikTok demo app"; §8 demo is 100% web).
+  SDK (`packages/sdk-react-native`) fully implemented but the TikTok app does
+  NOT consume it (uses tiktok-backend + raw AdMob). Mobile money-loop BROKEN at
+  one point: `apps/tiktok-backend/.env DATACLAUS_APP_ID=fd6036a9-…` not in
+  seeded DB (seed gives "TikTok Clone" a fresh UUID; real one in JURY_LOGIN.md).
+  Every `/ads/slot` → "Application not found" → 500. Login/feed/AdMob banner
+  work. Fix (LOW, operational): paste real app UUID into tiktok-backend/.env
+  after `demo:seed`, restart :4001. Don't demo mobile earnings/"Watch Ad" live
+  unless fixed (shows error or fake "$0.0105").
+- **Doc staleness**: `JURY_LOGIN.md:51` still says "95% seller / 5% platform" —
+  the fee was changed to 90/10 (PACKAGE_FEE_RATE). Update the doc.
