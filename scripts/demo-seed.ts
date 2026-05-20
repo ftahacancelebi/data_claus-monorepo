@@ -484,54 +484,68 @@ async function seedAdImpressions(
 async function seedScoredEvents(
   ds: DataSource,
   applications: Application[],
-  users: DataClausUser[],
-  developers: Developer[],
 ): Promise<number> {
   const repo = ds.getRepository(ScoredEvent);
   const existing = await repo.count();
-  if (existing >= 50) return existing;
+  if (existing >= 3000) {
+    return existing;
+  }
 
-  const toInsert = 50 - existing;
-  let inserted = 0;
-  const eventTypes = [
-    'accelerometer',
-    'gyroscope',
-    'touch',
-    'scroll',
-    'screen_view',
-  ];
+  const toInsert = 3000 - existing;
+
+  // 100 deterministic synthetic user UUIDs per seed run — no FK needed on scored_events
+  function syntheticUserId(index: number): string {
+    const hex = require('crypto')
+      .createHash('sha256')
+      .update(`demo-synthetic-user-${index}`)
+      .digest('hex')
+      .slice(0, 32);
+    return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20,32)}`;
+  }
+  const syntheticUsers = Array.from({ length: 100 }, (_, i) => syntheticUserId(i));
+
+  const eventTypes = ['accelerometer', 'gyroscope', 'touch', 'scroll', 'screen_view'];
+  const rows: Partial<ScoredEvent>[] = [];
+  const now = new Date();
+
   for (let i = 0; i < toInsert; i++) {
     const app = applications[i % applications.length];
-    const user = users[i % users.length];
-    const dev = developers.find((d) => d.id === app.developerId);
-    if (!dev) continue;
+    const userId = syntheticUsers[i % syntheticUsers.length];
     const isBot = i % 7 === 0;
-    const fraudScore = isBot ? 0.85 + Math.random() * 0.15 : Math.random() * 0.4;
+    const fraudScore = isBot
+      ? 0.85 + Math.random() * 0.15
+      : Math.random() * 0.35;
     const qualityScore = 1 - fraudScore;
     const eventType = eventTypes[i % eventTypes.length];
-    try {
-      const ingestedAt = new Date();
-      await repo.save(
-        repo.create({
-          applicationId: app.id,
-          userId: user.id,
-          developerId: dev.id,
-          eventId: `demo-${Date.now()}-${i}`,
-          eventType,
-          fraudScore,
-          qualityScore,
-          payoutAmount: qualityScore * 0.0005,
-          status: isBot ? 'rejected' : 'scored',
-          rejectionReason: isBot ? 'fraud_score_threshold' : null,
-          ingestedAt,
-          scoredAt: isBot ? null : ingestedAt,
-        } as Partial<ScoredEvent>),
-      );
-      inserted++;
-    } catch {
-      // Schema may differ slightly across migrations — skip individual failures.
-      continue;
-    }
+    // Spread ingestedAt across the last 60 days
+    const daysAgo = Math.floor(Math.random() * 60);
+    const ingestedAt = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+
+    rows.push({
+      applicationId: app.id,
+      userId,
+      developerId: app.developerId,
+      eventId: `demo-${i}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      eventType,
+      fraudScore,
+      qualityScore,
+      payoutAmount: 0,
+      status: isBot ? 'rejected' : 'scored',
+      rejectionReason: isBot ? 'bot_pattern' : null,
+      ingestedAt,
+      scoredAt: ingestedAt,
+      createdAt: ingestedAt,
+      updatedAt: ingestedAt,
+    });
+  }
+
+  // Bulk insert in batches of 500 to avoid statement size limits
+  const BATCH = 500;
+  let inserted = 0;
+  for (let start = 0; start < rows.length; start += BATCH) {
+    const batch = rows.slice(start, start + BATCH);
+    await repo.insert(batch as ScoredEvent[]);
+    inserted += batch.length;
   }
   return inserted;
 }
@@ -1051,12 +1065,7 @@ async function main(): Promise<void> {
     );
     console.log(`  ✓ Ad impressions: ${impressionCount} rows`);
 
-    const scoredEventCount = await seedScoredEvents(
-      ds,
-      applications,
-      users,
-      developers,
-    );
+    const scoredEventCount = await seedScoredEvents(ds, applications);
     console.log(`  ✓ Scored events: ${scoredEventCount} rows`);
 
     const payoutCount = await seedPayouts(ds, users);
