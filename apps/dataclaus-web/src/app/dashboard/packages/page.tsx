@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useMyPackages } from '@/lib/api-hooks';
 import { RequireRole } from '@/lib/route-guards';
@@ -8,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataclausScoreGauge } from '@/components/packages/score-gauge';
 import { ErrorPanel } from '@/components/layout/error-panel';
+import { CreateFromAppModal } from '@/components/packages/CreateFromAppModal';
 import { Package, Database, Clock } from 'lucide-react';
 import type { DataPackage } from '@/lib/api';
 
@@ -30,6 +32,8 @@ function statusVariant(status: DataPackage['status']) {
 
 function PackagesContent() {
   const { data, isLoading, isError, error, refetch } = useMyPackages();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -61,9 +65,40 @@ function PackagesContent() {
             Submit datasets for AI evaluation and listing on the marketplace.
           </p>
         </div>
-        <Link href="/dashboard/packages/new">
-          <Button>New Package</Button>
-        </Link>
+        <div className="relative">
+          <div className="flex">
+            <Button
+              onClick={() => setModalOpen(true)}
+              className="rounded-r-none border-r border-white/20"
+            >
+              ✨ From an app
+            </Button>
+            <div className="relative">
+              <Button
+                variant="outline"
+                className="rounded-l-none border-l-0 px-2"
+                onClick={() => setDropdownOpen(v => !v)}
+                aria-label="More options"
+              >
+                <svg viewBox="0 0 12 12" width={12} height={12} fill="currentColor">
+                  <path d="M6 8L1 3h10L6 8z"/>
+                </svg>
+              </Button>
+              {dropdownOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-20 min-w-[160px]">
+                  <Link
+                    href="/dashboard/packages/new"
+                    className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    From scratch (advanced)
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+          <CreateFromAppModal open={modalOpen} onClose={() => setModalOpen(false)} />
+        </div>
       </div>
 
       {packages.length === 0 ? (
