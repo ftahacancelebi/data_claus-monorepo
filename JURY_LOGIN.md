@@ -44,11 +44,22 @@ Six packages are pre-seeded across the trust-score spectrum:
 - One **rejected** (<0.4): only visible in `/dashboard/admin/packages`, with bot-signature red flags
 - One **evaluating**: admin can watch a spinner
 
+## Submitting a Package (Demo Steps 2–4)
+
+1. Login as `developer.social@dataclaus.demo` / `demo1234`
+2. Navigate to **Data Packages** in the sidebar
+3. Click **✨ From an app** (the primary button in the top-right)
+4. In the modal → **Step 1**: Select `TikTok Clone`, keep `Last 30 days`, click **Extract preview**
+5. **Step 2**: Review the package preview — note the sample rows and any ⚠ flagged rows
+6. Adjust the title if desired, click **Submit for AI Evaluation →**
+7. Wait 3–8 seconds for Claude to evaluate the package
+8. Watch the status flip to **Certified** with Claude's summary and trust score
+
 Demo flow:
 1. Log in as `developer.fitness@dataclaus.demo` → "Data Packages" → "New Package"
 2. Fill the form (defaults are ready); submit. Status flips from *evaluating* → *certified* in 3–8 s.
 3. Log in as `buyer.brandone@dataclaus.demo` → "Marketplace" → click the new package → "Purchase".
-4. Funds split 95% seller / 5% platform via the existing wallet/ledger primitives.
+4. Fee split (packages): 90% → developer, 10% → platform via the existing wallet/ledger primitives.
 
 Smoke test: `pnpm exec ts-node --transpile-only --project scripts/tsconfig.json scripts/smoke-test-package-marketplace.ts`.
 
