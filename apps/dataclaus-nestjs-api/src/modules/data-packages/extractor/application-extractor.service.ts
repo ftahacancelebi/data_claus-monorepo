@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
@@ -51,6 +52,8 @@ const SCHEMA_JSON: Record<string, string> = {
 
 @Injectable()
 export class ApplicationExtractorService {
+  private readonly logger = new Logger(ApplicationExtractorService.name);
+
   constructor(
     @InjectRepository(Application)
     private readonly appRepo: Repository<Application>,
@@ -64,6 +67,7 @@ export class ApplicationExtractorService {
     const now = new Date();
     const from = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
+    // N+1 accepted; developer app count is small (same pattern as data-packages.service.ts)
     for (const app of apps) {
       const [agg] = await this.dataSource.query<AggRow[]>(
         `SELECT COUNT(*) AS row_count, COUNT(DISTINCT user_id) AS unique_users
@@ -163,8 +167,8 @@ export class ApplicationExtractorService {
       claimed_metrics: {
         row_count: rowCount,
         unique_users: uniqueUsers,
-        date_range_start: agg.min_date?.split('T')[0] ?? from.toISOString().split('T')[0],
-        date_range_end: agg.max_date?.split('T')[0] ?? to.toISOString().split('T')[0],
+        date_range_start: agg?.min_date?.split('T')[0] ?? from.toISOString().split('T')[0],
+        date_range_end:   agg?.max_date?.split('T')[0] ?? to.toISOString().split('T')[0],
       },
       schema_json: SCHEMA_JSON,
       sample_rows: sampleRows,
