@@ -9,7 +9,7 @@ export const PRICE_BASELINE_USD_PER_ROW: Record<string, number> = {
   other:         0.0004,
 };
 
-export const EVENT_TYPE_TO_CATEGORY: Record<string, string> = {
+export const EVENT_TYPE_TO_CATEGORY: Partial<Record<string, string>> = {
   accelerometer: 'fitness',
   gyroscope:     'fitness',
   scroll:        'social',
