@@ -20,6 +20,8 @@ import {
   CampaignSchema,
   CreatePackageResponseSchema,
   DashboardStatsSchema,
+  EligibleApplicationSchema,
+  ExtractedPackageDraftSchema,
   DataClausUserSchema,
   DataPackageListResponseSchema,
   DataPackageSchema,
@@ -994,4 +996,26 @@ export const delistPackage = (id: string) =>
     body: JSON.stringify({}),
     schema: CreatePackageResponseSchema,
   });
+
+// =============================================================================
+// EXTRACTOR — auto-package from app
+// =============================================================================
+
+export const listEligibleApplications = () =>
+  request('/v1/packages/extract/eligible-apps', {
+    schema: z.array(EligibleApplicationSchema),
+  });
+
+export const extractPackagePreview = (
+  appId: string,
+  opts?: { from?: string; to?: string },
+) => {
+  const qs = new URLSearchParams();
+  if (opts?.from) qs.set('from', opts.from);
+  if (opts?.to)   qs.set('to',   opts.to);
+  const query = qs.toString() ? `?${qs}` : '';
+  return request(`/v1/packages/extract/preview/${appId}${query}`, {
+    schema: ExtractedPackageDraftSchema,
+  });
+};
 

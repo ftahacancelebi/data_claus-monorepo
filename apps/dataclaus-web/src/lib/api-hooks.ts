@@ -68,6 +68,9 @@ import {
   getAdminUsers,
   getLedgerEntries,
   getAdminHealth,
+  // extractor
+  listEligibleApplications,
+  extractPackagePreview,
   // packages
   listPackages,
   listMyPackages,
@@ -704,5 +707,23 @@ export function useDelistPackage() {
       qc.invalidateQueries({ queryKey: queryKeys.packages.detail(id) });
       qc.invalidateQueries({ queryKey: queryKeys.packages.all });
     },
+  });
+}
+
+// =============================================================================
+// EXTRACTOR
+// =============================================================================
+
+export function useEligibleApplications() {
+  return useQuery({
+    queryKey: queryKeys.extractor.eligibleApps(),
+    queryFn:  listEligibleApplications,
+  });
+}
+
+export function useExtractPreview() {
+  return useMutation({
+    mutationFn: ({ appId, from, to }: { appId: string; from?: string; to?: string }) =>
+      extractPackagePreview(appId, { from, to }),
   });
 }

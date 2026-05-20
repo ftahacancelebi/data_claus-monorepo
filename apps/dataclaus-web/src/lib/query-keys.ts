@@ -87,4 +87,10 @@ export const queryKeys = {
     all: ['purchases'] as const,
     mine: () => [...queryKeys.purchases.all, 'mine'] as const,
   },
+  extractor: {
+    all:          ['extractor'] as const,
+    eligibleApps: () => [...queryKeys.extractor.all, 'eligible-apps'] as const,
+    preview:      (appId: string, from?: string, to?: string) =>
+      [...queryKeys.extractor.all, 'preview', appId, from ?? '', to ?? ''] as const,
+  },
 } as const;

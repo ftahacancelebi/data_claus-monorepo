@@ -507,3 +507,40 @@ export const CreatePackageResponseSchema = z.object({
   id: z.string(),
   status: PackageStatusSchema,
 });
+
+// =============================================================================
+// EXTRACTOR — auto-package from app
+// =============================================================================
+
+export const EligibleApplicationSchema = z.object({
+  id:           z.string().uuid(),
+  name:         z.string(),
+  category:     z.string().nullable(),
+  event_count:  z.number(),
+  unique_users: z.number(),
+  eligible:     z.boolean(),
+  reason:       z.string().optional(),
+});
+export type EligibleApplication = z.infer<typeof EligibleApplicationSchema>;
+
+export const ExtractedPackageDraftSchema = z.object({
+  title:    z.string(),
+  category: z.string(),
+  claimed_metrics: z.object({
+    row_count:         z.number(),
+    unique_users:      z.number(),
+    date_range_start:  z.string(),
+    date_range_end:    z.string(),
+  }),
+  schema_json:    z.record(z.string(), z.string()),
+  sample_rows:    z.array(z.record(z.string(), z.unknown())),
+  price:          z.coerce.number(),
+  application_id: z.string(),
+  ui_meta: z.object({
+    application_name:      z.string(),
+    suggested_price_basis: z.string(),
+    flagged_sample_count:  z.number(),
+    coverage_warning:      z.string().optional(),
+  }),
+});
+export type ExtractedPackageDraft = z.infer<typeof ExtractedPackageDraftSchema>;
