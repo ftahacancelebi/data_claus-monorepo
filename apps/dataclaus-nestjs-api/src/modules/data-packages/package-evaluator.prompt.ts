@@ -28,6 +28,7 @@ PACKAGE
 - Sample rows (${sampleCount} of claimed ${claimedRowCount}):
 ${sampleRows}
 - Asking price (USD): ${pkg.price}
+- Note: user IDs in sample rows are pseudonymized as \`u_<hex>\` — this is privacy hygiene, not a data quality issue.
 
 EVALUATION RUBRIC — score each 0.0–1.0:
 1. schema_integrity — field types consistent across rows, required fields present, null/anomaly rate reasonable
