@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth-context';
 
 const DEMO_PASSWORD = 'demo1234';
 
@@ -19,7 +20,7 @@ const ROLES: JuryRole[] = [
     email: 'user.alice@dataclaus.demo',
     description:
       'See the wallet, earnings history, withdraw flow exactly as a real user does.',
-    redirectPath: '/dashboard',
+    redirectPath: '/u/dashboard',
     accent: 'from-emerald-500 to-emerald-600',
   },
   {
@@ -50,6 +51,7 @@ const ROLES: JuryRole[] = [
 
 export default function JuryPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
 
@@ -57,35 +59,25 @@ export default function JuryPage() {
     setBusy(role.label);
     setError('');
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: role.email, password: DEMO_PASSWORD }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.message || `Login failed (HTTP ${res.status})`);
-      }
-      const json = await res.json();
-      const data = json.data ?? json;
-      const token =
-        data.accessToken ?? data.token ?? data.access_token ?? null;
-      if (!token) throw new Error('No token in response');
+      // Go through the AuthProvider's login(), not a hand-rolled fetch.
+      // It sets in-memory auth state (status='authed') AND localStorage in
+      // the same tick. The previous code only wrote localStorage, so the
+      // soft client-side router.push() never re-ran AuthProvider's
+      // hydration effect — RequireRole still saw `guest` and bounced every
+      // jury click straight back to `/`. login() is the single auth path.
+      const authUser = await login(role.email, DEMO_PASSWORD);
 
-      const userPayload = data.user ?? data;
-      const authUser = {
-        id: userPayload.id ?? '',
-        email: userPayload.email ?? role.email,
-        name:
-          userPayload.name ??
-          userPayload.displayName ??
-          role.label,
-        role: userPayload.role ?? 'user',
-      };
-
-      localStorage.setItem('dataclaus_user', JSON.stringify(authUser));
-      localStorage.setItem('dataclaus_token', token);
-      router.push(role.redirectPath);
+      // Route by the real role returned from the backend so a mis-seeded
+      // account can't strand the jury on the wrong portal.
+      const target =
+        authUser.role === 'user'
+          ? '/u/dashboard'
+          : authUser.role === 'admin'
+          ? '/dashboard/admin/health'
+          : authUser.role === 'buyer'
+          ? '/dashboard/marketplace'
+          : role.redirectPath;
+      router.push(target);
     } catch (err) {
       setError((err as Error).message);
       setBusy(null);

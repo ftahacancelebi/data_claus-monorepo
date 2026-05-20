@@ -281,12 +281,16 @@ Web jury demo has **no CRITICAL/HIGH gap**. Verified role-readiness:
 - **Developer / End-user(client) / Admin** journeys fully demo-ready. `user.alice`
   (role=user) lands on a dedicated, fully-wired `/u/*` portal with real seeded
   `ad_impressions` earnings — NOT the dev dashboard or a blank page.
-- **Buyer landing is 100% mock** (`buyer-dashboard.tsx:29-140`): hardcoded zeros,
-  dead "Browse Marketplace"/"New Campaign" buttons (no Link/onClick), stale
-  "campaign" copy contradicting the pivot. Journey NOT blocked (buyer reaches
-  marketplace via sidebar) — MEDIUM cosmetic. Fix: wire button to
-  `/dashboard/marketplace`. Admin landing useEffect+fetch fragile = LOW
-  (demoable admin path `/dashboard/admin/packages` is solid).
+- **Buyer landing — FIXED (2026-05-16, commit pending after d7355a7).**
+  `buyer-dashboard.tsx` fully rewritten: real data via `useMyPurchases()` +
+  `useWalletsByOwner()` (one cache layer), full loading/error/empty/success
+  triad, working `<Link>` CTAs to `/dashboard/marketplace` (dead buttons
+  gone), all "campaign" copy removed (spec §12.6). KPIs: Wallet Balance /
+  Total Spent / Packages Owned / Avg Trust Score + Recent Acquisitions list
+  (score gauge, links to marketplace detail). Read-only landing — no
+  mutation, cache stays fresh via `usePurchasePackage` invalidation. tsc
+  clean. Admin landing useEffect+fetch fragile = LOW, still open (demoable
+  admin path `/dashboard/admin/packages` is solid, not blocking).
 - **Mobile/SDK = deprecated side-showcase, OFF the jury critical path**
   (spec 08 §1 "Does NOT touch: TikTok demo app"; §8 demo is 100% web).
   SDK (`packages/sdk-react-native`) fully implemented but the TikTok app does
