@@ -167,8 +167,8 @@ export class ApplicationExtractorService {
       claimed_metrics: {
         row_count: rowCount,
         unique_users: uniqueUsers,
-        date_range_start: agg?.min_date?.split('T')[0] ?? from.toISOString().split('T')[0],
-        date_range_end:   agg?.max_date?.split('T')[0] ?? to.toISOString().split('T')[0],
+        date_range_start: agg?.min_date ? new Date(agg.min_date).toISOString().split('T')[0] : from.toISOString().split('T')[0],
+        date_range_end:   agg?.max_date ? new Date(agg.max_date).toISOString().split('T')[0] : to.toISOString().split('T')[0],
       },
       schema_json: SCHEMA_JSON,
       sample_rows: sampleRows,
