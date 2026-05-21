@@ -19,6 +19,7 @@ import { useEligibleApplications, useExtractPreview, useCreatePackage } from '@/
 import { ApiError } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import type { EligibleApplication, ExtractedPackageDraft } from '@/lib/schemas';
+import { DimensionGrid } from '@/components/marketplace/DimensionGrid';
 
 interface Props {
   open: boolean;
@@ -272,46 +273,50 @@ export function CreateFromAppModal({ open, onClose }: Props) {
                       </span>
                     )}
                   </p>
-                  <div className="rounded-xl border border-slate-100 overflow-hidden">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="bg-slate-50 border-b border-slate-100">
-                          <th className="text-left px-3 py-2 font-mono text-slate-400 font-normal">user_pseudo_id</th>
-                          <th className="text-left px-3 py-2 font-mono text-slate-400 font-normal">event_type</th>
-                          <th className="text-right px-3 py-2 font-mono text-slate-400 font-normal">quality</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {draft.sample_rows.map((row, i) => {
-                          const qs = typeof row.quality_score === 'number'
-                            ? row.quality_score
-                            : parseFloat(String(row.quality_score ?? 0));
-                          const flagged = qs < 0.3;
-                          return (
-                            <tr
-                              key={i}
-                              className={`border-b border-slate-50 last:border-0 ${flagged ? 'bg-amber-50/60' : ''}`}
-                            >
-                              <td className="px-3 py-1.5 font-mono text-slate-600 truncate max-w-[140px]">
-                                {String(row.user_pseudo_id ?? '')}
-                              </td>
-                              <td className="px-3 py-1.5 text-slate-700">
-                                {String(row.event_type ?? '')}
-                              </td>
-                              <td className="px-3 py-1.5 text-right">
-                                <span className={`font-mono ${flagged ? 'text-amber-700' : 'text-slate-600'}`}>
-                                  {qs.toFixed(2)}
-                                  {flagged && (
-                                    <Warning weight="fill" className="inline w-3 h-3 ml-1 text-amber-500" />
-                                  )}
-                                </span>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                  {draft.dimensions && Object.keys(draft.dimensions).length > 0 ? (
+                    <DimensionGrid dimensions={draft.dimensions} />
+                  ) : (
+                    <div className="rounded-xl border border-slate-100 overflow-hidden">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="bg-slate-50 border-b border-slate-100">
+                            <th className="text-left px-3 py-2 font-mono text-slate-400 font-normal">user_pseudo_id</th>
+                            <th className="text-left px-3 py-2 font-mono text-slate-400 font-normal">event_type</th>
+                            <th className="text-right px-3 py-2 font-mono text-slate-400 font-normal">quality</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {draft.sample_rows.map((row, i) => {
+                            const qs = typeof row.quality_score === 'number'
+                              ? row.quality_score
+                              : parseFloat(String(row.quality_score ?? 0));
+                            const flagged = qs < 0.3;
+                            return (
+                              <tr
+                                key={i}
+                                className={`border-b border-slate-50 last:border-0 ${flagged ? 'bg-amber-50/60' : ''}`}
+                              >
+                                <td className="px-3 py-1.5 font-mono text-slate-600 truncate max-w-[140px]">
+                                  {String(row.user_pseudo_id ?? '')}
+                                </td>
+                                <td className="px-3 py-1.5 text-slate-700">
+                                  {String(row.event_type ?? '')}
+                                </td>
+                                <td className="px-3 py-1.5 text-right">
+                                  <span className={`font-mono ${flagged ? 'text-amber-700' : 'text-slate-600'}`}>
+                                    {qs.toFixed(2)}
+                                    {flagged && (
+                                      <Warning weight="fill" className="inline w-3 h-3 ml-1 text-amber-500" />
+                                    )}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-3">
