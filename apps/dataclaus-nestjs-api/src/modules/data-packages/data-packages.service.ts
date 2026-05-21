@@ -72,6 +72,37 @@ export class DataPackagesService {
       llmEvaluation: null,
       evaluatedAt: null,
     });
+
+    // Auto-extract flow: persist raw dimensions payload (evaluator will
+    // enrich with per-dim valuations later in runEvaluationAsync). Also
+    // backfill the legacy flat fields from the `device` dimension so the
+    // old buyer UI (which still reads claimedMetrics / schemaJson /
+    // sampleRows) keeps rendering. Only backfill when the DTO didn't
+    // supply the flat shape — the flat fields remain the source of truth
+    // when both are present.
+    if (dto.dimensions) {
+      pkg.dimensions = dto.dimensions as any;
+
+      const deviceDim = (dto.dimensions as any).device;
+      if (deviceDim) {
+        if (!pkg.claimedMetrics) {
+          const today = new Date().toISOString().slice(0, 10);
+          pkg.claimedMetrics = {
+            row_count: deviceDim.count,
+            unique_users: deviceDim.distribution?.['unique_users'] ?? 0,
+            date_range_start: today,
+            date_range_end: today,
+          };
+        }
+        if (!pkg.schemaJson || Object.keys(pkg.schemaJson).length === 0) {
+          pkg.schemaJson = deviceDim.schema_json;
+        }
+        if (!pkg.sampleRows || pkg.sampleRows.length === 0) {
+          pkg.sampleRows = deviceDim.sample_rows;
+        }
+      }
+    }
+
     const saved = await this.packageRepo.save(pkg);
 
     // Fire-and-forget evaluation. We deliberately do NOT await — the
