@@ -1,102 +1,952 @@
 [
   {
-    "id": "video_1",
+    "id": "vid_01",
     "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-    "thumbnail": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
-    "description": "Big Buck Bunny - A classic animated short film 🐰 #animation #fun",
+    "thumbnail": "https://picsum.photos/seed/vid_01/400/600",
+    "description": "Sunset rooftop choreo — full energy 8-count combo",
     "creator": {
-      "id": "creator_1",
-      "username": "animation_studio",
-      "avatar": "https://i.pravatar.cc/150?u=creator1",
+      "id": "creator_alice",
+      "username": "@aliceDanceTok",
+      "avatar": "https://i.pravatar.cc/100?img=1",
       "verified": true
     },
-    "likes": 15420,
-    "comments": 892,
-    "shares": 234,
-    "views": 125000,
-    "music": {
-      "title": "Original Sound",
-      "artist": "Blender Foundation"
-    }
+    "likes": 24890,
+    "comments": 612,
+    "shares": 287,
+    "views": 184000,
+    "music": { "title": "Sunset Vibes", "artist": "DJ Demo" },
+    "tags": ["dance", "music"],
+    "category": "dance"
   },
   {
-    "id": "video_2",
+    "id": "vid_02",
     "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-    "thumbnail": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg",
-    "description": "Elephants Dream - First Blender Open Movie 🐘 #openSourcet #blender",
+    "thumbnail": "https://picsum.photos/seed/vid_02/400/600",
+    "description": "Hip-hop freestyle in the studio — late night session",
     "creator": {
-      "id": "creator_2",
-      "username": "blender_films",
-      "avatar": "https://i.pravatar.cc/150?u=creator2",
+      "id": "creator_alice",
+      "username": "@aliceDanceTok",
+      "avatar": "https://i.pravatar.cc/100?img=1",
       "verified": true
     },
-    "likes": 8932,
-    "comments": 456,
-    "shares": 123,
-    "views": 83000,
-    "music": {
-      "title": "Dream",
-      "artist": "Proog & Emo"
-    }
+    "likes": 18420,
+    "comments": 401,
+    "shares": 198,
+    "views": 142000,
+    "music": { "title": "Midnight Bass", "artist": "Loop Kid" },
+    "tags": ["dance"],
+    "category": "dance"
   },
   {
-    "id": "video_3",
+    "id": "vid_03",
     "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    "thumbnail": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg",
-    "description": "For Bigger Blazes - Action packed! 🔥 #action #adventure",
+    "thumbnail": "https://picsum.photos/seed/vid_03/400/600",
+    "description": "K-pop dance cover with the crew — viral choreo edition",
     "creator": {
-      "id": "creator_3",
-      "username": "action_clips",
-      "avatar": "https://i.pravatar.cc/150?u=creator3",
-      "verified": false
-    },
-    "likes": 5621,
-    "comments": 234,
-    "shares": 89,
-    "views": 45000,
-    "music": {
-      "title": "Blaze",
-      "artist": "Chrome"
-    }
-  },
-  {
-    "id": "video_4",
-    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-    "thumbnail": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerEscapes.jpg",
-    "description": "For Bigger Escapes - The chase is on! 🏃 #escape #thriller",
-    "creator": {
-      "id": "creator_4",
-      "username": "thriller_vids",
-      "avatar": "https://i.pravatar.cc/150?u=creator4",
-      "verified": false
-    },
-    "likes": 7823,
-    "comments": 345,
-    "shares": 156,
-    "views": 62000,
-    "music": {
-      "title": "Escape",
-      "artist": "Chrome"
-    }
-  },
-  {
-    "id": "video_5",
-    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-    "thumbnail": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerFun.jpg",
-    "description": "For Bigger Fun - Enjoy the ride! 🎢 #fun #entertainment",
-    "creator": {
-      "id": "creator_5",
-      "username": "fun_times",
-      "avatar": "https://i.pravatar.cc/150?u=creator5",
+      "id": "creator_hank",
+      "username": "@hankMusicMan",
+      "avatar": "https://i.pravatar.cc/100?img=8",
       "verified": true
     },
-    "likes": 12456,
-    "comments": 678,
-    "shares": 289,
+    "likes": 38210,
+    "comments": 1280,
+    "shares": 612,
+    "views": 312000,
+    "music": { "title": "Neon Heartbeat", "artist": "Aurora Bloom" },
+    "tags": ["dance", "music", "fashion"],
+    "category": "dance"
+  },
+  {
+    "id": "vid_04",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_04/400/600",
+    "description": "Contemporary solo to a piano cover — first take",
+    "creator": {
+      "id": "creator_alice",
+      "username": "@aliceDanceTok",
+      "avatar": "https://i.pravatar.cc/100?img=1",
+      "verified": true
+    },
+    "likes": 9120,
+    "comments": 215,
+    "shares": 78,
+    "views": 67000,
+    "music": { "title": "Quiet Hours", "artist": "Niko Wells" },
+    "tags": ["dance", "art"],
+    "category": "dance"
+  },
+  {
+    "id": "vid_05",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_05/400/600",
+    "description": "Beginner tutorial — 4 moves anyone can learn today",
+    "creator": {
+      "id": "creator_iris",
+      "username": "@irisExplains",
+      "avatar": "https://i.pravatar.cc/100?img=9",
+      "verified": false
+    },
+    "likes": 5230,
+    "comments": 184,
+    "shares": 92,
+    "views": 41000,
+    "music": { "title": "Easy Steps", "artist": "Toe Tap Trio" },
+    "tags": ["dance", "education"],
+    "category": "dance"
+  },
+  {
+    "id": "vid_06",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_06/400/600",
+    "description": "Salsa night highlights — partner work and footwork drills",
+    "creator": {
+      "id": "creator_hank",
+      "username": "@hankMusicMan",
+      "avatar": "https://i.pravatar.cc/100?img=8",
+      "verified": true
+    },
+    "likes": 14760,
+    "comments": 332,
+    "shares": 145,
     "views": 98000,
-    "music": {
-      "title": "Fun Times",
-      "artist": "Chrome"
-    }
+    "music": { "title": "Caliente", "artist": "Trio Habana" },
+    "tags": ["dance", "music"],
+    "category": "dance"
+  },
+  {
+    "id": "vid_07",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_07/400/600",
+    "description": "Street performance in the park — crowd went wild",
+    "creator": {
+      "id": "creator_gigi",
+      "username": "@gigiOnTheGo",
+      "avatar": "https://i.pravatar.cc/100?img=7",
+      "verified": false
+    },
+    "likes": 21100,
+    "comments": 540,
+    "shares": 220,
+    "views": 156000,
+    "music": { "title": "Sidewalk Anthem", "artist": "Block Party" },
+    "tags": ["dance", "vlog"],
+    "category": "dance"
+  },
+  {
+    "id": "vid_08",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_08/400/600",
+    "description": "House style routine + slow-mo breakdown of every move",
+    "creator": {
+      "id": "creator_alice",
+      "username": "@aliceDanceTok",
+      "avatar": "https://i.pravatar.cc/100?img=1",
+      "verified": true
+    },
+    "likes": 11320,
+    "comments": 287,
+    "shares": 110,
+    "views": 82000,
+    "music": { "title": "Floorwork", "artist": "DJ Demo" },
+    "tags": ["dance", "education", "music"],
+    "category": "dance"
+  },
+  {
+    "id": "vid_09",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_09/400/600",
+    "description": "When your roommate eats the last slice — a tragedy",
+    "creator": {
+      "id": "creator_bob",
+      "username": "@bobComedyHour",
+      "avatar": "https://i.pravatar.cc/100?img=2",
+      "verified": false
+    },
+    "likes": 42150,
+    "comments": 1820,
+    "shares": 765,
+    "views": 389000,
+    "music": { "title": "Sad Trombone", "artist": "Stock Vibes" },
+    "tags": ["comedy"],
+    "category": "comedy"
+  },
+  {
+    "id": "vid_10",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_10/400/600",
+    "description": "Impressions of every coworker on a Monday morning",
+    "creator": {
+      "id": "creator_bob",
+      "username": "@bobComedyHour",
+      "avatar": "https://i.pravatar.cc/100?img=2",
+      "verified": false
+    },
+    "likes": 31280,
+    "comments": 1410,
+    "shares": 522,
+    "views": 268000,
+    "music": { "title": "Coffee Mood", "artist": "Lo-Fi Mondays" },
+    "tags": ["comedy", "lifestyle"],
+    "category": "comedy"
+  },
+  {
+    "id": "vid_11",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_11/400/600",
+    "description": "Stand-up bit about airline seats — front row reactions",
+    "creator": {
+      "id": "creator_bob",
+      "username": "@bobComedyHour",
+      "avatar": "https://i.pravatar.cc/100?img=2",
+      "verified": false
+    },
+    "likes": 18650,
+    "comments": 720,
+    "shares": 281,
+    "views": 142000,
+    "music": { "title": "Original Sound", "artist": "@bobComedyHour" },
+    "tags": ["comedy"],
+    "category": "comedy"
+  },
+  {
+    "id": "vid_12",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_12/400/600",
+    "description": "Prank: I replaced his protein powder with flour",
+    "creator": {
+      "id": "creator_fin",
+      "username": "@finFitDaily",
+      "avatar": "https://i.pravatar.cc/100?img=6",
+      "verified": true
+    },
+    "likes": 27410,
+    "comments": 1180,
+    "shares": 612,
+    "views": 231000,
+    "music": { "title": "Gotcha", "artist": "Prank Pack" },
+    "tags": ["comedy", "fitness"],
+    "category": "comedy"
+  },
+  {
+    "id": "vid_13",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_13/400/600",
+    "description": "Sketch: tech support call from 1995 — modem screams included",
+    "creator": {
+      "id": "creator_bob",
+      "username": "@bobComedyHour",
+      "avatar": "https://i.pravatar.cc/100?img=2",
+      "verified": false
+    },
+    "likes": 14920,
+    "comments": 612,
+    "shares": 240,
+    "views": 118000,
+    "music": { "title": "Dial-Up Drama", "artist": "Retro Wave" },
+    "tags": ["comedy", "tech"],
+    "category": "comedy"
+  },
+  {
+    "id": "vid_14",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_14/400/600",
+    "description": "My dog reacting to a cucumber — final form unlocked",
+    "creator": {
+      "id": "creator_kim",
+      "username": "@kimWildLife",
+      "avatar": "https://i.pravatar.cc/100?img=11",
+      "verified": false
+    },
+    "likes": 38400,
+    "comments": 1620,
+    "shares": 894,
+    "views": 412000,
+    "music": { "title": "Pet Panic", "artist": "Stock Vibes" },
+    "tags": ["comedy", "animals"],
+    "category": "comedy"
+  },
+  {
+    "id": "vid_15",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_15/400/600",
+    "description": "Ranked grind hits Diamond — clutch 1v3 ace at the end",
+    "creator": {
+      "id": "creator_cara",
+      "username": "@caraGamingLive",
+      "avatar": "https://i.pravatar.cc/100?img=3",
+      "verified": true
+    },
+    "likes": 16830,
+    "comments": 940,
+    "shares": 412,
+    "views": 124000,
+    "music": { "title": "Game Over", "artist": "Pixel Pulse" },
+    "tags": ["gaming"],
+    "category": "gaming"
+  },
+  {
+    "id": "vid_16",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_16/400/600",
+    "description": "New build PC reveal — RTX, RGB, regret, all included",
+    "creator": {
+      "id": "creator_cara",
+      "username": "@caraGamingLive",
+      "avatar": "https://i.pravatar.cc/100?img=3",
+      "verified": true
+    },
+    "likes": 22910,
+    "comments": 1120,
+    "shares": 530,
+    "views": 198000,
+    "music": { "title": "Boot Sequence", "artist": "Synth Lab" },
+    "tags": ["gaming", "tech"],
+    "category": "gaming"
+  },
+  {
+    "id": "vid_17",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_17/400/600",
+    "description": "Speedrun world record attempt — every frame matters",
+    "creator": {
+      "id": "creator_cara",
+      "username": "@caraGamingLive",
+      "avatar": "https://i.pravatar.cc/100?img=3",
+      "verified": true
+    },
+    "likes": 31420,
+    "comments": 1810,
+    "shares": 720,
+    "views": 286000,
+    "music": { "title": "Frame Perfect", "artist": "Chiptune Crew" },
+    "tags": ["gaming", "education"],
+    "category": "gaming"
+  },
+  {
+    "id": "vid_18",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_18/400/600",
+    "description": "Indie horror jump-scare reaction compilation",
+    "creator": {
+      "id": "creator_cara",
+      "username": "@caraGamingLive",
+      "avatar": "https://i.pravatar.cc/100?img=3",
+      "verified": true
+    },
+    "likes": 19450,
+    "comments": 890,
+    "shares": 312,
+    "views": 152000,
+    "music": { "title": "Haunted Halls", "artist": "Shadow Kit" },
+    "tags": ["gaming", "comedy"],
+    "category": "gaming"
+  },
+  {
+    "id": "vid_19",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_19/400/600",
+    "description": "Mobile MOBA tier list — patch 4.2 meta rundown",
+    "creator": {
+      "id": "creator_iris",
+      "username": "@irisExplains",
+      "avatar": "https://i.pravatar.cc/100?img=9",
+      "verified": false
+    },
+    "likes": 8230,
+    "comments": 410,
+    "shares": 161,
+    "views": 64000,
+    "music": { "title": "Tier One", "artist": "Pixel Pulse" },
+    "tags": ["gaming", "education", "tech"],
+    "category": "gaming"
+  },
+  {
+    "id": "vid_20",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_20/400/600",
+    "description": "Soft glam GRWM — drugstore products under $40",
+    "creator": {
+      "id": "creator_dee",
+      "username": "@deeBeautyLab",
+      "avatar": "https://i.pravatar.cc/100?img=4",
+      "verified": true
+    },
+    "likes": 27840,
+    "comments": 1320,
+    "shares": 560,
+    "views": 245000,
+    "music": { "title": "Mirror Mirror", "artist": "Glow Tape" },
+    "tags": ["beauty", "fashion"],
+    "category": "beauty"
+  },
+  {
+    "id": "vid_21",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_21/400/600",
+    "description": "Skincare routine for sensitive skin — derm-approved",
+    "creator": {
+      "id": "creator_dee",
+      "username": "@deeBeautyLab",
+      "avatar": "https://i.pravatar.cc/100?img=4",
+      "verified": true
+    },
+    "likes": 18920,
+    "comments": 740,
+    "shares": 312,
+    "views": 161000,
+    "music": { "title": "Soft Light", "artist": "Niko Wells" },
+    "tags": ["beauty"],
+    "category": "beauty"
+  },
+  {
+    "id": "vid_22",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_22/400/600",
+    "description": "Bold red lip tutorial — long-wear pick & layering tip",
+    "creator": {
+      "id": "creator_dee",
+      "username": "@deeBeautyLab",
+      "avatar": "https://i.pravatar.cc/100?img=4",
+      "verified": true
+    },
+    "likes": 22310,
+    "comments": 920,
+    "shares": 420,
+    "views": 192000,
+    "music": { "title": "Mirror Mirror", "artist": "Glow Tape" },
+    "tags": ["beauty", "fashion"],
+    "category": "beauty"
+  },
+  {
+    "id": "vid_23",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_23/400/600",
+    "description": "Trying viral TikTok blush hacks — does any of it work?",
+    "creator": {
+      "id": "creator_jax",
+      "username": "@jaxStyleFiles",
+      "avatar": "https://i.pravatar.cc/100?img=10",
+      "verified": true
+    },
+    "likes": 31650,
+    "comments": 1480,
+    "shares": 612,
+    "views": 278000,
+    "music": { "title": "Trend Cycle", "artist": "DJ Demo" },
+    "tags": ["beauty", "lifestyle"],
+    "category": "beauty"
+  },
+  {
+    "id": "vid_24",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_24/400/600",
+    "description": "Hair tutorial — heatless overnight waves with a t-shirt",
+    "creator": {
+      "id": "creator_dee",
+      "username": "@deeBeautyLab",
+      "avatar": "https://i.pravatar.cc/100?img=4",
+      "verified": true
+    },
+    "likes": 14710,
+    "comments": 530,
+    "shares": 244,
+    "views": 121000,
+    "music": { "title": "Slow Sunday", "artist": "Lo-Fi Mondays" },
+    "tags": ["beauty", "diy"],
+    "category": "beauty"
+  },
+  {
+    "id": "vid_25",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_25/400/600",
+    "description": "15-min ramen upgrade — soft egg, scallion oil, chili crisp",
+    "creator": {
+      "id": "creator_eli",
+      "username": "@eliEatsEverything",
+      "avatar": "https://i.pravatar.cc/100?img=5",
+      "verified": false
+    },
+    "likes": 33420,
+    "comments": 1280,
+    "shares": 720,
+    "views": 298000,
+    "music": { "title": "Kitchen Lo-Fi", "artist": "Lo-Fi Mondays" },
+    "tags": ["food", "diy"],
+    "category": "food"
+  },
+  {
+    "id": "vid_26",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_26/400/600",
+    "description": "I tried the most viral pasta of 2026 — verdict inside",
+    "creator": {
+      "id": "creator_eli",
+      "username": "@eliEatsEverything",
+      "avatar": "https://i.pravatar.cc/100?img=5",
+      "verified": false
+    },
+    "likes": 24180,
+    "comments": 940,
+    "shares": 432,
+    "views": 214000,
+    "music": { "title": "Italiano", "artist": "Trio Habana" },
+    "tags": ["food", "lifestyle"],
+    "category": "food"
+  },
+  {
+    "id": "vid_27",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_27/400/600",
+    "description": "Bakery tour — 5 croissants in 5 neighborhoods",
+    "creator": {
+      "id": "creator_gigi",
+      "username": "@gigiOnTheGo",
+      "avatar": "https://i.pravatar.cc/100?img=7",
+      "verified": false
+    },
+    "likes": 15920,
+    "comments": 612,
+    "shares": 290,
+    "views": 132000,
+    "music": { "title": "Morning Walk", "artist": "Lo-Fi Mondays" },
+    "tags": ["food", "travel", "vlog"],
+    "category": "food"
+  },
+  {
+    "id": "vid_28",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_28/400/600",
+    "description": "Knife skills 101 — the only chop you actually need",
+    "creator": {
+      "id": "creator_iris",
+      "username": "@irisExplains",
+      "avatar": "https://i.pravatar.cc/100?img=9",
+      "verified": false
+    },
+    "likes": 9820,
+    "comments": 348,
+    "shares": 140,
+    "views": 78000,
+    "music": { "title": "Easy Steps", "artist": "Toe Tap Trio" },
+    "tags": ["food", "education"],
+    "category": "food"
+  },
+  {
+    "id": "vid_29",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_29/400/600",
+    "description": "Sourdough from starter to slice — full week timelapse",
+    "creator": {
+      "id": "creator_eli",
+      "username": "@eliEatsEverything",
+      "avatar": "https://i.pravatar.cc/100?img=5",
+      "verified": false
+    },
+    "likes": 28930,
+    "comments": 1140,
+    "shares": 612,
+    "views": 246000,
+    "music": { "title": "Slow Rise", "artist": "Niko Wells" },
+    "tags": ["food", "diy", "art"],
+    "category": "food"
+  },
+  {
+    "id": "vid_30",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_30/400/600",
+    "description": "Full-body HIIT in 12 minutes — zero equipment",
+    "creator": {
+      "id": "creator_fin",
+      "username": "@finFitDaily",
+      "avatar": "https://i.pravatar.cc/100?img=6",
+      "verified": true
+    },
+    "likes": 21450,
+    "comments": 720,
+    "shares": 340,
+    "views": 186000,
+    "music": { "title": "Pulse Drive", "artist": "Synth Lab" },
+    "tags": ["fitness", "sports"],
+    "category": "fitness"
+  },
+  {
+    "id": "vid_31",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_31/400/600",
+    "description": "Push day routine — 5 lifts, no fluff, real PRs",
+    "creator": {
+      "id": "creator_fin",
+      "username": "@finFitDaily",
+      "avatar": "https://i.pravatar.cc/100?img=6",
+      "verified": true
+    },
+    "likes": 17820,
+    "comments": 540,
+    "shares": 220,
+    "views": 142000,
+    "music": { "title": "Heavy Hands", "artist": "Synth Lab" },
+    "tags": ["fitness"],
+    "category": "fitness"
+  },
+  {
+    "id": "vid_32",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_32/400/600",
+    "description": "Morning yoga flow for desk workers — 8 minutes",
+    "creator": {
+      "id": "creator_fin",
+      "username": "@finFitDaily",
+      "avatar": "https://i.pravatar.cc/100?img=6",
+      "verified": true
+    },
+    "likes": 12410,
+    "comments": 380,
+    "shares": 165,
+    "views": 98000,
+    "music": { "title": "Soft Light", "artist": "Niko Wells" },
+    "tags": ["fitness", "lifestyle"],
+    "category": "fitness"
+  },
+  {
+    "id": "vid_33",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_33/400/600",
+    "description": "Marathon training week 6 — long-run pacing breakdown",
+    "creator": {
+      "id": "creator_fin",
+      "username": "@finFitDaily",
+      "avatar": "https://i.pravatar.cc/100?img=6",
+      "verified": true
+    },
+    "likes": 9820,
+    "comments": 290,
+    "shares": 140,
+    "views": 74000,
+    "music": { "title": "Long Road", "artist": "Block Party" },
+    "tags": ["fitness", "sports", "education"],
+    "category": "fitness"
+  },
+  {
+    "id": "vid_34",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_34/400/600",
+    "description": "Day in my life — 6am wake-up, deep work, sunset run",
+    "creator": {
+      "id": "creator_gigi",
+      "username": "@gigiOnTheGo",
+      "avatar": "https://i.pravatar.cc/100?img=7",
+      "verified": false
+    },
+    "likes": 14210,
+    "comments": 480,
+    "shares": 198,
+    "views": 112000,
+    "music": { "title": "Morning Walk", "artist": "Lo-Fi Mondays" },
+    "tags": ["vlog", "lifestyle"],
+    "category": "vlog"
+  },
+  {
+    "id": "vid_35",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_35/400/600",
+    "description": "Moving into my first apartment — full empty-to-cozy",
+    "creator": {
+      "id": "creator_gigi",
+      "username": "@gigiOnTheGo",
+      "avatar": "https://i.pravatar.cc/100?img=7",
+      "verified": false
+    },
+    "likes": 26840,
+    "comments": 1110,
+    "shares": 520,
+    "views": 232000,
+    "music": { "title": "New Keys", "artist": "Aurora Bloom" },
+    "tags": ["vlog", "diy", "lifestyle"],
+    "category": "vlog"
+  },
+  {
+    "id": "vid_36",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_36/400/600",
+    "description": "Weekend with friends — coffee, hike, golden hour BBQ",
+    "creator": {
+      "id": "creator_leo",
+      "username": "@leoLensCo",
+      "avatar": "https://i.pravatar.cc/100?img=12",
+      "verified": true
+    },
+    "likes": 18920,
+    "comments": 612,
+    "shares": 290,
+    "views": 158000,
+    "music": { "title": "Golden Hour", "artist": "Aurora Bloom" },
+    "tags": ["vlog", "travel"],
+    "category": "vlog"
+  },
+  {
+    "id": "vid_37",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_37/400/600",
+    "description": "Studying abroad week 1 — first impressions and chaos",
+    "creator": {
+      "id": "creator_gigi",
+      "username": "@gigiOnTheGo",
+      "avatar": "https://i.pravatar.cc/100?img=7",
+      "verified": false
+    },
+    "likes": 21320,
+    "comments": 840,
+    "shares": 412,
+    "views": 184000,
+    "music": { "title": "New Horizon", "artist": "Aurora Bloom" },
+    "tags": ["vlog", "travel", "education"],
+    "category": "vlog"
+  },
+  {
+    "id": "vid_38",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_38/400/600",
+    "description": "Original song — bedroom acoustic version, one take",
+    "creator": {
+      "id": "creator_hank",
+      "username": "@hankMusicMan",
+      "avatar": "https://i.pravatar.cc/100?img=8",
+      "verified": true
+    },
+    "likes": 32140,
+    "comments": 1420,
+    "shares": 680,
+    "views": 287000,
+    "music": { "title": "Quiet Hours", "artist": "Niko Wells" },
+    "tags": ["music", "art"],
+    "category": "music"
+  },
+  {
+    "id": "vid_39",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_39/400/600",
+    "description": "Producing a beat from scratch in 60 seconds — go!",
+    "creator": {
+      "id": "creator_hank",
+      "username": "@hankMusicMan",
+      "avatar": "https://i.pravatar.cc/100?img=8",
+      "verified": true
+    },
+    "likes": 19840,
+    "comments": 720,
+    "shares": 312,
+    "views": 156000,
+    "music": { "title": "Loop One", "artist": "Loop Kid" },
+    "tags": ["music", "education", "tech"],
+    "category": "music"
+  },
+  {
+    "id": "vid_40",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_40/400/600",
+    "description": "Cover of the song that's everywhere right now",
+    "creator": {
+      "id": "creator_hank",
+      "username": "@hankMusicMan",
+      "avatar": "https://i.pravatar.cc/100?img=8",
+      "verified": true
+    },
+    "likes": 41320,
+    "comments": 1820,
+    "shares": 920,
+    "views": 384000,
+    "music": { "title": "Neon Heartbeat", "artist": "Aurora Bloom" },
+    "tags": ["music"],
+    "category": "music"
+  },
+  {
+    "id": "vid_41",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_41/400/600",
+    "description": "How compound interest actually works — visual breakdown",
+    "creator": {
+      "id": "creator_iris",
+      "username": "@irisExplains",
+      "avatar": "https://i.pravatar.cc/100?img=9",
+      "verified": false
+    },
+    "likes": 24840,
+    "comments": 1240,
+    "shares": 720,
+    "views": 218000,
+    "music": { "title": "Soft Light", "artist": "Niko Wells" },
+    "tags": ["education", "finance"],
+    "category": "education"
+  },
+  {
+    "id": "vid_42",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_42/400/600",
+    "description": "3 productivity systems and which one actually works",
+    "creator": {
+      "id": "creator_iris",
+      "username": "@irisExplains",
+      "avatar": "https://i.pravatar.cc/100?img=9",
+      "verified": false
+    },
+    "likes": 18620,
+    "comments": 740,
+    "shares": 380,
+    "views": 148000,
+    "music": { "title": "Focus", "artist": "Lo-Fi Mondays" },
+    "tags": ["education", "lifestyle"],
+    "category": "education"
+  },
+  {
+    "id": "vid_43",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_43/400/600",
+    "description": "Quick history of the internet — 60 seconds, 60 years",
+    "creator": {
+      "id": "creator_iris",
+      "username": "@irisExplains",
+      "avatar": "https://i.pravatar.cc/100?img=9",
+      "verified": false
+    },
+    "likes": 12320,
+    "comments": 540,
+    "shares": 245,
+    "views": 102000,
+    "music": { "title": "Dial-Up Drama", "artist": "Retro Wave" },
+    "tags": ["education", "tech", "news"],
+    "category": "education"
+  },
+  {
+    "id": "vid_44",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_44/400/600",
+    "description": "Capsule wardrobe — 12 pieces, 30 outfits, one week",
+    "creator": {
+      "id": "creator_jax",
+      "username": "@jaxStyleFiles",
+      "avatar": "https://i.pravatar.cc/100?img=10",
+      "verified": true
+    },
+    "likes": 26230,
+    "comments": 980,
+    "shares": 480,
+    "views": 224000,
+    "music": { "title": "Runway", "artist": "Glow Tape" },
+    "tags": ["fashion", "lifestyle"],
+    "category": "fashion"
+  },
+  {
+    "id": "vid_45",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_45/400/600",
+    "description": "Thrift haul under $50 — 6 fits I actually love",
+    "creator": {
+      "id": "creator_jax",
+      "username": "@jaxStyleFiles",
+      "avatar": "https://i.pravatar.cc/100?img=10",
+      "verified": true
+    },
+    "likes": 19720,
+    "comments": 720,
+    "shares": 312,
+    "views": 162000,
+    "music": { "title": "Runway", "artist": "Glow Tape" },
+    "tags": ["fashion", "diy"],
+    "category": "fashion"
+  },
+  {
+    "id": "vid_46",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_46/400/600",
+    "description": "Rescue kitten's first week — slow blink unlocked",
+    "creator": {
+      "id": "creator_kim",
+      "username": "@kimWildLife",
+      "avatar": "https://i.pravatar.cc/100?img=11",
+      "verified": false
+    },
+    "likes": 44820,
+    "comments": 2120,
+    "shares": 1020,
+    "views": 462000,
+    "music": { "title": "Tiny Paws", "artist": "Lo-Fi Mondays" },
+    "tags": ["animals", "lifestyle"],
+    "category": "animals"
+  },
+  {
+    "id": "vid_47",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_47/400/600",
+    "description": "Backyard birdwatching — surprise visitor at 0:42",
+    "creator": {
+      "id": "creator_kim",
+      "username": "@kimWildLife",
+      "avatar": "https://i.pravatar.cc/100?img=11",
+      "verified": false
+    },
+    "likes": 12420,
+    "comments": 480,
+    "shares": 192,
+    "views": 96000,
+    "music": { "title": "Morning Walk", "artist": "Lo-Fi Mondays" },
+    "tags": ["animals"],
+    "category": "animals"
+  },
+  {
+    "id": "vid_48",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_48/400/600",
+    "description": "48 hours in Lisbon — trams, pastéis, sunset miradouro",
+    "creator": {
+      "id": "creator_leo",
+      "username": "@leoLensCo",
+      "avatar": "https://i.pravatar.cc/100?img=12",
+      "verified": true
+    },
+    "likes": 31420,
+    "comments": 1180,
+    "shares": 620,
+    "views": 274000,
+    "music": { "title": "Golden Hour", "artist": "Aurora Bloom" },
+    "tags": ["travel", "vlog", "food"],
+    "category": "travel"
+  },
+  {
+    "id": "vid_49",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_49/400/600",
+    "description": "Painting a 4-ft canvas in 60 seconds — chaos and color",
+    "creator": {
+      "id": "creator_leo",
+      "username": "@leoLensCo",
+      "avatar": "https://i.pravatar.cc/100?img=12",
+      "verified": true
+    },
+    "likes": 22410,
+    "comments": 780,
+    "shares": 340,
+    "views": 188000,
+    "music": { "title": "Loop One", "artist": "Loop Kid" },
+    "tags": ["art", "diy"],
+    "category": "art"
+  },
+  {
+    "id": "vid_50",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "thumbnail": "https://picsum.photos/seed/vid_50/400/600",
+    "description": "Unboxing the new foldable — first 60-second take",
+    "creator": {
+      "id": "creator_cara",
+      "username": "@caraGamingLive",
+      "avatar": "https://i.pravatar.cc/100?img=3",
+      "verified": true
+    },
+    "likes": 28920,
+    "comments": 1180,
+    "shares": 540,
+    "views": 246000,
+    "music": { "title": "Boot Sequence", "artist": "Synth Lab" },
+    "tags": ["tech", "gaming"],
+    "category": "tech"
   }
 ]

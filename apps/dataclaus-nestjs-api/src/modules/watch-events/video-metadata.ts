@@ -1,7 +1,59 @@
 /**
  * Mirror of apps/tiktok-backend/data/videos.json — only the fields the
- * ingest endpoint needs (id, tags, category). Populated in Task 16; empty
- * placeholder here is intentional. Lookups against missing ids default to
- * empty tags + 'other' category.
+ * ingest endpoint needs (id, tags, category). Lookups against missing
+ * ids default to empty tags + 'other' category.
+ *
+ * Regenerate this map whenever videos.json changes.
  */
-export const VIDEO_METADATA: Record<string, { tags: string[]; category: string }> = {};
+export const VIDEO_METADATA: Record<string, { tags: string[]; category: string }> = {
+  vid_01: { tags: ['dance', 'music'], category: 'dance' },
+  vid_02: { tags: ['dance'], category: 'dance' },
+  vid_03: { tags: ['dance', 'music', 'fashion'], category: 'dance' },
+  vid_04: { tags: ['dance', 'art'], category: 'dance' },
+  vid_05: { tags: ['dance', 'education'], category: 'dance' },
+  vid_06: { tags: ['dance', 'music'], category: 'dance' },
+  vid_07: { tags: ['dance', 'vlog'], category: 'dance' },
+  vid_08: { tags: ['dance', 'education', 'music'], category: 'dance' },
+  vid_09: { tags: ['comedy'], category: 'comedy' },
+  vid_10: { tags: ['comedy', 'lifestyle'], category: 'comedy' },
+  vid_11: { tags: ['comedy'], category: 'comedy' },
+  vid_12: { tags: ['comedy', 'fitness'], category: 'comedy' },
+  vid_13: { tags: ['comedy', 'tech'], category: 'comedy' },
+  vid_14: { tags: ['comedy', 'animals'], category: 'comedy' },
+  vid_15: { tags: ['gaming'], category: 'gaming' },
+  vid_16: { tags: ['gaming', 'tech'], category: 'gaming' },
+  vid_17: { tags: ['gaming', 'education'], category: 'gaming' },
+  vid_18: { tags: ['gaming', 'comedy'], category: 'gaming' },
+  vid_19: { tags: ['gaming', 'education', 'tech'], category: 'gaming' },
+  vid_20: { tags: ['beauty', 'fashion'], category: 'beauty' },
+  vid_21: { tags: ['beauty'], category: 'beauty' },
+  vid_22: { tags: ['beauty', 'fashion'], category: 'beauty' },
+  vid_23: { tags: ['beauty', 'lifestyle'], category: 'beauty' },
+  vid_24: { tags: ['beauty', 'diy'], category: 'beauty' },
+  vid_25: { tags: ['food', 'diy'], category: 'food' },
+  vid_26: { tags: ['food', 'lifestyle'], category: 'food' },
+  vid_27: { tags: ['food', 'travel', 'vlog'], category: 'food' },
+  vid_28: { tags: ['food', 'education'], category: 'food' },
+  vid_29: { tags: ['food', 'diy', 'art'], category: 'food' },
+  vid_30: { tags: ['fitness', 'sports'], category: 'fitness' },
+  vid_31: { tags: ['fitness'], category: 'fitness' },
+  vid_32: { tags: ['fitness', 'lifestyle'], category: 'fitness' },
+  vid_33: { tags: ['fitness', 'sports', 'education'], category: 'fitness' },
+  vid_34: { tags: ['vlog', 'lifestyle'], category: 'vlog' },
+  vid_35: { tags: ['vlog', 'diy', 'lifestyle'], category: 'vlog' },
+  vid_36: { tags: ['vlog', 'travel'], category: 'vlog' },
+  vid_37: { tags: ['vlog', 'travel', 'education'], category: 'vlog' },
+  vid_38: { tags: ['music', 'art'], category: 'music' },
+  vid_39: { tags: ['music', 'education', 'tech'], category: 'music' },
+  vid_40: { tags: ['music'], category: 'music' },
+  vid_41: { tags: ['education', 'finance'], category: 'education' },
+  vid_42: { tags: ['education', 'lifestyle'], category: 'education' },
+  vid_43: { tags: ['education', 'tech', 'news'], category: 'education' },
+  vid_44: { tags: ['fashion', 'lifestyle'], category: 'fashion' },
+  vid_45: { tags: ['fashion', 'diy'], category: 'fashion' },
+  vid_46: { tags: ['animals', 'lifestyle'], category: 'animals' },
+  vid_47: { tags: ['animals'], category: 'animals' },
+  vid_48: { tags: ['travel', 'vlog', 'food'], category: 'travel' },
+  vid_49: { tags: ['art', 'diy'], category: 'art' },
+  vid_50: { tags: ['tech', 'gaming'], category: 'tech' },
+};
