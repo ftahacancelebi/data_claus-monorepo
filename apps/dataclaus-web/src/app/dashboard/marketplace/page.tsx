@@ -152,6 +152,20 @@ function MarketplaceContent() {
                     <h3 className="text-base font-semibold text-slate-900 line-clamp-2">
                       {pkg.title}
                     </h3>
+                    {pkg.dimensions && Object.keys(pkg.dimensions).length > 0 && (
+                      <div className="flex gap-1.5 mt-1">
+                        {(['behavior', 'demographic', 'device'] as const)
+                          .filter((k) => pkg.dimensions?.[k])
+                          .map((k) => (
+                            <span
+                              key={k}
+                              className="rounded bg-slate-100 px-1.5 py-0.5 text-[9px] tracking-wider text-slate-600 font-mono uppercase"
+                            >
+                              {k}
+                            </span>
+                          ))}
+                      </div>
+                    )}
                     <p className="text-sm text-slate-500 mt-1 line-clamp-2">
                       {pkg.llmEvaluation?.summary ?? pkg.description ?? ''}
                     </p>

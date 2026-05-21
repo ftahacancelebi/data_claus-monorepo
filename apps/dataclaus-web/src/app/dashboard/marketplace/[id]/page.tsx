@@ -17,6 +17,43 @@ import { useToast } from '@/components/ui/use-toast';
 import { DataclausScoreGauge } from '@/components/packages/score-gauge';
 import { ErrorPanel } from '@/components/layout/error-panel';
 import { ApiError } from '@/lib/api';
+import { DimensionGrid } from '@/components/marketplace/DimensionGrid';
+import type { DimensionsMapValued } from '@/lib/schemas';
+
+function DimensionTotalStrip({ dimensions }: { dimensions: DimensionsMapValued }) {
+  const entries = Object.values(dimensions).filter(
+    (d): d is NonNullable<typeof d> => !!d,
+  );
+  const total = entries.reduce((s, d) => s + d.total_usd, 0);
+  const deviceOnly = dimensions.device?.total_usd ?? 0;
+  const multiDim = entries.length > 1;
+
+  return (
+    <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+      <div className="space-y-1">
+        <div className="text-[10px] tracking-[0.18em] text-slate-500 font-semibold">
+          PACKAGE TOTAL
+        </div>
+        <div className="font-mono text-3xl tabular-nums text-slate-900">
+          ${total.toFixed(2)}
+        </div>
+      </div>
+      {multiDim && deviceOnly > 0 && (
+        <div className="text-right space-y-1">
+          <div className="text-[10px] text-slate-500">
+            Device-only would be
+          </div>
+          <div className="font-mono text-sm text-slate-700">
+            ${deviceOnly.toFixed(2)}
+          </div>
+          <div className="text-[10px] text-slate-400">
+            {(total / deviceOnly).toFixed(1)}× richer
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function MarketplaceDetailContent() {
   const router = useRouter();
@@ -207,6 +244,22 @@ function MarketplaceDetailContent() {
           </CardContent>
         </Card>
       </div>
+
+      {pkg.dimensions && Object.keys(pkg.dimensions).length > 0 && (
+        <Card className="glass-panel border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-base">
+              <span className="text-xs tracking-[0.18em] text-slate-500 font-semibold">
+                DIMENSION BREAKDOWN
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <DimensionGrid dimensions={pkg.dimensions} />
+            <DimensionTotalStrip dimensions={pkg.dimensions} />
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="glass-panel border-0 shadow-lg">
         <CardHeader>
