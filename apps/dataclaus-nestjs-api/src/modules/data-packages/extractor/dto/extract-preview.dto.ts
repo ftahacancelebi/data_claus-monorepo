@@ -1,3 +1,5 @@
+import { DimensionsMap } from '../../dto/dimension-payload.dto';
+
 export class ExtractedPackageDraftDto {
   // These map 1:1 to CreatePackageDto — submit directly to POST /v1/packages
   title: string;
@@ -20,4 +22,8 @@ export class ExtractedPackageDraftDto {
     flagged_sample_count: number;
     coverage_warning?: string;
   };
+
+  // Multi-dimension payload. Optional for backward compat; lives alongside the
+  // flat fields above. Apps without behavior/demographic only get `device`.
+  dimensions?: DimensionsMap;
 }

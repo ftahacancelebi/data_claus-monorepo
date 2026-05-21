@@ -20,6 +20,14 @@ import {
 } from './extractor.constants';
 import { EligibleApplicationDto } from './dto/eligible-application.dto';
 import { ExtractedPackageDraftDto } from './dto/extract-preview.dto';
+import {
+  buildBehaviorDimension,
+  buildDemographicDimension,
+  WatchEventRow,
+  ProfileRow,
+} from './dimension-extractor.helpers';
+import { APP_DIMENSIONS, DimensionName } from './dimensions.constants';
+import { DimensionsMap } from '../dto/dimension-payload.dto';
 
 interface AggRow {
   row_count: string;
@@ -161,6 +169,57 @@ export class ApplicationExtractorService {
     const quarter = `Q${Math.ceil((to.getMonth() + 1) / 3)} ${to.getFullYear()}`;
     const title = `${app.name} ${this.capitalize(category)} Telemetry ${quarter}`;
 
+    // Multi-dimension assembly — additive, lives alongside the flat fields above.
+    // Apps not declared in APP_DIMENSIONS default to device-only.
+    const dimensionsToExtract: DimensionName[] = APP_DIMENSIONS[app.name] ?? ['device'];
+    const dimensions: DimensionsMap = {};
+
+    // Device dimension — re-package what the existing aggregation already built.
+    dimensions.device = {
+      count: rowCount,
+      sample_rows: sampleRows,
+      distribution: distMap,
+      schema_json: SCHEMA_JSON,
+    };
+
+    if (dimensionsToExtract.includes('behavior')) {
+      const [bAgg] = await this.dataSource.query<{ count: string }[]>(
+        `SELECT COUNT(*)::text AS count FROM watch_events
+         WHERE application_id = $1 AND recorded_at BETWEEN $2 AND $3`,
+        [app.id, from, to],
+      );
+      const bCount = parseInt(bAgg?.count ?? '0', 10);
+      if (bCount > 0) {
+        const bRows = await this.dataSource.query<WatchEventRow[]>(
+          `SELECT user_id, video_id, video_tags, video_category, dwell_ms, completed, recorded_at
+           FROM watch_events
+           WHERE application_id = $1 AND recorded_at BETWEEN $2 AND $3
+           ORDER BY recorded_at DESC LIMIT 200`,
+          [app.id, from, to],
+        );
+        const tagCounts = new Map<string, number>();
+        for (const r of bRows) {
+          for (const t of r.video_tags ?? []) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+        }
+        dimensions.behavior = buildBehaviorDimension(app.id, bRows, tagCounts, bCount);
+      }
+    }
+
+    if (dimensionsToExtract.includes('demographic')) {
+      const profileRows = await this.dataSource.query<ProfileRow[]>(
+        `SELECT DISTINCT p.user_id, p.age_bucket, p.gender, p.locale
+         FROM user_profiles p
+         WHERE p.user_id IN (
+           SELECT DISTINCT user_id FROM watch_events
+           WHERE application_id = $1 AND recorded_at BETWEEN $2 AND $3
+         )`,
+        [app.id, from, to],
+      );
+      if (profileRows.length > 0) {
+        dimensions.demographic = buildDemographicDimension(app.id, profileRows, profileRows.length);
+      }
+    }
+
     return {
       title,
       category,
@@ -179,6 +238,7 @@ export class ApplicationExtractorService {
         suggested_price_basis: `${category} baseline × ${rowCount.toLocaleString()} rows`,
         flagged_sample_count: flaggedCount,
       },
+      dimensions,
     };
   }
 
