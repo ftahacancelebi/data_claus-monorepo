@@ -1,6 +1,17 @@
 import { z } from 'zod';
 
 /**
+ * Per-dimension valuation block returned by the evaluator when the package
+ * contains extracted dimensions. Mirrors `DimensionValuationResult` in
+ * `entities/data-package.entity.ts`.
+ */
+const DimensionValuationSchema = z.object({
+  unit_price_usd: z.number().min(0),
+  quality_score: z.number().min(0).max(1),
+  ai_justification: z.string().min(1),
+});
+
+/**
  * Strict schema for the JSON Claude returns. Parsed in
  * PackageEvaluatorService; on parse failure we retry once with a tighter
  * instruction, and if that still fails we mark the package `rejected`.
@@ -21,6 +32,11 @@ export const LlmEvaluationSchema = z.object({
   }),
   confidence: z.enum(['high', 'medium', 'low']),
   verdict: z.enum(['certified', 'rejected']),
+  dimensions: z.object({
+    behavior:    DimensionValuationSchema.optional(),
+    demographic: DimensionValuationSchema.optional(),
+    device:      DimensionValuationSchema.optional(),
+  }).optional(),
 });
 
 export type LlmEvaluationParsed = z.infer<typeof LlmEvaluationSchema>;

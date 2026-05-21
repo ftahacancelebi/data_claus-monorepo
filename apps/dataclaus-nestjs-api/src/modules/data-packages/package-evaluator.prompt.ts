@@ -15,6 +15,28 @@ export function buildPrompt(pkg: DataPackage): string {
   const schema = JSON.stringify(pkg.schemaJson ?? {}, null, 2);
   const claimedMetrics = JSON.stringify(pkg.claimedMetrics ?? {}, null, 2);
 
+  const dimensionsBlock = pkg.dimensions
+    ? `
+DIMENSIONS PRESENT
+${Object.entries(pkg.dimensions).filter(([, dim]) => dim != null).map(([name, dim]: any) => `
+- ${name.toUpperCase()}: ${dim.count} units
+  Schema: ${JSON.stringify(dim.schema_json)}
+  Sample (first 3): ${JSON.stringify((dim.sample_rows ?? []).slice(0, 3))}
+  ${dim.distribution ? `Top distribution: ${JSON.stringify(Object.entries(dim.distribution).slice(0, 5))}` : ''}
+`).join('\n')}
+
+For each dimension above, you ALSO output a per-dimension valuation. Industry anchor bands (USD per 1,000 units):
+- behavior:    $1–10 per 1,000 events
+- demographic: $5–50 per 1,000 profiles
+- device:      $0.50–5 per 1,000 events
+
+Quality multipliers (apply within band):
+- behavior: completion rate >60% → upper band; tag diversity >30 → upper band
+- demographic: completeness <80% → lower band
+- device: bot-flagged fraction >10% → lower band
+`
+    : '';
+
   return `You are DataClaus AI — an independent data-quality auditor for a B2B behavioral-data marketplace.
 
 A developer has submitted a data package. Your job: evaluate whether the package matches its claims and is suitable for sale to buyers. Be skeptical but fair.
@@ -36,7 +58,7 @@ EVALUATION RUBRIC — score each 0.0–1.0:
 3. bot_signature_absence — flags for: repeated user-agents, sub-100ms intervals, zero jitter, dup fingerprints, suspicious round numbers
 4. claim_evidence_alignment — samples actually show what title/category/metrics claim
 5. price_fairness — price per row vs. category baseline (fitness ~$0.001/row, social ~$0.0003/row, finance ~$0.01/row, location ~$0.002/row, entertainment ~$0.0008/row, health ~$0.005/row, productivity ~$0.0006/row)
-
+${dimensionsBlock}
 OUTPUT — STRICT JSON only. No prose outside the JSON. No markdown fences. The first character of your reply MUST be "{".
 {
   "trust_score": <weighted avg 0.0-1.0>,
@@ -51,8 +73,15 @@ OUTPUT — STRICT JSON only. No prose outside the JSON. No markdown fences. The 
     "price_fairness": <0-1>
   },
   "confidence": "high" | "medium" | "low",
-  "verdict": "certified" | "rejected"
-}`;
+  "verdict": "certified" | "rejected",
+  "dimensions": {
+    "behavior":    { "unit_price_usd": <float, anchored to band>, "quality_score": <0-1>, "ai_justification": "<1 sentence>" },
+    "demographic": { "unit_price_usd": <float>, "quality_score": <0-1>, "ai_justification": "<1 sentence>" },
+    "device":      { "unit_price_usd": <float>, "quality_score": <0-1>, "ai_justification": "<1 sentence>" }
+  }
+}
+
+The "dimensions" field is OPTIONAL — include ONLY the dimensions actually listed in the "DIMENSIONS PRESENT" section above. If no dimensions were listed, omit the "dimensions" field entirely.`;
 }
 
 /**

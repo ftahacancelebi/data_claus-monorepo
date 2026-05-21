@@ -22,6 +22,17 @@ export interface ClaimedMetrics {
 export type PackageSchema = Record<string, string>;
 
 /**
+ * Per-dimension valuation returned by the LLM evaluator when the package
+ * contains extracted dimensions (behavior / demographic / device).
+ * Mirrored by `DimensionValuationSchema` in `llm-evaluation.schema.ts`.
+ */
+export interface DimensionValuationResult {
+  unit_price_usd: number;
+  quality_score: number;
+  ai_justification: string;
+}
+
+/**
  * The shape Claude returns. Parsed and validated by `LlmEvaluationSchema`
  * (zod) in `llm-evaluation.schema.ts`; stored as-is in `llm_evaluation`.
  */
@@ -39,6 +50,11 @@ export interface LlmEvaluation {
   };
   confidence: 'high' | 'medium' | 'low';
   verdict: 'certified' | 'rejected';
+  dimensions?: {
+    behavior?: DimensionValuationResult;
+    demographic?: DimensionValuationResult;
+    device?: DimensionValuationResult;
+  };
 }
 
 @Entity('data_packages')
