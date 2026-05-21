@@ -1,6 +1,7 @@
 import { Entity, Column, Index } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { PackageStatus } from '../../../common/constants';
+import { DimensionsMapValued } from '../dto/dimension-payload.dto';
 
 /**
  * `claimed_metrics` JSON shape — what the developer SAYS the package contains.
@@ -95,4 +96,7 @@ export class DataPackage extends BaseEntity {
 
   @Column({ name: 'evaluated_at', type: 'timestamp', nullable: true })
   evaluatedAt: Date | null;
+
+  @Column({ name: 'dimensions', type: 'jsonb', nullable: true })
+  dimensions: DimensionsMapValued | null;
 }

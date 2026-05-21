@@ -98,4 +98,9 @@ export class CreatePackageDto {
   @IsOptional()
   @IsString()
   application_id?: string;
+
+  @ApiPropertyOptional({ description: 'Optional: multi-dimension payload map (structural validation upstream in extractor)' })
+  @IsOptional()
+  @IsObject()
+  dimensions?: Record<string, unknown>;
 }
