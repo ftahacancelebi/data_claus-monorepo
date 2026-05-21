@@ -33,6 +33,8 @@ export interface Video {
   shares: number;
   views: number;
   music: VideoMusic;
+  tags: string[];
+  category: string;
 }
 
 export interface FeedItem {
@@ -73,6 +75,13 @@ export class VideosService {
       console.error('Failed to load videos:', error);
       this.videos = this.createDefaultVideos();
     }
+
+    // Default tags/category for any video missing them (forward-compat with watch-event ingest)
+    this.videos = this.videos.map((v: any) => ({
+      ...v,
+      tags: v.tags ?? [],
+      category: v.category ?? 'other',
+    }));
   }
 
   /**
@@ -98,6 +107,8 @@ export class VideosService {
         shares: 234,
         views: 125000,
         music: { title: 'Original Sound', artist: 'Blender Foundation' },
+        tags: ['animation', 'fun'],
+        category: 'animation',
       },
       {
         id: 'video_2',
@@ -117,6 +128,8 @@ export class VideosService {
         shares: 123,
         views: 83000,
         music: { title: 'Dream', artist: 'Proog & Emo' },
+        tags: ['openSource', 'blender'],
+        category: 'animation',
       },
       {
         id: 'video_3',
@@ -135,6 +148,8 @@ export class VideosService {
         shares: 89,
         views: 45000,
         music: { title: 'Blaze', artist: 'Chrome' },
+        tags: ['action', 'adventure'],
+        category: 'action',
       },
       {
         id: 'video_4',
@@ -154,6 +169,8 @@ export class VideosService {
         shares: 156,
         views: 62000,
         music: { title: 'Escape', artist: 'Chrome' },
+        tags: ['escape', 'thriller'],
+        category: 'thriller',
       },
       {
         id: 'video_5',
@@ -172,6 +189,8 @@ export class VideosService {
         shares: 289,
         views: 98000,
         music: { title: 'Fun Times', artist: 'Chrome' },
+        tags: ['fun', 'entertainment'],
+        category: 'entertainment',
       },
     ];
   }

@@ -108,4 +108,31 @@ export class DataClausService {
       expiresIn: 86400,
     };
   }
+
+  /**
+   * Forward a watch event to dataclaus-core's internal ingest endpoint.
+   * Best-effort: any failure is swallowed so the feed UX stays unaffected.
+   */
+  async forwardWatchEvent(payload: {
+    applicationId: string;
+    userId: string;
+    videoId: string;
+    dwellMs: number;
+    completed: boolean;
+  }): Promise<void> {
+    const secret = this.config.get<string>('DATACLAUS_INTERNAL_INGEST_SECRET');
+    if (!secret) return; // demo-tolerant: marketplace extract just sees fewer events
+    try {
+      await fetch(`${this.apiUrl}/v1/internal/watch-events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-internal-secret': secret,
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch {
+      // best-effort; don't break the feed UX
+    }
+  }
 }

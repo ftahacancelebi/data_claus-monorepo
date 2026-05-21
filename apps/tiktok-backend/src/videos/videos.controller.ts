@@ -100,6 +100,7 @@ export class VideosController {
     @Headers('authorization') authHeader?: string,
   ): Promise<{ success: boolean; isNewView: boolean }> {
     let userId = 'anonymous';
+    let resolvedUserId: string | undefined;
 
     if (authHeader) {
       try {
@@ -107,6 +108,7 @@ export class VideosController {
         const user = await this.dataClausService.getUserProfile(token);
         if (user) {
           userId = user.id;
+          resolvedUserId = user.id;
         }
       } catch {
         // Continue with anonymous
@@ -119,6 +121,22 @@ export class VideosController {
       dto.duration,
       dto.completed,
     );
+
+    // Forward to dataclaus-core (best-effort; failures shouldn't break the feed)
+    if (resolvedUserId) {
+      try {
+        await this.dataClausService.forwardWatchEvent({
+          applicationId: process.env.DATACLAUS_APP_ID ?? '',
+          userId: resolvedUserId,
+          videoId: id,
+          dwellMs: dto.duration,
+          completed: dto.completed,
+        });
+      } catch {
+        // best-effort forwarding
+      }
+    }
+
     return { success: true, isNewView: result.isNewView };
   }
 }
