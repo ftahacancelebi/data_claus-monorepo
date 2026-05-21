@@ -45,6 +45,7 @@ import { Campaign } from './modules/campaign/entities';
 import { LedgerTransaction } from './modules/ledger/entities';
 import { AdImpression } from './modules/ads/entities';
 import { DataClausUser } from './modules/dataclaus-user/entities/dataclaus-user.entity';
+import { UserProfile } from './modules/dataclaus-user/entities/user-profile.entity';
 import { ScoredEvent } from './modules/ingest/entities/scored-event.entity';
 import { PayoutRequest } from './modules/payout/entities/payout-request.entity';
 import { OtpRequest } from './modules/auth/entities';
@@ -88,6 +89,7 @@ import {
           LedgerTransaction,
           AdImpression,
           DataClausUser,
+          UserProfile,
           ScoredEvent,
           PayoutRequest,
           OtpRequest,

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataClausUser } from './entities/dataclaus-user.entity';
+import { UserProfile } from './entities/user-profile.entity';
 import { DataClausUserService } from './dataclaus-user.service';
 import { DataClausUserController } from './dataclaus-user.controller';
 import { MeService } from './me.service';
@@ -16,6 +17,7 @@ import { WalletModule } from '../wallet/wallet.module';
   imports: [
     TypeOrmModule.forFeature([
       DataClausUser,
+      UserProfile,
       AdImpression,
       Application,
       LedgerTransaction,
