@@ -40,7 +40,7 @@ import { CryptoModule } from './common/crypto';
 import { Developer, ApiKey } from './modules/developer/entities';
 import { Application } from './modules/application/entities';
 import { Wallet } from './modules/wallet/entities';
-import { WatchEvent } from './modules/watch-events/entities/watch-event.entity';
+import { WatchEvent } from './modules/watch-events/entities';
 import { Campaign } from './modules/campaign/entities';
 import { LedgerTransaction } from './modules/ledger/entities';
 import { AdImpression } from './modules/ads/entities';

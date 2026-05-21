@@ -1,12 +1,10 @@
-import { Entity, Column, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
+import { BaseEntity } from '../../../common/entities/base.entity';
 
 @Entity('watch_events')
 @Index('idx_watch_app_recorded', ['applicationId', 'recordedAt'])
 @Index('idx_watch_user_recorded', ['userId', 'recordedAt'])
-export class WatchEvent {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class WatchEvent extends BaseEntity {
   @Column({ name: 'application_id', type: 'uuid' })
   applicationId: string;
 
