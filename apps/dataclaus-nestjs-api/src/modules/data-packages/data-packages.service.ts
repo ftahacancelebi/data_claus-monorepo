@@ -30,6 +30,7 @@ import { DataPackage } from './entities/data-package.entity';
 import { PackagePurchase } from './entities/package-purchase.entity';
 import { CreatePackageDto, ListPackagesDto } from './dto';
 import { PackageEvaluatorService } from './package-evaluator.service';
+import { DimensionsMap, DimensionsMapValued } from './dto/dimension-payload.dto';
 
 import type { CurrentUserData } from '../../common/decorators/current-user.decorator';
 
@@ -100,13 +101,34 @@ export class DataPackagesService {
       if (!pkg) return;
       const evaluation = await this.evaluator.evaluate(pkg);
 
+      // If this package was built from extracted dimensions, clamp the
+      // LLM's per-dim unit prices to the industry band and compute totals.
+      // The package's `dimensions` column holds the raw `DimensionsMap`
+      // (pre-valuation) at this point — replace it with the valued shape.
+      const dimensionsValued: DimensionsMapValued | null = pkg.dimensions
+        ? this.evaluator.clampAndTotal(
+            pkg.dimensions as unknown as DimensionsMap,
+            evaluation.dimensions,
+          )
+        : null;
+
       pkg.llmEvaluation = evaluation;
+      pkg.dimensions = dimensionsValued;
       pkg.dataclausScore = evaluation.trust_score;
       pkg.status =
         evaluation.verdict === 'certified'
           ? PackageStatus.CERTIFIED
           : PackageStatus.REJECTED;
       pkg.evaluatedAt = new Date();
+
+      if (dimensionsValued) {
+        const total = Object.values(dimensionsValued).reduce(
+          (sum, d) => sum + (d?.total_usd ?? 0),
+          0,
+        );
+        if (total > 0) pkg.price = total;
+      }
+
       await this.packageRepo.save(pkg);
 
       this.eventEmitter.emit('package.evaluated', {

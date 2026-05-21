@@ -1,19 +1,25 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { DataPackage, LlmEvaluation } from './entities/data-package.entity';
 import { LlmEvaluationSchema } from './llm-evaluation.schema';
 import {
   buildPrompt,
   buildRetryPrompt,
 } from './package-evaluator.prompt';
+import {
+  INDUSTRY_ANCHORS,
+  ANCHOR_CLAMP_TOLERANCE,
+  DimensionName,
+} from './extractor/dimensions.constants';
+import { DimensionsMap, DimensionsMapValued } from './dto/dimension-payload.dto';
 
 /**
  * PackageEvaluatorService — produces a trust-score evaluation for a
- * developer-submitted data package.
+ * developer-submitted data package using Google Gemini.
  *
- * If `ANTHROPIC_API_KEY` is set, calls Claude (model from `LLM_MODEL`,
- * defaults to `claude-haiku-4-5-20251001`). Response is validated against
+ * If `GEMINI_API_KEY` is set, calls Gemini (model from `LLM_MODEL`,
+ * defaults to `gemini-2.0-flash`). Response is validated against
  * `LlmEvaluationSchema` (zod); on parse failure we retry once with a tighter
  * instruction. If the retry still fails, the caller flips the package to
  * `rejected` with a "evaluator output unparseable" red flag.
@@ -24,21 +30,17 @@ import {
 @Injectable()
 export class PackageEvaluatorService {
   private readonly logger = new Logger(PackageEvaluatorService.name);
-  private readonly client: Anthropic | null;
+  private readonly client: GoogleGenerativeAI | null;
   private readonly model: string;
-  private readonly maxTokens: number;
 
   constructor(private readonly config: ConfigService) {
-    const apiKey = this.config.get<string>('ANTHROPIC_API_KEY');
+    const apiKey = this.config.get<string>('GEMINI_API_KEY');
     this.model =
-      this.config.get<string>('LLM_MODEL') ?? 'claude-haiku-4-5-20251001';
-    this.maxTokens = Number(
-      this.config.get<string>('LLM_EVAL_MAX_TOKENS') ?? '1024',
-    );
-    this.client = apiKey ? new Anthropic({ apiKey }) : null;
+      this.config.get<string>('LLM_MODEL') ?? 'gemini-2.0-flash';
+    this.client = apiKey ? new GoogleGenerativeAI(apiKey) : null;
     if (!this.client) {
       this.logger.warn(
-        'ANTHROPIC_API_KEY not set — package evaluator will use the deterministic stub.',
+        'GEMINI_API_KEY not set — package evaluator will use the deterministic stub.',
       );
     }
   }
@@ -48,20 +50,68 @@ export class PackageEvaluatorService {
       return this.stubEvaluate(pkg);
     }
     try {
-      return await this.callClaude(pkg);
+      return await this.callGemini(pkg);
     } catch (err) {
       this.logger.error(
-        `Claude evaluation failed for package ${pkg.id}: ${(err as Error).message} — falling back to stub.`,
+        `Gemini evaluation failed for package ${pkg.id}: ${(err as Error).message} — falling back to stub.`,
       );
       return this.stubEvaluate(pkg);
     }
   }
 
   // ---------------------------------------------------------------------------
+  // Per-dimension valuation: clamp to industry band + compute totals
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Clamps the LLM's per-dimension unit prices to ±20% of the industry anchor
+   * band and computes `total_usd = count * unit_price_usd` (rounded to 2 dp).
+   * Returns a `DimensionsMapValued` ready for persistence on the package.
+   *
+   * If a dimension is present in `dimensions` but absent from `valuations`,
+   * it is skipped (no entry in the output). The caller decides whether that
+   * constitutes a soft or hard failure.
+   */
+  clampAndTotal(
+    dimensions: DimensionsMap,
+    valuations: LlmEvaluation['dimensions'],
+  ): DimensionsMapValued {
+    const out: DimensionsMapValued = {};
+    for (const name of Object.keys(dimensions) as DimensionName[]) {
+      const dim = dimensions[name];
+      if (!dim) continue;
+      const val = valuations?.[name];
+      if (!val) continue;
+      const anchor = INDUSTRY_ANCHORS[name];
+      const lowPerUnit =
+        (anchor.lowPerThousand / 1000) * (1 - ANCHOR_CLAMP_TOLERANCE);
+      const highPerUnit =
+        (anchor.highPerThousand / 1000) * (1 + ANCHOR_CLAMP_TOLERANCE);
+      let unitPrice = val.unit_price_usd;
+      let justification = val.ai_justification;
+      if (unitPrice < lowPerUnit) {
+        unitPrice = lowPerUnit;
+        justification += ' (adjusted to industry band)';
+      } else if (unitPrice > highPerUnit) {
+        unitPrice = highPerUnit;
+        justification += ' (adjusted to industry band)';
+      }
+      out[name] = {
+        ...dim,
+        unit_price_usd: unitPrice,
+        quality_score: val.quality_score,
+        ai_justification: justification,
+        total_usd: Math.round(dim.count * unitPrice * 100) / 100,
+      };
+    }
+    return out;
+  }
+
+  // ---------------------------------------------------------------------------
   // Real call
   // ---------------------------------------------------------------------------
 
-  private async callClaude(pkg: DataPackage): Promise<LlmEvaluation> {
+  private async callGemini(pkg: DataPackage): Promise<LlmEvaluation> {
     const prompt = buildPrompt(pkg);
 
     const first = await this.callOnce(prompt);
@@ -69,7 +119,7 @@ export class PackageEvaluatorService {
     if (firstParsed) return firstParsed;
 
     this.logger.warn(
-      `Package ${pkg.id}: first Claude response failed schema, retrying with stricter prompt.`,
+      `Package ${pkg.id}: first Gemini response failed schema, retrying with stricter prompt.`,
     );
     const retry = await this.callOnce(
       buildRetryPrompt(prompt, 'JSON failed schema validation'),
@@ -77,27 +127,16 @@ export class PackageEvaluatorService {
     const retryParsed = this.tryParse(retry);
     if (retryParsed) return retryParsed;
 
-    // Both passes failed. Throw so the caller marks the package rejected
-    // with a clean reason (rather than silently returning a stub eval that
-    // looks legitimate).
     throw new Error('LLM output unparseable after retry');
   }
 
   private async callOnce(prompt: string): Promise<string> {
-    const resp = await this.client!.messages.create({
-      model: this.model,
-      max_tokens: this.maxTokens,
-      messages: [{ role: 'user', content: prompt }],
-    });
-    const block = resp.content[0];
-    if (!block || block.type !== 'text') {
-      throw new Error('Claude returned non-text content block');
-    }
-    return block.text;
+    const genModel = this.client!.getGenerativeModel({ model: this.model });
+    const result = await genModel.generateContent(prompt);
+    return result.response.text();
   }
 
   private tryParse(raw: string): LlmEvaluation | null {
-    // Trim leading whitespace, strip ``` fences if Claude added them.
     let body = raw.trim();
     if (body.startsWith('```')) {
       body = body.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
@@ -114,7 +153,7 @@ export class PackageEvaluatorService {
   }
 
   // ---------------------------------------------------------------------------
-  // Deterministic fallback (Phase 1 stub kept for CI / offline)
+  // Deterministic fallback (for CI / offline)
   // ---------------------------------------------------------------------------
 
   private stubEvaluate(pkg: DataPackage): LlmEvaluation {
@@ -142,11 +181,15 @@ export class PackageEvaluatorService {
 
     const verdict: LlmEvaluation['verdict'] = trust >= 0.4 ? 'certified' : 'rejected';
 
+    const stubDims = pkg.dimensions
+      ? this.stubDimensionValuations(pkg.dimensions as unknown as DimensionsMap)
+      : undefined;
+
     return {
       trust_score: Number(trust.toFixed(3)),
       summary:
         `Heuristic evaluation for "${pkg.title}": ${sampleSize} sample rows across ${fieldCount} declared fields, ` +
-        `claimed ${rowCount} rows from ${uniqueUsers} users. Set ANTHROPIC_API_KEY to enable the live AI auditor.`,
+        `claimed ${rowCount} rows from ${uniqueUsers} users. Set GEMINI_API_KEY to enable the live AI auditor.`,
       red_flags:
         verdict === 'rejected'
           ? ['Heuristic returned a low score; rerun with the live evaluator before listing.']
@@ -161,7 +204,30 @@ export class PackageEvaluatorService {
       },
       confidence: 'low',
       verdict,
+      dimensions: stubDims,
     };
+  }
+
+  /**
+   * Stub valuator: emits midpoint-of-anchor-band valuations for every present
+   * dimension. Used in CI / offline dev when Gemini isn't reachable.
+   */
+  private stubDimensionValuations(
+    dimensions: DimensionsMap,
+  ): NonNullable<LlmEvaluation['dimensions']> {
+    const out: NonNullable<LlmEvaluation['dimensions']> = {};
+    for (const name of Object.keys(dimensions) as DimensionName[]) {
+      if (!dimensions[name]) continue;
+      const anchor = INDUSTRY_ANCHORS[name];
+      const mid =
+        ((anchor.lowPerThousand + anchor.highPerThousand) / 2) / 1000;
+      out[name] = {
+        unit_price_usd: mid,
+        quality_score: 0.7,
+        ai_justification: 'Auditor offline — defaulted to market median',
+      };
+    }
+    return out;
   }
 
   private clamp01(x: number): number {
