@@ -466,6 +466,7 @@ export const DataPackageSchema = z.object({
   evaluatedAt: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  dimensions: z.lazy(() => DimensionsMapValuedSchema).nullable().optional(),
 });
 
 export const DataPackageListMetaSchema = z.object({
@@ -542,5 +543,41 @@ export const ExtractedPackageDraftSchema = z.object({
     flagged_sample_count:  z.number(),
     coverage_warning:      z.string().optional(),
   }),
+  dimensions: z.lazy(() => DimensionsMapSchema).optional(),
 });
 export type ExtractedPackageDraft = z.infer<typeof ExtractedPackageDraftSchema>;
+
+// ---------------------------------------------------------------------------
+// Dimension schemas — multi-dimension data package payloads
+// ---------------------------------------------------------------------------
+
+export const DimensionPayloadSchema = z.object({
+  count: z.number(),
+  sample_rows: z.array(z.record(z.string(), z.unknown())),
+  distribution: z.record(z.string(), z.number()).optional(),
+  schema_json: z.record(z.string(), z.string()),
+});
+
+export const DimensionPayloadValuedSchema = DimensionPayloadSchema.extend({
+  unit_price_usd: z.number(),
+  quality_score: z.number().min(0).max(1),
+  ai_justification: z.string(),
+  total_usd: z.number(),
+});
+
+export const DimensionsMapSchema = z.object({
+  behavior:    DimensionPayloadSchema.optional(),
+  demographic: DimensionPayloadSchema.optional(),
+  device:      DimensionPayloadSchema.optional(),
+});
+
+export const DimensionsMapValuedSchema = z.object({
+  behavior:    DimensionPayloadValuedSchema.optional(),
+  demographic: DimensionPayloadValuedSchema.optional(),
+  device:      DimensionPayloadValuedSchema.optional(),
+});
+
+export type DimensionPayload = z.infer<typeof DimensionPayloadSchema>;
+export type DimensionPayloadValued = z.infer<typeof DimensionPayloadValuedSchema>;
+export type DimensionsMap = z.infer<typeof DimensionsMapSchema>;
+export type DimensionsMapValued = z.infer<typeof DimensionsMapValuedSchema>;
