@@ -44,6 +44,8 @@ import {
   DataPackage,
   PackagePurchase,
 } from '../apps/dataclaus-nestjs-api/src/modules/data-packages/entities';
+import { UserProfile } from '../apps/dataclaus-nestjs-api/src/modules/dataclaus-user/entities/user-profile.entity';
+import { WatchEvent } from '../apps/dataclaus-nestjs-api/src/modules/watch-events/entities/watch-event.entity';
 
 import {
   AdType,
@@ -138,6 +140,8 @@ async function buildDataSource(): Promise<DataSource> {
       AuditLog,
       DataPackage,
       PackagePurchase,
+      UserProfile,
+      WatchEvent,
     ],
     synchronize: false,
     logging: false,
@@ -1044,6 +1048,338 @@ async function seedDataPackages(
   return created;
 }
 
+/**
+ * Seed UserProfile rows for each of the 5 demo end-users. Censored demographics
+ * only: age bucket, gender (m/f/x), ISO country locale — no raw ages, no city.
+ * Powers the demographic-dimension extractor + showcase package.
+ */
+async function seedUserProfiles(
+  ds: DataSource,
+  users: DataClausUser[],
+): Promise<number> {
+  const repo = ds.getRepository(UserProfile);
+  // Map by display name → demographic bucket. Stable across re-seeds.
+  const profilesByName: Record<
+    string,
+    { ageBucket: '18-24' | '25-34' | '35-44' | '45-54' | '55+'; gender: 'm' | 'f' | 'x'; locale: string }
+  > = {
+    'Alice Yılmaz':  { ageBucket: '25-34', gender: 'f', locale: 'TR' },
+    'Bob Demir':     { ageBucket: '25-34', gender: 'm', locale: 'TR' },
+    'Cem Kaya':      { ageBucket: '35-44', gender: 'm', locale: 'TR' },
+    'Deniz Aydın':   { ageBucket: '18-24', gender: 'x', locale: 'US' },
+    'Elif Korkmaz':  { ageBucket: '18-24', gender: 'f', locale: 'DE' },
+  };
+
+  let created = 0;
+  for (const u of users) {
+    const profile = profilesByName[u.displayName ?? ''];
+    if (!profile) continue;
+    const existing = await repo.findOne({ where: { userId: u.id } });
+    if (existing) continue;
+    await repo.save(
+      repo.create({
+        userId: u.id,
+        ageBucket: profile.ageBucket,
+        gender: profile.gender,
+        locale: profile.locale,
+      }),
+    );
+    created++;
+  }
+  return created;
+}
+
+/**
+ * Seed ~3000 WatchEvent rows for the TikTok Clone application, exercising the
+ * behavior dimension. Each user pulls from a tag-affinity pool 70% of the time
+ * so the distribution shows real preference signal, with ~10% bot-like dwell
+ * patterns (200ms) so the bot-detection layer has something to flag.
+ */
+async function seedWatchEvents(
+  ds: DataSource,
+  applications: Application[],
+  users: DataClausUser[],
+): Promise<number> {
+  const repo = ds.getRepository(WatchEvent);
+  const tiktokApp = applications.find((a) => a.name === 'TikTok Clone');
+  if (!tiktokApp) {
+    console.warn('  ⚠ TikTok Clone application not found — skipping watch_events seed');
+    return 0;
+  }
+
+  const existing = await repo.count({ where: { applicationId: tiktokApp.id } });
+  if (existing > 0) {
+    return existing;
+  }
+
+  // Map each user to a tag-affinity pool. Picks bias toward these 70% of the time.
+  const usersByName = new Map(users.map((u) => [u.displayName ?? '', u]));
+  const userTagAffinity: Array<{ user: DataClausUser; tags: string[] }> = [];
+  for (const [name, tags] of [
+    ['Alice Yılmaz',  ['dance', 'beauty', 'music']],
+    ['Bob Demir',     ['gaming', 'tech', 'education']],
+    ['Cem Kaya',      ['food', 'fitness']],
+    ['Deniz Aydın',   ['comedy', 'animals', 'vlog']],
+    ['Elif Korkmaz',  ['fashion', 'lifestyle', 'art']],
+  ] as Array<[string, string[]]>) {
+    const u = usersByName.get(name);
+    if (u) userTagAffinity.push({ user: u, tags });
+  }
+
+  if (userTagAffinity.length === 0) {
+    console.warn('  ⚠ No demo users matched for watch_events — skipping');
+    return 0;
+  }
+
+  // Load video metadata to know each video's tags + category.
+  const videosJsonPath = join(__dirname, '..', 'apps', 'tiktok-backend', 'data', 'videos.json');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const videosRaw: Array<{ id: string; tags?: string[]; category?: string }> = require(videosJsonPath);
+  const allVideos = videosRaw.map((v) => ({
+    id: v.id,
+    tags: v.tags ?? [],
+    category: v.category ?? 'other',
+  }));
+
+  const TARGET_ROWS = 3000;
+  const rows: Partial<WatchEvent>[] = [];
+  const now = Date.now();
+  const sixtyDaysMs = 60 * 24 * 60 * 60 * 1000;
+
+  for (let i = 0; i < TARGET_ROWS; i++) {
+    const { user, tags: affinity } = userTagAffinity[i % userTagAffinity.length];
+    const matchingVids = allVideos.filter((v) => v.tags.some((t) => affinity.includes(t)));
+    const useAffinity = Math.random() < 0.7 && matchingVids.length > 0;
+    const pickPool = useAffinity ? matchingVids : allVideos;
+    const video = pickPool[Math.floor(Math.random() * pickPool.length)];
+    const isBot = i % 10 === 0; // ~10% bot-like
+    const dwellMs = isBot ? 200 : Math.floor(2000 + Math.random() * 28000);
+    rows.push({
+      applicationId: tiktokApp.id,
+      userId: user.id,
+      videoId: video.id,
+      videoTags: video.tags,
+      videoCategory: video.category,
+      dwellMs,
+      completed: !isBot && dwellMs > 12000,
+      recordedAt: new Date(now - Math.random() * sixtyDaysMs),
+    });
+  }
+
+  // Bulk insert in batches of 500 to keep statement sizes safe.
+  const BATCH = 500;
+  let inserted = 0;
+  for (let start = 0; start < rows.length; start += BATCH) {
+    const batch = rows.slice(start, start + BATCH);
+    await repo.insert(batch as WatchEvent[]);
+    inserted += batch.length;
+  }
+  return inserted;
+}
+
+/**
+ * Seed 2 hand-curated headline packages with multi-dimensional jsonb payloads:
+ *   1. TikTok Clone — Behavior & Demo Q1 (behavior + demographic + device)
+ *   2. FitMove — Device-Only Baseline (device only)
+ *
+ * These showcase the dimension pivot at the marketplace level before any live
+ * extraction runs. Idempotent: checks by title.
+ */
+async function seedHeadlinePackages(
+  ds: DataSource,
+  developers: Developer[],
+  applications: Application[],
+): Promise<number> {
+  const pkgRepo = ds.getRepository(DataPackage);
+
+  const devByEmail = (email: string) =>
+    developers.find((d) => d.email === email);
+  const appByName = (name: string) =>
+    applications.find((a) => a.name === name);
+
+  const tiktokApp = appByName('TikTok Clone');
+  const fitMoveApp = appByName('FitMove Tracker');
+  const socialDev = devByEmail('developer.social@dataclaus.demo');
+  const fitnessDev = devByEmail('developer.fitness@dataclaus.demo');
+
+  const headlinePackages: Array<{
+    title: string;
+    category: string;
+    developerId: string | undefined;
+    applicationId: string | undefined;
+    dimensions: Record<string, any>;
+    dataclausScore: number;
+  }> = [
+    {
+      title: 'TikTok Clone — Behavior & Demo Q1',
+      category: 'social',
+      developerId: socialDev?.id,
+      applicationId: tiktokApp?.id,
+      dimensions: {
+        behavior: {
+          count: 2463,
+          sample_rows: [
+            { user_pseudo_id: 'u_a8c1f1d2', video_id: 'vid_07', video_tags: ['dance'], dwell_ms: 18400, completed: true, recorded_at: '2026-04-12T14:22:00Z' },
+            { user_pseudo_id: 'u_3f9b21cc', video_id: 'vid_19', video_tags: ['gaming', 'tech'], dwell_ms: 24100, completed: true, recorded_at: '2026-04-13T09:05:00Z' },
+            { user_pseudo_id: 'u_a8c1f1d2', video_id: 'vid_32', video_tags: ['music'], dwell_ms: 200, completed: false, recorded_at: '2026-04-14T19:11:00Z' },
+          ],
+          distribution: { dance: 412, gaming: 358, comedy: 298, beauty: 287, food: 241 },
+          schema_json: {
+            user_pseudo_id: 'string',
+            video_id: 'string',
+            video_tags: 'string[]',
+            video_category: 'string',
+            dwell_ms: 'number',
+            completed: 'boolean',
+            recorded_at: 'timestamp',
+          },
+          unit_price_usd: 0.0042,
+          quality_score: 0.88,
+          ai_justification: '68% completion, 18-tag breadth, strong content affinity per user',
+          total_usd: 10.34,
+        },
+        demographic: {
+          count: 2100,
+          sample_rows: [
+            { user_pseudo_id: 'u_a8c1f1d2', age_bucket: '25-34', gender: 'f', locale: 'TR' },
+            { user_pseudo_id: 'u_3f9b21cc', age_bucket: '25-34', gender: 'm', locale: 'TR' },
+            { user_pseudo_id: 'u_c0d12345', age_bucket: '18-24', gender: 'f', locale: 'DE' },
+          ],
+          distribution: {
+            'age:18-24': 720, 'age:25-34': 950, 'age:35-44': 380, 'age:45-54': 50,
+            'gender:f': 1180, 'gender:m': 880, 'gender:x': 40,
+            'locale:TR': 1450, 'locale:DE': 320, 'locale:US': 330,
+          },
+          schema_json: {
+            user_pseudo_id: 'string',
+            age_bucket: 'string',
+            gender: 'string',
+            locale: 'string',
+          },
+          unit_price_usd: 0.0235,
+          quality_score: 0.74,
+          ai_justification: 'Broad coverage across age and locale; gender balance reasonable',
+          total_usd: 49.35,
+        },
+        device: {
+          count: 1247,
+          sample_rows: [
+            { user_pseudo_id: 'u_a8c1f1d2', event_type: 'scroll', sensor_class: 'touch', quality_score: 0.92, session_id: 'sess_001', recorded_at: '2026-04-12T14:22:00Z' },
+          ],
+          distribution: { scroll: 612, screen_view: 423, touch: 212 },
+          schema_json: {
+            user_pseudo_id: 'string',
+            event_type: 'string',
+            sensor_class: 'string',
+            quality_score: 'number',
+            session_id: 'string',
+            recorded_at: 'timestamp',
+          },
+          unit_price_usd: 0.0019,
+          quality_score: 0.81,
+          ai_justification: 'Median fraud_score 0.86, ~9% bot-flagged rows correctly isolated',
+          total_usd: 2.37,
+        },
+      },
+      dataclausScore: 0.91,
+    },
+    {
+      title: 'FitMove — Device-Only Baseline',
+      category: 'fitness',
+      developerId: fitnessDev?.id,
+      applicationId: fitMoveApp?.id,
+      dimensions: {
+        device: {
+          count: 8420,
+          sample_rows: [
+            { user_pseudo_id: 'u_b8c1f00d', event_type: 'accelerometer', sensor_class: 'motion', quality_score: 0.95, session_id: 'sess_a01', recorded_at: '2026-04-10T07:14:00Z' },
+          ],
+          distribution: { accelerometer: 4200, gyroscope: 3100, touch: 1120 },
+          schema_json: {
+            user_pseudo_id: 'string',
+            event_type: 'string',
+            sensor_class: 'string',
+            quality_score: 'number',
+            session_id: 'string',
+            recorded_at: 'timestamp',
+          },
+          unit_price_usd: 0.0048,
+          quality_score: 0.87,
+          ai_justification: 'High fidelity motion data, low bot signature',
+          total_usd: 40.42,
+        },
+      },
+      dataclausScore: 0.87,
+    },
+  ];
+
+  let created = 0;
+  for (const h of headlinePackages) {
+    if (!h.developerId) {
+      console.warn(`  ⚠ Headline package "${h.title}" skipped: developer not found`);
+      continue;
+    }
+    const exists = await pkgRepo.findOne({ where: { title: h.title } });
+    if (exists) continue;
+
+    const total = Object.values(h.dimensions).reduce(
+      (s: number, d: any) => s + (d?.total_usd ?? 0),
+      0,
+    );
+    const deviceDim = (h.dimensions as any).device;
+    const dimCount = Object.keys(h.dimensions).length;
+
+    const row = pkgRepo.create({
+      developerId: h.developerId,
+      applicationId: h.applicationId ?? null,
+      title: h.title,
+      description: `Hand-curated headline package showcasing the ${dimCount}-dimension data profile of this app.`,
+      category: h.category,
+      price: total,
+      status: 'certified' as any,
+      dataclausScore: h.dataclausScore,
+      dimensions: h.dimensions as any,
+      claimedMetrics: {
+        row_count: deviceDim?.count ?? 0,
+        unique_users: 5,
+        date_range_start: '2026-03-15',
+        date_range_end: '2026-04-15',
+      },
+      schemaJson: deviceDim?.schema_json ?? {},
+      sampleRows: deviceDim?.sample_rows ?? [],
+      llmEvaluation: {
+        trust_score: h.dataclausScore,
+        summary: 'Hand-curated demo package.',
+        red_flags: [],
+        buyer_match: ['advertisers', 'data partners'],
+        rubric: {
+          schema_integrity: 0.9,
+          sample_diversity: 0.85,
+          bot_signature_absence: 0.88,
+          claim_evidence_alignment: 0.9,
+          price_fairness: 0.9,
+        },
+        confidence: 'high',
+        verdict: 'certified',
+        dimensions: Object.fromEntries(
+          Object.entries(h.dimensions).map(([k, v]: [string, any]) => [
+            k,
+            {
+              unit_price_usd: v.unit_price_usd,
+              quality_score: v.quality_score,
+              ai_justification: v.ai_justification,
+            },
+          ]),
+        ) as any,
+      },
+      evaluatedAt: new Date(),
+    } as any);
+    await pkgRepo.save(row);
+    created++;
+  }
+  return created;
+}
+
 async function main(): Promise<void> {
   const startedAt = Date.now();
   console.log('🌱 DataClaus demo seed — starting...');
@@ -1090,6 +1426,15 @@ async function main(): Promise<void> {
 
     const packageCount = await seedDataPackages(ds, developers, applications);
     console.log(`  ✓ Data packages: ${packageCount} created (6 total in marketplace)`);
+
+    const profileCount = await seedUserProfiles(ds, users);
+    console.log(`  ✓ User profiles: ${profileCount} created (${users.length - profileCount} already existed)`);
+
+    const watchEventCount = await seedWatchEvents(ds, applications, users);
+    console.log(`  ✓ Watch events (TikTok Clone): ${watchEventCount} rows`);
+
+    const headlineCount = await seedHeadlinePackages(ds, developers, applications);
+    console.log(`  ✓ Headline packages: ${headlineCount} created (2 total — multi-dim showcase)`);
 
     writeJuryLogin(developers, users, buyers, applications);
 
