@@ -113,9 +113,18 @@ async function main() {
   );
 
   // Submit the draft. Unique-ify the title so re-runs don't collide.
+  // Explicit field pick — preview response includes `ui_meta` which is NOT in
+  // CreatePackageDto, and Nest's ValidationPipe runs with forbidNonWhitelisted,
+  // so spreading `...draft` would 400 the request before any assertion fires.
   const createInput = {
-    ...draft,
     title: `${draft.title} (smoke ${Date.now()})`,
+    category: draft.category,
+    claimed_metrics: draft.claimed_metrics,
+    schema_json: draft.schema_json,
+    sample_rows: draft.sample_rows,
+    price: draft.price,
+    application_id: draft.application_id,
+    dimensions: draft.dimensions,
   };
   const create = (await authFetch(dev.token, '/v1/packages', {
     method: 'POST',
