@@ -19,6 +19,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { DeveloperModule } from './modules/developer/developer.module';
 import { ApplicationModule } from './modules/application/application.module';
 import { WalletModule } from './modules/wallet/wallet.module';
+import { WatchEventsModule } from './modules/watch-events/watch-events.module';
 import { CampaignModule } from './modules/campaign/campaign.module';
 import { LedgerModule } from './modules/ledger/ledger.module';
 import { AdsModule } from './modules/ads/ads.module';
@@ -126,6 +127,7 @@ import {
     DeveloperModule,
     ApplicationModule,
     WalletModule,
+    WatchEventsModule,
     CampaignModule,
     LedgerModule,
     AdsModule,
