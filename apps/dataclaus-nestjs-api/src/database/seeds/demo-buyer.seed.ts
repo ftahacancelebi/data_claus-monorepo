@@ -50,7 +50,7 @@ export async function ensureDemoBuyer(dataSource: DataSource): Promise<void> {
   }
 
   // 3. Active AdCreative
-  const existingCreative = await creativeRepo.findOne({ where: { isActive: true } });
+  const existingCreative = await creativeRepo.findOne({ where: { buyerId: buyer.id, isActive: true } });
   if (!existingCreative) {
     await creativeRepo.save(
       creativeRepo.create({
