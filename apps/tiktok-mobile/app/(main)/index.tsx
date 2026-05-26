@@ -4,7 +4,7 @@
  * TikTok-style vertical scrolling video feed
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -285,7 +285,7 @@ export default function FeedScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [adData, setAdData] = useState<AdPostCardData | null>(null);
+  const adDataRef = useRef<AdPostCardData | null>(null);
   const { logout } = useAuth();
   const router = useRouter();
 
@@ -306,8 +306,8 @@ export default function FeedScreen() {
       const allTags = videos.flatMap(v => v.tags ?? []);
       const uniqueTags = [...new Set(allTags)].slice(0, 8);
 
-      // Fetch ad on first load only (when adData is still null)
-      let currentAdData = adData;
+      // Fetch ad on first load only (when adDataRef is still null)
+      let currentAdData = adDataRef.current;
       if (pageNum === 1 && currentAdData === null && uniqueTags.length > 0) {
         try {
           const served = await api.serveFeedAd(uniqueTags);
@@ -320,7 +320,7 @@ export default function FeedScreen() {
               image_url: served.image_url,
               matched_tags: served.matched_tags,
             };
-            setAdData(currentAdData);
+            adDataRef.current = currentAdData;
           }
         } catch {
           // Ad fetch failure is non-fatal
@@ -359,7 +359,7 @@ export default function FeedScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [adData]);
+  }, []);
 
   useEffect(() => {
     loadFeed();
