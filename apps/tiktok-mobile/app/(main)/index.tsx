@@ -21,6 +21,9 @@ import { api, Video as VideoType } from '../../services/api';
 import { useAuth } from '../../hooks/useAuth';
 import { useRouter } from 'expo-router';
 import { DataClausBannerAd } from '../../components/ads/BannerAd';
+import { showRewarded } from '../../components/ads/RewardedAd';
+import { showInterstitial } from '../../components/ads/InterstitialAd';
+import { AdPostCard, AdPostCardData } from '../../components/ads/AdPostCard';
 
 const { width, height } = Dimensions.get('window');
 const PLAYER_HEIGHT = height - 85; // Subtract tab bar
@@ -38,6 +41,7 @@ function frameFor(item: { id: string; creator: { avatar?: string } }): string {
 interface FeedItem extends VideoType {
   type?: 'video' | 'ad';
   adType?: string;
+  adData?: AdPostCardData;
 }
 
 function formatCount(num: number): string {
@@ -186,30 +190,86 @@ function VideoItem({
   );
 }
 
-function AdItem({ adType }: { adType: string }) {
+interface AdCreative {
+  id: string;
+  brandName: string;
+  imageUrl: string;
+  ctaText: string | null;
+}
+
+function AdItem({ adType, isActive }: { adType: string; isActive: boolean }) {
+  const [creative, setCreative] = useState<AdCreative | null | undefined>(undefined);
+
+  useEffect(() => {
+    api.getActiveAdCreative().then(setCreative).catch(() => setCreative(null));
+  }, []);
+
+  useEffect(() => {
+    if (!isActive) return;
+    api.recordAdImpression('rewarded').catch(() => {});
+  }, [isActive, adType]);
+
+  // Loading state — neutral dark while fetching
+  if (creative === undefined) {
+    return (
+      <View style={[styles.adContainer, { backgroundColor: '#111' }]}>
+        <View style={styles.adBadge}>
+          <Text style={styles.adBadgeText}>Ad</Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Real creative uploaded by a buyer
+  if (creative) {
+    return (
+      <View style={styles.adContainer}>
+        <Image
+          source={{ uri: creative.imageUrl }}
+          style={StyleSheet.absoluteFillObject}
+          resizeMode="cover"
+        />
+        {/* Dark gradient at bottom for text legibility */}
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.75)']}
+          style={styles.adRealGradient}
+          pointerEvents="none"
+        />
+        <View style={styles.adRealInfo}>
+          <Text style={styles.adRealBrand}>{creative.brandName}</Text>
+          {creative.ctaText && (
+            <TouchableOpacity style={styles.adButton}>
+              <Text style={styles.adButtonText}>{creative.ctaText}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        <View style={styles.adBadge}>
+          <Text style={styles.adBadgeText}>Sponsored</Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Placeholder — no active creative yet
   return (
     <View style={styles.adContainer}>
       <LinearGradient
-        colors={['#fe2c55', '#25f4ee']}
+        colors={['#1a1a2e', '#16213e', '#0f3460']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.adGradient}
       >
         <View style={styles.adContent}>
-          <Ionicons name="gift" size={64} color="#fff" />
-          <Text style={styles.adTitle}>
-            {adType === 'rewarded' ? 'Watch & Earn!' : 'Sponsored'}
-          </Text>
+          <View style={styles.adPlaceholderBadge}>
+            <Text style={styles.adPlaceholderBadgeText}>Reklam Alanı</Text>
+          </View>
+          <Text style={styles.adTitle}>Markanızın Reklamı</Text>
           <Text style={styles.adSubtitle}>
-            {adType === 'rewarded' 
-              ? 'Watch this ad to earn coins + real money!' 
-              : 'Swipe up to learn more'}
+            Bu alana reklamınızı yerleştirin.{'\n'}
+            DataClaus portalından yükleyebilirsiniz.
           </Text>
-          {adType === 'rewarded' && (
-            <TouchableOpacity style={styles.adButton}>
-              <Text style={styles.adButtonText}>Watch Now</Text>
-            </TouchableOpacity>
-          )}
+          <View style={styles.adPlaceholderDivider} />
+          <Text style={styles.adPlaceholderUrl}>dataclaus.io/advertise</Text>
         </View>
       </LinearGradient>
       <View style={styles.adBadge}>
@@ -225,6 +285,7 @@ export default function FeedScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [adData, setAdData] = useState<AdPostCardData | null>(null);
   const { logout } = useAuth();
   const router = useRouter();
 
@@ -236,15 +297,61 @@ export default function FeedScreen() {
   const loadFeed = useCallback(async (pageNum: number = 1) => {
     try {
       const result = await api.getFeed(pageNum);
-      const videos = result.videos.map(v => ({
+      const videos: FeedItem[] = result.videos.map(v => ({
         ...v,
-        type: 'type' in v && v.type === 'ad' ? 'ad' as const : 'video' as const,
-      }));
+        type: ('type' in v && v.type === 'ad' ? 'ad' : 'video') as 'video' | 'ad',
+      })) as FeedItem[];
+
+      // Collect tags from all videos for ad targeting
+      const allTags = videos.flatMap(v => v.tags ?? []);
+      const uniqueTags = [...new Set(allTags)].slice(0, 8);
+
+      // Fetch ad on first load only (when adData is still null)
+      let currentAdData = adData;
+      if (pageNum === 1 && currentAdData === null && uniqueTags.length > 0) {
+        try {
+          const served = await api.serveFeedAd(uniqueTags);
+          if (served) {
+            currentAdData = {
+              brand_name: served.brand_name,
+              headline: served.headline,
+              sub_copy: served.sub_copy,
+              cta_label: served.cta_label,
+              image_url: served.image_url,
+              matched_tags: served.matched_tags,
+            };
+            setAdData(currentAdData);
+          }
+        } catch {
+          // Ad fetch failure is non-fatal
+        }
+      }
+
+      // Inject ad at position 4 on first page if we have enough videos
+      if (pageNum === 1 && currentAdData && videos.length > 4) {
+        const adItem: FeedItem = {
+          id: `ad-post-${Date.now()}`,
+          type: 'ad' as const,
+          adType: 'post',
+          adData: currentAdData,
+          url: '',
+          thumbnail: '',
+          description: '',
+          creator: { id: '', username: '', avatar: '', verified: false },
+          likes: 0,
+          comments: 0,
+          shares: 0,
+          views: 0,
+          music: { title: '', artist: '' },
+          tags: [],
+        };
+        videos.splice(4, 0, adItem);
+      }
 
       if (pageNum === 1) {
-        setFeed(videos as FeedItem[]);
+        setFeed(videos);
       } else {
-        setFeed(prev => [...prev, ...(videos as FeedItem[])]);
+        setFeed(prev => [...prev, ...videos]);
       }
       setHasMore(result.hasMore);
     } catch (error) {
@@ -252,7 +359,7 @@ export default function FeedScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [adData]);
 
   useEffect(() => {
     loadFeed();
@@ -274,7 +381,10 @@ export default function FeedScreen() {
 
   const renderItem = ({ item, index }: { item: FeedItem; index: number }) => {
     if (item.type === 'ad') {
-      return <AdItem adType={item.adType || 'native'} />;
+      if (item.adData) {
+        return <AdPostCard data={item.adData} />;
+      }
+      return <AdItem adType={item.adType || 'native'} isActive={index === activeIndex} />;
     }
     return <VideoItem item={item} isActive={index === activeIndex} />;
   };
@@ -535,6 +645,54 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: '600',
+  },
+  adRealGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 220,
+  },
+  adRealInfo: {
+    position: 'absolute',
+    bottom: 100,
+    left: 16,
+    right: 16,
+    gap: 12,
+  },
+  adRealBrand: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: '800',
+    textShadowColor: 'rgba(0,0,0,0.6)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  adPlaceholderBadge: {
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 8,
+  },
+  adPlaceholderBadgeText: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  adPlaceholderDivider: {
+    height: 1,
+    width: 60,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    marginVertical: 8,
+  },
+  adPlaceholderUrl: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+    fontWeight: '500',
   },
   bannerContainer: {
     position: 'absolute',
