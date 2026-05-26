@@ -69,6 +69,7 @@ export interface Video {
   isLiked?: boolean;
   likesCount?: number;
   viewsCount?: number;
+  tags?: string[];
 }
 
 export interface Earnings {
@@ -330,11 +331,37 @@ class ApiService {
   async recordAdImpression(adType: 'banner' | 'interstitial' | 'rewarded', grossRevenue?: number) {
     // If no explicit revenue provided, let backend assign default based on type
     const body = { adType, grossRevenue };
-    return this.request<{ 
-      success: boolean; 
+    return this.request<{
+      success: boolean;
       impressionId: string;
-      userNewTotal: number 
+      userNewTotal: number
     }>('POST', '/ads/impression', body);
+  }
+
+  async serveFeedAd(tags: string[]): Promise<{
+    campaign_id: string;
+    brand_name: string;
+    headline: string;
+    sub_copy: string;
+    cta_label: string;
+    image_url: string | null;
+    matched_tags: string[];
+  } | null> {
+    if (tags.length === 0) return null;
+    try {
+      const encoded = encodeURIComponent(tags.join(','));
+      return this.request<{
+        campaign_id: string;
+        brand_name: string;
+        headline: string;
+        sub_copy: string;
+        cta_label: string;
+        image_url: string | null;
+        matched_tags: string[];
+      } | null>('GET', `/ads/feed-serve?tags=${encoded}`);
+    } catch {
+      return null;
+    }
   }
 
   // ======================
@@ -366,6 +393,28 @@ class ApiService {
 
   async forwardSensorData(events: Array<{ eventType: string; timestamp: string; payload: Record<string, unknown> }>) {
     return this.request<{ eventsReceived: number }>('POST', '/dataclaus/sensor', { events });
+  }
+
+  // ======================
+  // AD CREATIVE
+  // ======================
+
+  async getActiveAdCreative(): Promise<{
+    id: string;
+    brandName: string;
+    imageUrl: string;
+    ctaText: string | null;
+  } | null> {
+    try {
+      return await this.request<{
+        id: string;
+        brandName: string;
+        imageUrl: string;
+        ctaText: string | null;
+      } | null>('GET', '/ads/creative');
+    } catch {
+      return null;
+    }
   }
 
 }
