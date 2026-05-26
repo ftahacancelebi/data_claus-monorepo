@@ -254,12 +254,25 @@ export class AdConfigResponseDto {
 }
 
 export class ServeAdResponseDto {
+  @ApiProperty()
   campaign_id!: string;
+
+  @ApiProperty()
   brand_name!: string;
+
+  @ApiProperty()
   headline!: string;
+
+  @ApiProperty()
   sub_copy!: string;
+
+  @ApiProperty()
   cta_label!: string;
+
+  @ApiProperty({ nullable: true })
   image_url!: string | null;
+
+  @ApiProperty({ type: [String] })
   matched_tags!: string[];
 }
 

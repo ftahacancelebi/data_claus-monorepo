@@ -661,6 +661,7 @@ export class AdsService {
     const campaigns = await this.campaignRepository.find({
       where: { status: CampaignStatus.ACTIVE },
       order: { bidPerImpression: 'DESC' },
+      take: 20,
     });
 
     for (const campaign of campaigns) {
