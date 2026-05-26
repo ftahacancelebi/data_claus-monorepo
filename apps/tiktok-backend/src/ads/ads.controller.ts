@@ -10,6 +10,7 @@ import {
   Get,
   Post,
   Body,
+  Query,
   UseGuards,
   Request,
   InternalServerErrorException,
@@ -94,11 +95,13 @@ export class AdsController {
           );
         }
         throw new InternalServerErrorException(
-          err.error || 'Failed to obtain ad slot',
+          err.message || err.error || 'Failed to obtain ad slot',
         );
       }
 
-      const slot = await slotResponse.json();
+      const slotBody = await slotResponse.json();
+      // NestJS TransformInterceptor wraps all responses: { data: {...}, statusCode, ... }
+      const slot = slotBody.data ?? slotBody;
 
       // STEP 2 — seal the impression
       const sealResponse = await fetch(
@@ -122,11 +125,12 @@ export class AdsController {
           .catch(() => ({ error: 'Seal failed' }));
         console.error('[ADS] Seal error:', err);
         throw new InternalServerErrorException(
-          err.error || 'Failed to seal impression',
+          err.message || err.error || 'Failed to seal impression',
         );
       }
 
-      const result = await sealResponse.json();
+      const sealBody = await sealResponse.json();
+      const result = sealBody.data ?? sealBody;
       console.log(
         `[ADS] Impression sealed (${adType}):`,
         JSON.stringify(result, null, 2),
@@ -244,6 +248,47 @@ export class AdsController {
     } catch (error) {
       console.error('[Earnings] Error fetching earnings:', error);
       return { userId, totalEarned: 0, currency: 'USD' };
+    }
+  }
+
+  /**
+   * Proxy the active ad creative from the DataClaus NestJS API.
+   * Returns null (204) if no active creative is set.
+   */
+  @Get('creative')
+  async getActiveCreative() {
+    try {
+      const dataclauspApiUrl = this.config.get('DATACLAUS_NESTJS_URL') || 'http://localhost:3001';
+      const response = await fetch(`${dataclauspApiUrl}/ad-creatives/active`);
+      if (response.status === 204 || response.status === 404) return null;
+      if (!response.ok) return null;
+      const body = await response.json();
+      // NestJS TransformInterceptor wraps in { data: ... }
+      return body?.data ?? body ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Serve a tag-matched ad creative from the DataClaus NestJS API.
+   * No auth required — called from the mobile feed without a user token.
+   * Returns null if no campaign matches or on any error (non-fatal).
+   */
+  @Get('feed-serve')
+  async serveFeedAd(@Query('tags') tags?: string) {
+    try {
+      const nestApiUrl =
+        this.config.get<string>('DATACLAUS_NESTJS_URL') || 'http://localhost:3001';
+      const url = tags
+        ? `${nestApiUrl}/ads/serve?tags=${encodeURIComponent(tags)}`
+        : `${nestApiUrl}/ads/serve`;
+      const response = await fetch(url);
+      if (!response.ok) return null;
+      const body = (await response.json()) as { data?: unknown } | null;
+      return body?.data ?? body ?? null;
+    } catch {
+      return null;
     }
   }
 
