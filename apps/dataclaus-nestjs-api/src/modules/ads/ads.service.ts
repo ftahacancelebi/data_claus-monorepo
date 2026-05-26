@@ -1,10 +1,12 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AdImpression } from './entities/ad-impression.entity';
+import { AdCreative } from './entities/ad-creative.entity';
 import { Application } from '../application/entities/application.entity';
 import { Wallet } from '../wallet/entities/wallet.entity';
+import { Campaign } from '../campaign/entities/campaign.entity';
 import {
   RecordImpressionDto,
   AdRatesResponseDto,
@@ -12,6 +14,7 @@ import {
   AdConfigResponseDto,
   ImpressionResponseDto,
   SealImpressionDto,
+  ServeAdResponseDto,
 } from './dto';
 import {
   AdType,
@@ -24,6 +27,8 @@ import {
   MAX_USER_SHARE_PERCENT,
   SYSTEM_WALLET_IDS,
   TransactionType,
+  CampaignStatus,
+  CampaignTargeting,
 } from '../../common/constants';
 
 import { FinancialTxService } from '../ledger/financial-tx.service';
@@ -42,10 +47,15 @@ export class AdsService {
     private readonly applicationRepository: Repository<Application>,
     @InjectRepository(Wallet)
     private readonly walletRepository: Repository<Wallet>,
+    @InjectRepository(AdCreative)
+    private readonly creativeRepository: Repository<AdCreative>,
+    @InjectRepository(Campaign)
+    private readonly campaignRepository: Repository<Campaign>,
     private readonly financialTx: FinancialTxService,
     private readonly campaignMatcher: CampaignMatcherService,
     private readonly mediation: AdMediationService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly dataSource: DataSource,
   ) {}
 
   getAdRates(): AdRatesResponseDto {
@@ -605,5 +615,84 @@ export class AdsService {
       total_revenue: totalRevenue,
       synced: true,
     };
+  }
+
+  async getActiveCreative(): Promise<AdCreative | null> {
+    return this.creativeRepository.findOne({ where: { isActive: true } });
+  }
+
+  async createCreative(dto: {
+    brandName: string;
+    imageUrl: string;
+    ctaText?: string;
+    buyerId?: string;
+  }): Promise<AdCreative> {
+    const creative = this.creativeRepository.create({
+      brandName: dto.brandName,
+      imageUrl: dto.imageUrl,
+      ctaText: dto.ctaText ?? null,
+      buyerId: dto.buyerId ?? null,
+      isActive: false,
+    });
+    return this.creativeRepository.save(creative);
+  }
+
+  async activateCreative(id: string): Promise<AdCreative> {
+    await this.dataSource.transaction(async (em) => {
+      await em.update(AdCreative, { isActive: true }, { isActive: false });
+      await em.update(AdCreative, { id }, { isActive: true });
+    });
+    const updated = await this.creativeRepository.findOne({ where: { id } });
+    if (!updated) throw new NotFoundException('AdCreative not found');
+    return updated;
+  }
+
+  async getCreativesByBuyer(buyerId: string): Promise<AdCreative[]> {
+    return this.creativeRepository.find({
+      where: { buyerId },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async serveAd(tags: string[]): Promise<ServeAdResponseDto | null> {
+    const creative = await this.creativeRepository.findOne({ where: { isActive: true } });
+    if (!creative) return null;
+
+    const campaigns = await this.campaignRepository.find({
+      where: { status: CampaignStatus.ACTIVE },
+      order: { bidPerImpression: 'DESC' },
+    });
+
+    for (const campaign of campaigns) {
+      const targeting = campaign.targeting as CampaignTargeting;
+      const contentTags: string[] = targeting?.contentTags ?? [];
+
+      if (contentTags.length === 0) {
+        return {
+          campaign_id: campaign.id,
+          brand_name: creative.brandName,
+          headline: creative.ctaText ?? `${creative.brandName} — Özel Teklif`,
+          sub_copy: "nike.com.tr'de şimdi keşfet",
+          cta_label: 'Şimdi Keşfet →',
+          image_url: creative.imageUrl ?? null,
+          matched_tags: tags.slice(0, 3),
+        };
+      }
+
+      const overlap = tags.filter((t) => contentTags.includes(t.toLowerCase()));
+      if (overlap.length > 0) {
+        return {
+          campaign_id: campaign.id,
+          brand_name: creative.brandName,
+          headline: creative.ctaText ?? `${creative.brandName} — Özel Teklif`,
+          sub_copy: "nike.com.tr'de şimdi keşfet",
+          cta_label: 'Şimdi Keşfet →',
+          image_url: creative.imageUrl ?? null,
+          matched_tags: overlap,
+        };
+      }
+    }
+
+    return null;
   }
 }

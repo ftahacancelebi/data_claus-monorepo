@@ -2,9 +2,12 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   Param,
   ParseUUIDPipe,
+  Request,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,6 +26,7 @@ import {
   RequestAdSlotDto,
   SignedAdSlotDto,
   SealImpressionDto,
+  ServeAdResponseDto,
 } from './dto';
 import { Public, Roles, Role } from '../../common/decorators';
 
@@ -41,6 +45,19 @@ export class AdsController {
   @ApiResponse({ status: 200, type: AdRatesResponseDto })
   getAdRates(): AdRatesResponseDto {
     return this.adsService.getAdRates();
+  }
+
+  @Get('ads/serve')
+  @Public()
+  @ApiOperation({ summary: 'Serve a feed ad matched against content tags' })
+  @ApiResponse({ status: 200, type: ServeAdResponseDto })
+  async serveAd(
+    @Query('tags') tags?: string,
+  ): Promise<ServeAdResponseDto | null> {
+    const tagList = tags
+      ? tags.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean)
+      : [];
+    return this.adsService.serveAd(tagList);
   }
 
   /**
@@ -148,5 +165,40 @@ export class AdsController {
     synced: boolean;
   }> {
     return this.adsService.syncApplicationStats(appId);
+  }
+
+  // ─── Ad Creative endpoints ─────────────────────────────────────────────────
+
+  @Get('ad-creatives/active')
+  @Public()
+  @ApiOperation({ summary: 'Get currently active ad creative (public)' })
+  async getActiveCreative() {
+    return this.adsService.getActiveCreative();
+  }
+
+  @Post('ad-creatives')
+  @ApiOperation({ summary: 'Submit an ad creative (buyer)' })
+  async createCreative(
+    @Body() body: { brandName: string; imageUrl: string; ctaText?: string },
+    @Request() req: { user?: { id: string } },
+  ) {
+    return this.adsService.createCreative({
+      ...body,
+      buyerId: req.user?.id,
+    });
+  }
+
+  @Get('ad-creatives/mine')
+  @ApiOperation({ summary: 'List my submitted ad creatives (buyer)' })
+  async getMyCreatives(@Request() req: { user?: { id: string } }) {
+    if (!req.user?.id) return [];
+    return this.adsService.getCreativesByBuyer(req.user.id);
+  }
+
+  @Patch('ad-creatives/:id/activate')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Activate an ad creative (admin)' })
+  async activateCreative(@Param('id', ParseUUIDPipe) id: string) {
+    return this.adsService.activateCreative(id);
   }
 }

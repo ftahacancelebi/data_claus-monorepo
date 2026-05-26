@@ -253,6 +253,16 @@ export class AdConfigResponseDto {
   minimum_ecpm: number;
 }
 
+export class ServeAdResponseDto {
+  campaign_id!: string;
+  brand_name!: string;
+  headline!: string;
+  sub_copy!: string;
+  cta_label!: string;
+  image_url!: string | null;
+  matched_tags!: string[];
+}
+
 export class ImpressionResponseDto {
   @ApiProperty()
   id: string;

@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdImpression } from './entities/ad-impression.entity';
+import { AdCreative } from './entities/ad-creative.entity';
 import { Application } from '../application/entities/application.entity';
 import { Wallet } from '../wallet/entities/wallet.entity';
+import { Campaign } from '../campaign/entities/campaign.entity';
 import { AdsService } from './ads.service';
 import { AdsController } from './ads.controller';
 import { AdMediationService } from './ad-mediation.service';
@@ -13,7 +15,7 @@ import { CampaignModule } from '../campaign/campaign.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AdImpression, Application, Wallet]),
+    TypeOrmModule.forFeature([AdImpression, AdCreative, Application, Wallet, Campaign]),
     WalletModule,
     LedgerModule,
     CampaignModule,
