@@ -46,6 +46,12 @@ export class CampaignTargetingDto implements CampaignTargeting {
   @IsArray()
   @IsEnum(TargetingDeviceType, { each: true })
   deviceTypes?: TargetingDeviceType[];
+
+  @ApiPropertyOptional({ type: [String], example: ['action', 'fitness', 'lifestyle'] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  contentTags?: string[];
 }
 
 export class CreateCampaignDto {

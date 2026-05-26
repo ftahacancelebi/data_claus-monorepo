@@ -258,7 +258,7 @@ export class AdsController {
   @Get('creative')
   async getActiveCreative() {
     try {
-      const dataclauspApiUrl = this.config.get('DATACLAUS_NESTJS_URL') || 'http://localhost:3001';
+      const dataclauspApiUrl = this.config.get('DATACLAUS_API_URL') || 'http://localhost:3000';
       const response = await fetch(`${dataclauspApiUrl}/ad-creatives/active`);
       if (response.status === 204 || response.status === 404) return null;
       if (!response.ok) return null;
@@ -279,7 +279,7 @@ export class AdsController {
   async serveFeedAd(@Query('tags') tags?: string) {
     try {
       const nestApiUrl =
-        this.config.get<string>('DATACLAUS_NESTJS_URL') || 'http://localhost:3001';
+        this.config.get<string>('DATACLAUS_API_URL') || 'http://localhost:3000';
       const url = tags
         ? `${nestApiUrl}/ads/serve?tags=${encodeURIComponent(tags)}`
         : `${nestApiUrl}/ads/serve`;

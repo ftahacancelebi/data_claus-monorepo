@@ -21,8 +21,6 @@ import { api, Video as VideoType } from '../../services/api';
 import { useAuth } from '../../hooks/useAuth';
 import { useRouter } from 'expo-router';
 import { DataClausBannerAd } from '../../components/ads/BannerAd';
-import { showRewarded } from '../../components/ads/RewardedAd';
-import { showInterstitial } from '../../components/ads/InterstitialAd';
 import { AdPostCard, AdPostCardData } from '../../components/ads/AdPostCard';
 
 const { width, height } = Dimensions.get('window');
