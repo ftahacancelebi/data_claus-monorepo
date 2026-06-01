@@ -8,6 +8,8 @@ import {
   Card,
   CardContent,
 } from '@/components/ui/card';
+import { PremiumAppCard } from '@/components/ui/premium-app-card';
+import { PremiumStatCard } from '@/components/ui/premium-stat-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,6 +40,7 @@ import {
   ArrowRight,
   Activity,
   TrendUp,
+  TrendDown,
   Lightning,
   Key,
   Copy,
@@ -78,7 +81,7 @@ const item = {
 };
 
 export default function MyAppsPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
 
   const appsQuery = useApplications(user?.id);
@@ -88,9 +91,11 @@ export default function MyAppsPage() {
   const apps = appsQuery.data ?? [];
   const stats = statsQuery.data ?? null;
   const loading = appsQuery.isLoading;
-  const error =
-    appsQuery.error?.message ??
-    (appsQuery.error ? 'Failed to load applications. Make sure the backend is running.' : null);
+  const isStaleSession = appsQuery.error?.message?.includes('not found');
+  const error = isStaleSession
+    ? null
+    : appsQuery.error?.message ??
+      (appsQuery.error ? 'Failed to load applications. Make sure the backend is running.' : null);
   const creating = createMutation.isPending;
 
   const [newAppApiKey, setNewAppApiKey] = useState<string | null>(null);
@@ -139,12 +144,20 @@ export default function MyAppsPage() {
         toast({ title: 'Application Created!' });
       }
     } catch (err) {
-      toast({
-        title: 'Failed to create application',
-        description:
-          err instanceof Error ? err.message : 'Make sure the backend server is running.',
-        variant: 'destructive',
-      });
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('not found')) {
+        toast({
+          title: 'Session expired',
+          description: 'Your developer account was not found. Please log out and log back in.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Failed to create application',
+          description: msg || 'Make sure the backend server is running.',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
@@ -437,6 +450,22 @@ export default function MyAppsPage() {
         </Button>
       </div>
 
+      {/* Stale Session Banner */}
+      {isStaleSession && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+          <Warning size={20} className="text-red-600 mt-0.5" />
+          <div className="flex-1">
+            <p className="font-medium text-red-800">Session expired</p>
+            <p className="text-sm text-red-600 mt-1">
+              Your developer account was not found. This usually means the database was reset. Please log out and register again.
+            </p>
+          </div>
+          <Button size="sm" variant="destructive" onClick={logout}>
+            Log out
+          </Button>
+        </div>
+      )}
+
       {/* Error Banner */}
       {error && (
         <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
@@ -444,8 +473,7 @@ export default function MyAppsPage() {
           <div>
             <p className="font-medium text-amber-800">{error}</p>
             <p className="text-sm text-amber-600 mt-1">
-              Run `docker-compose up -d` and `go run apps/dataclaus-api/cmd/api` to start the
-              backend.
+              Make sure the backend is running.
             </p>
           </div>
         </div>
@@ -458,88 +486,99 @@ export default function MyAppsPage() {
           <h2 className="text-lg font-semibold text-slate-700">Statistics Overview</h2>
         </div>
         <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="grid gap-4 md:grid-cols-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+          className="relative w-full overflow-hidden bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
         >
-          <motion.div variants={item}>
-            <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                    <AppWindow size={20} className="text-blue-600" weight="duotone" />
-                  </div>
-                </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-dashed divide-slate-300">
+            {/* Stat 1: Total Apps */}
+            <div className="p-8 group relative overflow-hidden transition-colors hover:bg-slate-50/50 flex flex-col min-h-[180px] justify-between">
+              {/* Giant Background Icon */}
+              <div className="absolute -bottom-6 -right-6 opacity-[0.04] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-700 ease-out z-0 pointer-events-none text-blue-900">
+                <AppWindow size={160} weight="duotone" />
+              </div>
+              
+              <div className="relative z-10 flex justify-end h-6">
+                {/* No trend for total apps currently, just an empty space to match heights */}
+              </div>
+
+              <div className="relative z-10 mt-auto">
+                <p className="text-[12px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">
                   Total Apps
                 </p>
-                <p className="text-3xl font-bold text-slate-900">{loading ? '-' : apps.length}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
+                <p className="text-4xl font-bold text-slate-900 tracking-tight">
+                  {loading ? '-' : apps.length}
+                </p>
+              </div>
+            </div>
 
-          <motion.div variants={item}>
-            <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                    <Activity size={20} className="text-emerald-600" weight="duotone" />
-                  </div>
-                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
-                    <Lightning size={10} className="mr-1" weight="fill" />
-                    Live
-                  </Badge>
+            {/* Stat 2: Active Apps */}
+            <div className="p-8 group relative overflow-hidden transition-colors hover:bg-slate-50/50 flex flex-col min-h-[180px] justify-between">
+              <div className="absolute -bottom-6 -right-6 opacity-[0.04] group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-700 ease-out z-0 pointer-events-none text-emerald-900">
+                <Activity size={160} weight="duotone" />
+              </div>
+
+              <div className="relative z-10 flex justify-end">
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700">
+                  12% <TrendUp size={12} weight="bold" />
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+              </div>
+
+              <div className="relative z-10 mt-auto">
+                <p className="text-[12px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">
                   Active Apps
                 </p>
-                <p className="text-3xl font-bold text-slate-900">{loading ? '-' : activeApps}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
+                <p className="text-4xl font-bold text-slate-900 tracking-tight">
+                  {loading ? '-' : activeApps}
+                </p>
+              </div>
+            </div>
 
-          <motion.div variants={item}>
-            <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="h-10 w-10 rounded-xl bg-purple-50 flex items-center justify-center">
-                    <Users size={20} className="text-purple-600" weight="duotone" />
-                  </div>
-                  {stats && (
-                    <span className="flex items-center text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                      <TrendUp size={10} className="mr-1" weight="bold" />
-                      Live
-                    </span>
-                  )}
+            {/* Stat 3: Total Events */}
+            <div className="p-8 group relative overflow-hidden transition-colors hover:bg-slate-50/50 flex flex-col min-h-[180px] justify-between">
+              <div className="absolute -bottom-6 -right-6 opacity-[0.04] group-hover:scale-110 group-hover:rotate-6 transition-transform duration-700 ease-out z-0 pointer-events-none text-purple-900">
+                <Users size={160} weight="duotone" />
+              </div>
+
+              <div className="relative z-10 flex justify-end">
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700">
+                  24% <TrendUp size={12} weight="bold" />
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+              </div>
+
+              <div className="relative z-10 mt-auto">
+                <p className="text-[12px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">
                   Total Events
                 </p>
-                <p className="text-3xl font-bold text-slate-900">
+                <p className="text-4xl font-bold text-slate-900 tracking-tight">
                   {stats?.total_events?.toLocaleString() ?? '-'}
                 </p>
-              </CardContent>
-            </Card>
-          </motion.div>
+              </div>
+            </div>
 
-          <motion.div variants={item}>
-            <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                    <CurrencyDollar size={20} className="text-slate-700" weight="duotone" />
-                  </div>
+            {/* Stat 4: Total Payouts */}
+            <div className="p-8 group relative overflow-hidden transition-colors hover:bg-slate-50/50 flex flex-col min-h-[180px] justify-between">
+              <div className="absolute -bottom-6 -right-6 opacity-[0.04] group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out z-0 pointer-events-none text-amber-900">
+                <CurrencyDollar size={160} weight="duotone" />
+              </div>
+
+              <div className="relative z-10 flex justify-end">
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-50 text-rose-700">
+                  5% <TrendDown size={12} weight="bold" />
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+              </div>
+
+              <div className="relative z-10 mt-auto">
+                <p className="text-[12px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">
                   Total Payouts
                 </p>
-                <p className="text-3xl font-bold text-slate-900">
+                <p className="text-4xl font-bold text-slate-900 tracking-tight">
                   ${stats?.total_payouts?.toLocaleString() ?? '0'}
                 </p>
-              </CardContent>
-            </Card>
-          </motion.div>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </section>
 
@@ -570,76 +609,22 @@ export default function MyAppsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.08 }}
               >
-                <Card className="glass-panel border-0 shadow-lg hover:shadow-xl transition-all h-full group">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-900/20">
-                        <Code size={22} weight="duotone" />
-                      </div>
-                      <Badge
-                        className={
-                          app.is_active
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            : 'bg-slate-50 text-slate-600 border-slate-200'
-                        }
-                      >
-                        {app.is_active && <Activity size={10} className="mr-1" weight="fill" />}
-                        {app.is_active ? 'active' : 'inactive'}
-                      </Badge>
-                    </div>
-                    <h3 className="font-bold text-lg text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
-                      {app.name}
-                    </h3>
-                    <p className="text-sm text-slate-500 mb-4">
-                      {app.description || 'Your SDK integration app'}
-                    </p>
-                    {app.api_key_prefix && (
-                      <div className="p-3 bg-slate-100 rounded-lg mb-4">
-                        <div className="flex items-center justify-between">
-                          <code className="text-xs text-slate-600 font-mono">
-                            {app.api_key_prefix}••••••••
-                          </code>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyApiKey(app.api_key_prefix || '')}
-                            className="h-7 w-7 p-0"
-                          >
-                            <Copy size={14} />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    <div className="grid grid-cols-3 gap-2 mb-4 pb-4 border-b border-slate-100">
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-slate-900">
-                          {app.total_events.toLocaleString()}
-                        </p>
-                        <p className="text-xs text-slate-400">Events</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-slate-900">
-                          {app.total_users.toLocaleString()}
-                        </p>
-                        <p className="text-xs text-slate-400">Users</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-emerald-600">
-                          ${app.total_revenue.toFixed(2)}
-                        </p>
-                        <p className="text-xs text-slate-400">Revenue</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Link href={`/dashboard/my-apps/${app.id}`} className="flex-1">
-                        <Button variant="outline" size="sm" className="w-full hover:bg-slate-50">
-                          View Details
-                          <ArrowRight size={14} className="ml-2" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="flex justify-center">
+                  <PremiumAppCard
+                    appName={app.name}
+                    category={app.description || 'App Integration'}
+                    badgeText={app.is_active ? 'Active' : 'Inactive'}
+                    badgeActive={app.is_active}
+                    icon={<Code size={20} weight="duotone" className="text-slate-700" />}
+                    stat1Label="Events"
+                    stat1Value={app.total_events.toLocaleString()}
+                    stat2Label="Users"
+                    stat2Value={app.total_users.toLocaleString()}
+                    stat3Label="Revenue"
+                    stat3Value={`$${app.total_revenue.toFixed(2)}`}
+                    actionHref={`/dashboard/my-apps/${app.id}`}
+                  />
+                </div>
               </motion.div>
             ))}
 

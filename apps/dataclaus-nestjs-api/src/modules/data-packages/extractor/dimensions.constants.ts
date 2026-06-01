@@ -6,8 +6,8 @@ export type DimensionName = 'behavior' | 'demographic' | 'device';
  */
 export const APP_DIMENSIONS: Record<string, DimensionName[]> = {
   'TikTok Clone':       ['behavior', 'demographic', 'device'],
-  'Cinema+ Streaming':  ['device'], // v1.1 will add behavior
-  'FitMove Tracker':    ['device'],
+  'Cinema+ Streaming':  ['behavior', 'demographic', 'device'],
+  'FitMove Tracker':    ['behavior', 'demographic', 'device'],
 };
 
 /**

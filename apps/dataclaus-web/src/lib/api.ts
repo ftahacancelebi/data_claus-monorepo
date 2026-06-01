@@ -805,6 +805,19 @@ export const requestAccountDeletion = () =>
 export const cancelAccountDeletion = () =>
   request<void>('/me/account/delete-request', { method: 'DELETE' });
 
+export interface ContributionStats {
+  totalEvents: number;
+  completedEvents: number;
+  partialEvents: number;
+  totalEarnedFromData: number;
+  topCategories: Array<{ category: string; count: number }>;
+  topTags: Array<{ tag: string; count: number }>;
+  poolContributionPct: number;
+}
+
+export const getMyContributionStats = () =>
+  request<ContributionStats>('/v1/watch-events/my-stats');
+
 // Webhook event types that DataClaus sends to developer backends
 export type WebhookEventType =
   | 'user.earnings.updated'
@@ -1018,4 +1031,76 @@ export const extractPackagePreview = (
     schema: ExtractedPackageDraftSchema,
   });
 };
+
+// =============================================================================
+// AD CREATIVE
+// =============================================================================
+
+const AdCreativeSchema = z.object({
+  id: z.string(),
+  brandName: z.string(),
+  imageUrl: z.string(),
+  ctaText: z.string().nullable(),
+  isActive: z.boolean(),
+  buyerId: z.string().nullable(),
+  createdAt: z.string(),
+}).nullable();
+
+export type AdCreative = z.infer<typeof AdCreativeSchema>;
+
+export const getActiveAdCreative = () =>
+  request('/ad-creatives/active', {
+    schema: AdCreativeSchema,
+  }).catch(() => null);
+
+// =============================================================================
+// PACKAGE DOWNLOAD
+// =============================================================================
+
+export const fetchPackageDownload = (packageId: string, token: string) =>
+  request(
+    `/v1/packages/${packageId}/download?token=${encodeURIComponent(token)}`,
+    {
+      schema: z.object({
+        package: z.object({
+          id: z.string(),
+          title: z.string(),
+          category: z.string(),
+          schema_json: z.record(z.string(), z.unknown()),
+          sample_rows: z.array(z.record(z.string(), z.unknown())),
+          claimed_metrics: z.record(z.string(), z.unknown()).nullable(),
+        }),
+        purchase: z.object({
+          id: z.string(),
+          purchased_at: z.string(),
+          amount: z.number(),
+        }),
+      }),
+    },
+  );
+
+export const getMyAdCreatives = () =>
+  request('/ad-creatives/mine', {
+    schema: z.array(
+      z.object({
+        id: z.string(),
+        brandName: z.string(),
+        imageUrl: z.string(),
+        ctaText: z.string().nullable(),
+        isActive: z.boolean(),
+        buyerId: z.string().nullable(),
+        createdAt: z.string(),
+      }),
+    ),
+  }).catch(() => [] as { id: string; brandName: string; imageUrl: string; ctaText: string | null; isActive: boolean; buyerId: string | null; createdAt: string }[]);
+
+export const createAdCreative = (dto: {
+  brandName: string;
+  imageUrl: string;
+  ctaText?: string;
+}) =>
+  request('/ad-creatives', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
 

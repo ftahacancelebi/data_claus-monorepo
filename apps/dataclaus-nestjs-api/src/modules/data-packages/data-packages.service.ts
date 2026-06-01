@@ -14,18 +14,13 @@ import { Wallet } from '../wallet/entities';
 import { FinancialTxService } from '../ledger/financial-tx.service';
 import {
   PackageStatus,
+  PLATFORM_FEE_PERCENT,
+  DEFAULT_USER_SHARE_PERCENT,
   SYSTEM_WALLET_IDS,
   TransactionType,
   WalletType,
 } from '../../common/constants';
-
-/**
- * Marketplace platform fee = 10% (spec §12.2: dev +0.9X / platform +0.1X).
- * Intentionally NOT the shared `PLATFORM_FEE_PERCENT` (=5%), which governs the
- * unrelated ads/payout pipeline — changing that global would silently shift
- * ad revenue splits. This rate is local to package sales by design.
- */
-const PACKAGE_FEE_RATE = 0.1;
+import { Application } from '../application/entities/application.entity';
 import { DataPackage } from './entities/data-package.entity';
 import { PackagePurchase } from './entities/package-purchase.entity';
 import { CreatePackageDto, ListPackagesDto } from './dto';
@@ -45,6 +40,8 @@ export class DataPackagesService {
     private readonly purchaseRepo: Repository<PackagePurchase>,
     @InjectRepository(Wallet)
     private readonly walletRepo: Repository<Wallet>,
+    @InjectRepository(Application)
+    private readonly appRepo: Repository<Application>,
     private readonly evaluator: PackageEvaluatorService,
     private readonly financialTx: FinancialTxService,
     private readonly eventEmitter: EventEmitter2,
@@ -285,12 +282,23 @@ export class DataPackagesService {
     }
 
     const price = Number(pkg.price);
-    const platformFee = Number((price * PACKAGE_FEE_RATE).toFixed(2));
-    const sellerCut = Number((price - platformFee).toFixed(2));
+
+    // Use the application's configured revenue share.
+    // Falls back to DEFAULT_USER_SHARE_PERCENT when no app is linked or share is unset.
+    let userSharePct = DEFAULT_USER_SHARE_PERCENT;
+    if (pkg.applicationId) {
+      const app = await this.appRepo.findOne({ where: { id: pkg.applicationId } });
+      if (app && app.userSharePercent > 0) {
+        userSharePct = app.userSharePercent;
+      }
+    }
+    const platformFee = Number((price * (PLATFORM_FEE_PERCENT / 100)).toFixed(2));
+    const contributorCut = Number((price * (userSharePct / 100)).toFixed(2));
+    const sellerCut = Number((price - platformFee - contributorCut).toFixed(2));
     const downloadToken = crypto.randomBytes(24).toString('base64url');
 
     const purchase = await this.financialTx.runInTransaction(async (qr) => {
-      // 1. Seller cut → developer wallet (available so payouts work right away)
+      // 1. Seller cut (70%) → developer wallet (available so payouts work right away)
       const { creditId } = await this.financialTx.transferAtomic(qr, {
         sourceWalletId: buyerWallet.id,
         destWalletId: sellerWallet.id,
@@ -306,7 +314,7 @@ export class DataPackagesService {
         },
       });
 
-      // 2. Platform fee → platform system wallet
+      // 2. Platform fee (10%) → platform system wallet
       if (platformFee > 0) {
         await this.financialTx.transferAtomic(qr, {
           sourceWalletId: buyerWallet.id,
@@ -318,6 +326,25 @@ export class DataPackagesService {
           target: 'available',
           metadata: {
             side: 'platform_fee',
+            package_id: pkg.id,
+            buyer_id: buyerId,
+          },
+        });
+      }
+
+      // 3. Contributor pool (20%) → DATA_CONTRIBUTORS holding wallet.
+      //    Async listener (ContributorDistributionService) distributes to users after commit.
+      if (contributorCut > 0) {
+        await this.financialTx.transferAtomic(qr, {
+          sourceWalletId: buyerWallet.id,
+          destWalletId: SYSTEM_WALLET_IDS.DATA_CONTRIBUTORS,
+          amount: contributorCut,
+          currency: buyerWallet.currency,
+          referenceId: pkg.id,
+          type: TransactionType.DATA_REVENUE,
+          target: 'available',
+          metadata: {
+            side: 'contributor_pool',
             package_id: pkg.id,
             buyer_id: buyerId,
           },
@@ -352,9 +379,12 @@ export class DataPackagesService {
       purchaseId: purchase.id,
       buyerId,
       developerId: pkg.developerId,
+      applicationId: pkg.applicationId,
+      category: pkg.category,
       amount: price,
       sellerCut,
       platformFee,
+      contributorCut,
     });
 
     return purchase;

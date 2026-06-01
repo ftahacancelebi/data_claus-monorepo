@@ -78,8 +78,7 @@ export default function SessionsPage() {
       ) : sessions.length === 0 ? (
         <Card className="border-dashed border-slate-200">
           <CardContent className="p-8 text-center text-sm text-slate-500">
-            Audit kaydı bulunamadı. Bu özellik refresh-token rotasyonu ile
-            tamamlanacak.
+            Aktif oturum bulunamadı.
           </CardContent>
         </Card>
       ) : (

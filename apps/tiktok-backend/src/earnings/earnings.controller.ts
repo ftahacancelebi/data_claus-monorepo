@@ -44,14 +44,17 @@ export class EarningsController {
         return this.getEmptyEarnings();
       }
 
-      const summary = await response.json();
+      const summaryBody = await response.json();
+      // NestJS TransformInterceptor wraps responses: { data: {...}, statusCode, ... }
+      const summary = summaryBody.data ?? summaryBody;
       console.log(
         `[Earnings] User ${userId} summary from DB:`,
         JSON.stringify(summary),
       );
 
-      // Also try to get wallet balance
-      let walletBalance = 0;
+      // Also try to get wallet balance (available + pending)
+      let availableBalance = 0;
+      let pendingBalance = 0;
       try {
         const walletResponse = await fetch(
           `${this.goApiUrl}/wallets/owner/${userId}`,
@@ -63,11 +66,12 @@ export class EarningsController {
           },
         );
         if (walletResponse.ok) {
-          const wallets = await walletResponse.json();
-          if (Array.isArray(wallets) && wallets.length > 0) {
-            walletBalance = Number(wallets[0].balance) || 0;
-          } else if (!Array.isArray(wallets)) {
-            walletBalance = Number(wallets.balance) || 0;
+          const walletBody = await walletResponse.json();
+          const wallets = walletBody.data ?? walletBody;
+          const wallet = Array.isArray(wallets) ? wallets[0] : wallets;
+          if (wallet) {
+            availableBalance = Number(wallet.balance) || 0;
+            pendingBalance = Number(wallet.pending_balance) || 0;
           }
         }
       } catch (e) {
@@ -75,11 +79,11 @@ export class EarningsController {
       }
 
       return {
-        totalEarned: summary.total_user_share || 0,
-        availableBalance: walletBalance,
-        pendingBalance: (summary.total_user_share || 0) - walletBalance,
+        totalEarned: availableBalance + pendingBalance,
+        availableBalance,
+        pendingBalance,
         totalImpressions: summary.total_impressions || 0,
-        qualityScore: 0.85, // TODO: Get from user profile
+        qualityScore: 0.85,
         currency: 'USD',
         breakdown: {
           banner: summary.by_type?.banner || { count: 0, revenue: 0 },

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Application } from './entities/application.entity';
+import { Developer } from '../developer/entities/developer.entity';
 import {
   CreateApplicationDto,
   UpdateApplicationDto,
@@ -15,12 +16,19 @@ export class ApplicationService {
   constructor(
     @InjectRepository(Application)
     private readonly applicationRepository: Repository<Application>,
+    @InjectRepository(Developer)
+    private readonly developerRepository: Repository<Developer>,
   ) {}
 
   async create(
     developerId: string,
     dto: CreateApplicationDto,
   ): Promise<ApplicationResponseDto> {
+    const developerExists = await this.developerRepository.existsBy({ id: developerId });
+    if (!developerExists) {
+      throw new NotFoundException(`Developer ${developerId} not found`);
+    }
+
     const application = this.applicationRepository.create({
       developerId,
       name: dto.name,
@@ -50,12 +58,15 @@ export class ApplicationService {
   async findByDeveloper(
     developerId: string,
   ): Promise<ApplicationResponseDto[]> {
+    const developerExists = await this.developerRepository.existsBy({ id: developerId });
+    if (!developerExists) {
+      throw new NotFoundException(`Developer ${developerId} not found`);
+    }
+
     const applications = await this.applicationRepository.find({
       where: { developerId },
       order: { createdAt: 'DESC' },
     });
-
-    console.log('applications', applications);
 
     return applications.map((app) => this.toResponseDto(app));
   }

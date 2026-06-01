@@ -18,7 +18,7 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { writeFileSync } from 'fs';
+import { writeFileSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { config as loadEnv } from 'dotenv';
 
@@ -64,6 +64,11 @@ loadEnv({ path: join(__dirname, '..', 'apps', 'dataclaus-nestjs-api', '.env') })
 
 const DEMO_PASSWORD = 'demo1234';
 const DEMO_TAG = 'demo';
+
+// Fixed UUID for TikTok Clone — must match tiktok-backend/.env DATACLAUS_APP_ID.
+// Hardcoded so the money-loop works immediately after any clean Docker restart + seed,
+// without needing to restart tiktok-backend to pick up a patched .env.
+const TIKTOK_CLONE_APP_ID = 'b6ee3a76-5863-45f0-84cf-f10dd55423f5';
 
 const DEMO_DEVELOPERS = [
   {
@@ -275,6 +280,7 @@ async function seedApplications(
     category: string;
     devIdx: number;
     sharePercent: number;
+    id?: string;
   }> = [
     {
       name: 'Cinema+ Streaming',
@@ -296,6 +302,7 @@ async function seedApplications(
       category: 'social',
       devIdx: 2,
       sharePercent: 85,
+      id: TIKTOK_CLONE_APP_ID,
     },
   ];
 
@@ -308,6 +315,7 @@ async function seedApplications(
     if (!app) {
       app = await repo.save(
         repo.create({
+          ...(a.id ? { id: a.id } : {}),
           developerId: dev.id,
           name: a.name,
           description: a.description,
@@ -508,7 +516,7 @@ async function seedScoredEvents(
   }
   const syntheticUsers = Array.from({ length: 100 }, (_, i) => syntheticUserId(i));
 
-  const eventTypes = ['accelerometer', 'gyroscope', 'touch', 'scroll', 'screen_view'];
+  const eventTypes = ['video_view', 'video_complete', 'video_skip', 'video_like', 'video_share'];
   const rows: Partial<ScoredEvent>[] = [];
   const now = new Date();
 
@@ -623,6 +631,30 @@ async function seedWebhookEndpoint(
     } catch {
       // Secret already exists or schema mismatch — best-effort only.
     }
+  }
+}
+
+function patchTiktokBackendEnv(applications: Application[]): void {
+  const tiktokApp = applications.find((a) => a.name === 'TikTok Clone');
+  if (!tiktokApp) {
+    console.warn('  ⚠ TikTok Clone app not found — skipping tiktok-backend/.env patch');
+    return;
+  }
+  const envPath = join(__dirname, '..', 'apps', 'tiktok-backend', '.env');
+  if (!existsSync(envPath)) {
+    console.warn('  ⚠ tiktok-backend/.env not found — skipping patch');
+    return;
+  }
+  const original = readFileSync(envPath, 'utf-8');
+  const patched = original.replace(
+    /^DATACLAUS_APP_ID=.*/m,
+    `DATACLAUS_APP_ID=${tiktokApp.id}`,
+  );
+  if (patched !== original) {
+    writeFileSync(envPath, patched, 'utf-8');
+    console.log(`  ✓ Patched tiktok-backend/.env → DATACLAUS_APP_ID=${tiktokApp.id}`);
+  } else {
+    console.log(`  ✓ tiktok-backend/.env already has correct DATACLAUS_APP_ID`);
   }
 }
 
@@ -1178,6 +1210,104 @@ async function seedWatchEvents(
 }
 
 /**
+ * Seed WatchEvent rows for Cinema+ Streaming and FitMove Tracker so the behavior
+ * dimension has data when a developer runs "Extract from app" on those apps.
+ */
+async function seedAppWatchEvents(
+  ds: DataSource,
+  applications: Application[],
+  users: DataClausUser[],
+): Promise<{ cinema: number; fitness: number }> {
+  const repo = ds.getRepository(WatchEvent);
+  const result = { cinema: 0, fitness: 0 };
+
+  const configs: Array<{
+    appName: string;
+    label: 'cinema' | 'fitness';
+    target: number;
+    videos: Array<{ id: string; tags: string[]; category: string }>;
+  }> = [
+    {
+      appName: 'Cinema+ Streaming',
+      label: 'cinema',
+      target: 800,
+      videos: [
+        { id: 'vid_cinema_01', tags: ['sci-fi', 'space', 'sequel'],        category: 'sci-fi' },
+        { id: 'vid_cinema_02', tags: ['drama', 'adaptation', 'award'],      category: 'drama' },
+        { id: 'vid_cinema_03', tags: ['documentary', 'nature', 'bbc'],      category: 'documentary' },
+        { id: 'vid_cinema_04', tags: ['action', 'blockbuster', 'sequel'],   category: 'action' },
+        { id: 'vid_cinema_05', tags: ['comedy', 'family', 'feel-good'],     category: 'comedy' },
+        { id: 'vid_cinema_06', tags: ['thriller', 'mystery', 'twist'],      category: 'thriller' },
+        { id: 'vid_cinema_07', tags: ['drama', 'indie', 'festival'],        category: 'drama' },
+        { id: 'vid_cinema_08', tags: ['sci-fi', 'cyberpunk', 'dystopia'],   category: 'sci-fi' },
+        { id: 'vid_cinema_09', tags: ['action', 'superhero', 'franchise'],  category: 'action' },
+        { id: 'vid_cinema_10', tags: ['documentary', 'history', 'war'],     category: 'documentary' },
+      ],
+    },
+    {
+      appName: 'FitMove Tracker',
+      label: 'fitness',
+      target: 600,
+      videos: [
+        { id: 'vid_fit_01', tags: ['hiit', 'cardio', 'beginner'],         category: 'hiit' },
+        { id: 'vid_fit_02', tags: ['yoga', 'flexibility', 'morning'],      category: 'yoga' },
+        { id: 'vid_fit_03', tags: ['strength', 'upper-body', 'dumbbell'],  category: 'strength' },
+        { id: 'vid_fit_04', tags: ['cardio', 'running', 'interval'],       category: 'cardio' },
+        { id: 'vid_fit_05', tags: ['yoga', 'calm', 'evening', 'stretch'],  category: 'yoga' },
+        { id: 'vid_fit_06', tags: ['hiit', 'advanced', 'full-body'],       category: 'hiit' },
+        { id: 'vid_fit_07', tags: ['strength', 'core', 'plank'],           category: 'strength' },
+        { id: 'vid_fit_08', tags: ['cardio', 'dance', 'fun'],              category: 'cardio' },
+      ],
+    },
+  ];
+
+  for (const cfg of configs) {
+    const app = applications.find((a) => a.name === cfg.appName);
+    if (!app) {
+      console.warn(`  ⚠ ${cfg.appName} not found — skipping watch_events seed`);
+      continue;
+    }
+
+    const existing = await repo.count({ where: { applicationId: app.id } });
+    if (existing > 0) {
+      result[cfg.label] = existing;
+      continue;
+    }
+
+    const rows: Partial<WatchEvent>[] = [];
+    const now = Date.now();
+    const sixtyDaysMs = 60 * 24 * 60 * 60 * 1000;
+
+    for (let i = 0; i < cfg.target; i++) {
+      const user = users[i % users.length];
+      const video = cfg.videos[i % cfg.videos.length];
+      const isBot = i % 10 === 0;
+      const dwellMs = isBot ? 200 : Math.floor(2000 + Math.random() * 28000);
+      rows.push({
+        applicationId: app.id,
+        userId: user.id,
+        videoId: video.id,
+        videoTags: video.tags,
+        videoCategory: video.category,
+        dwellMs,
+        completed: !isBot && dwellMs > 12000,
+        recordedAt: new Date(now - Math.random() * sixtyDaysMs),
+      });
+    }
+
+    const BATCH = 500;
+    let inserted = 0;
+    for (let start = 0; start < rows.length; start += BATCH) {
+      await repo.insert(rows.slice(start, start + BATCH) as WatchEvent[]);
+      inserted += rows.slice(start, start + BATCH).length;
+    }
+    result[cfg.label] = inserted;
+  }
+
+  return result;
+}
+
+/**
  * Seed 2 hand-curated headline packages with multi-dimensional jsonb payloads:
  *   1. TikTok Clone — Behavior & Demo Q1 (behavior + demographic + device)
  *   2. FitMove — Device-Only Baseline (device only)
@@ -1261,51 +1391,54 @@ async function seedHeadlinePackages(
           ai_justification: 'Broad coverage across age and locale; gender balance reasonable',
           total_usd: 49.35,
         },
-        device: {
+        engagement: {
           count: 1247,
           sample_rows: [
-            { user_pseudo_id: 'u_a8c1f1d2', event_type: 'scroll', sensor_class: 'touch', quality_score: 0.92, session_id: 'sess_001', recorded_at: '2026-04-12T14:22:00Z' },
+            { user_pseudo_id: 'u_a8c1f1d2', video_category: 'dance', action: 'like', replayed: true, session_id: 'sess_001', recorded_at: '2026-04-12T14:22:00Z' },
+            { user_pseudo_id: 'u_3f9b21cc', video_category: 'gaming', action: 'share', replayed: false, session_id: 'sess_002', recorded_at: '2026-04-13T09:05:00Z' },
           ],
-          distribution: { scroll: 612, screen_view: 423, touch: 212 },
+          distribution: { like: 612, share: 234, replay: 401 },
           schema_json: {
             user_pseudo_id: 'string',
-            event_type: 'string',
-            sensor_class: 'string',
-            quality_score: 'number',
+            video_category: 'string',
+            action: 'string',
+            replayed: 'boolean',
             session_id: 'string',
             recorded_at: 'timestamp',
           },
           unit_price_usd: 0.0019,
           quality_score: 0.81,
-          ai_justification: 'Median fraud_score 0.86, ~9% bot-flagged rows correctly isolated',
+          ai_justification: 'Strong like/share signal by category; replay rate 32% above baseline',
           total_usd: 2.37,
         },
       },
       dataclausScore: 0.91,
     },
     {
-      title: 'FitMove — Device-Only Baseline',
+      title: 'FitMove — Workout Video Watch Sessions',
       category: 'fitness',
       developerId: fitnessDev?.id,
       applicationId: fitMoveApp?.id,
       dimensions: {
-        device: {
+        behavior: {
           count: 8420,
           sample_rows: [
-            { user_pseudo_id: 'u_b8c1f00d', event_type: 'accelerometer', sensor_class: 'motion', quality_score: 0.95, session_id: 'sess_a01', recorded_at: '2026-04-10T07:14:00Z' },
+            { user_pseudo_id: 'u_b8c1f00d', video_category: 'hiit', video_title: 'Morning HIIT Blast', video_tags: ['hiit', 'cardio', 'beginner'], dwell_ms: 1840000, completed: true, recorded_at: '2026-04-10T07:14:00Z' },
+            { user_pseudo_id: 'u_c2d4e5f6', video_category: 'yoga', video_title: 'Evening Flow Yoga', video_tags: ['yoga', 'flexibility', 'calm'], dwell_ms: 2700000, completed: true, recorded_at: '2026-04-10T20:30:00Z' },
           ],
-          distribution: { accelerometer: 4200, gyroscope: 3100, touch: 1120 },
+          distribution: { hiit: 2890, yoga: 1940, strength: 1720, cardio: 1870 },
           schema_json: {
             user_pseudo_id: 'string',
-            event_type: 'string',
-            sensor_class: 'string',
-            quality_score: 'number',
-            session_id: 'string',
+            video_category: 'string',
+            video_title: 'string',
+            video_tags: 'string[]',
+            dwell_ms: 'number',
+            completed: 'boolean',
             recorded_at: 'timestamp',
           },
           unit_price_usd: 0.0048,
           quality_score: 0.87,
-          ai_justification: 'High fidelity motion data, low bot signature',
+          ai_justification: 'High completion on yoga/strength; HIIT sessions show skip at 12min mark, organic pattern',
           total_usd: 40.42,
         },
       },
@@ -1326,7 +1459,11 @@ async function seedHeadlinePackages(
       (s: number, d: any) => s + (d?.total_usd ?? 0),
       0,
     );
-    const deviceDim = (h.dimensions as any).device;
+    // Use behavior dim first (video data), then any available dim as fallback
+    const primaryDim: any =
+      (h.dimensions as any).behavior ??
+      (h.dimensions as any).engagement ??
+      Object.values(h.dimensions)[0];
     const dimCount = Object.keys(h.dimensions).length;
 
     const row = pkgRepo.create({
@@ -1340,13 +1477,13 @@ async function seedHeadlinePackages(
       dataclausScore: h.dataclausScore,
       dimensions: h.dimensions as any,
       claimedMetrics: {
-        row_count: deviceDim?.count ?? 0,
+        row_count: primaryDim?.count ?? 0,
         unique_users: 5,
         date_range_start: '2026-03-15',
         date_range_end: '2026-04-15',
       },
-      schemaJson: deviceDim?.schema_json ?? {},
-      sampleRows: deviceDim?.sample_rows ?? [],
+      schemaJson: primaryDim?.schema_json ?? {},
+      sampleRows: primaryDim?.sample_rows ?? [],
       llmEvaluation: {
         trust_score: h.dataclausScore,
         summary: 'Hand-curated demo package.',
@@ -1433,9 +1570,13 @@ async function main(): Promise<void> {
     const watchEventCount = await seedWatchEvents(ds, applications, users);
     console.log(`  ✓ Watch events (TikTok Clone): ${watchEventCount} rows`);
 
+    const appWatchCounts = await seedAppWatchEvents(ds, applications, users);
+    console.log(`  ✓ Watch events (Cinema+): ${appWatchCounts.cinema} rows, (FitMove): ${appWatchCounts.fitness} rows`);
+
     const headlineCount = await seedHeadlinePackages(ds, developers, applications);
     console.log(`  ✓ Headline packages: ${headlineCount} created (2 total — multi-dim showcase)`);
 
+    patchTiktokBackendEnv(applications);
     writeJuryLogin(developers, users, buyers, applications);
 
     const tookMs = Date.now() - startedAt;

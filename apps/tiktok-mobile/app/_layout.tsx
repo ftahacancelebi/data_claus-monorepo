@@ -10,6 +10,8 @@ import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider, useAuth } from '../hooks/useAuth';
+import { loadRewarded } from '../components/ads/RewardedAd';
+import { loadInterstitial } from '../components/ads/InterstitialAd';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,6 +29,11 @@ function AuthGate() {
       router.replace('/auth');
     } else if (isAuthenticated && inAuthGroup) {
       router.replace('/');
+    }
+
+    if (isAuthenticated) {
+      loadRewarded();
+      loadInterstitial();
     }
   }, [isLoading, isAuthenticated, segments]);
 

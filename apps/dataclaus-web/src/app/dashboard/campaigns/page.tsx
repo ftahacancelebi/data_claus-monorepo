@@ -28,6 +28,8 @@ import {
   useUpdateCampaignStatus,
   useWalletsByOwner,
   useCreditWallet,
+  useCreateAdCreative,
+  useMyAdCreatives,
 } from '@/lib/api-hooks';
 import { formatMoney, REVENUE_SHARES } from '@/lib/types';
 import {
@@ -37,6 +39,9 @@ import {
   Pause,
   Play,
   Wallet as WalletIcon,
+  Image as ImageIcon,
+  CheckCircle,
+  Clock,
 } from 'lucide-react';
 
 export default function CampaignsPage() {
@@ -54,12 +59,20 @@ export default function CampaignsPage() {
   });
   const [fundAmount, setFundAmount] = useState('');
   const [statusBusy, setStatusBusy] = useState<string | null>(null);
+  const [showCreativeForm, setShowCreativeForm] = useState(false);
+  const [creativeForm, setCreativeForm] = useState({
+    brandName: '',
+    imageUrl: '',
+    ctaText: '',
+  });
 
   const campaignsQuery = useCampaignsByBuyer(user?.id);
   const walletsQuery = useWalletsByOwner(user?.id);
   const createCampaignMutation = useCreateCampaign();
   const fundWalletMutation = useCreditWallet();
   const updateStatusMutation = useUpdateCampaignStatus();
+  const myCreativesQuery = useMyAdCreatives();
+  const createCreativeMutation = useCreateAdCreative();
 
   const campaigns = campaignsQuery.data ?? [];
   const wallets = walletsQuery.data ?? [];
@@ -179,6 +192,28 @@ export default function CampaignsPage() {
       toast({ title: 'Error', description: message, variant: 'destructive' });
     } finally {
       setStatusBusy(null);
+    }
+  };
+
+  const handleSubmitCreative = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!creativeForm.brandName || !creativeForm.imageUrl) {
+      toast({ title: 'Error', description: 'Brand name and image URL are required', variant: 'destructive' });
+      return;
+    }
+    if (createCreativeMutation.isPending) return;
+    try {
+      await createCreativeMutation.mutateAsync({
+        brandName: creativeForm.brandName,
+        imageUrl: creativeForm.imageUrl,
+        ctaText: creativeForm.ctaText || undefined,
+      });
+      toast({ title: 'Ad creative submitted', description: 'Your ad will be reviewed and activated by our team.' });
+      setCreativeForm({ brandName: '', imageUrl: '', ctaText: '' });
+      setShowCreativeForm(false);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to submit creative';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
     }
   };
 
@@ -400,6 +435,129 @@ export default function CampaignsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Ad Creative Section */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <ImageIcon className="h-5 w-5" />
+              Ad Creatives
+            </CardTitle>
+            <CardDescription>
+              Your submitted ad images — active ones are displayed in the app feed
+            </CardDescription>
+          </div>
+          <Button variant="outline" onClick={() => setShowCreativeForm(!showCreativeForm)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Submit Ad
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Buyer's own creatives list */}
+          {myCreativesQuery.isLoading ? (
+            <div className="space-y-2">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-16 bg-slate-100 rounded-lg animate-pulse" />
+              ))}
+            </div>
+          ) : (myCreativesQuery.data ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground py-2">
+              No ad creatives submitted yet. Submit one below — it will go live after review.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {(myCreativesQuery.data ?? []).map((creative) => (
+                <div
+                  key={creative.id}
+                  className={`flex gap-4 items-center p-3 border rounded-lg ${
+                    creative.isActive
+                      ? 'bg-green-50 border-green-200 dark:bg-green-950/20'
+                      : 'bg-slate-50 dark:bg-slate-900/20'
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={creative.imageUrl}
+                    alt={creative.brandName}
+                    className="w-12 h-12 object-cover rounded border shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{creative.brandName}</p>
+                    {creative.ctaText && (
+                      <p className="text-xs text-muted-foreground">CTA: {creative.ctaText}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(creative.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Badge
+                    variant={creative.isActive ? 'success' : 'outline'}
+                    className="shrink-0 flex items-center gap-1"
+                  >
+                    {creative.isActive ? (
+                      <><CheckCircle className="h-3 w-3" /> Active</>
+                    ) : (
+                      <><Clock className="h-3 w-3" /> Pending Review</>
+                    )}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Submit form */}
+          {showCreativeForm && (
+            <form onSubmit={handleSubmitCreative} className="grid gap-4 pt-4 border-t">
+              <div className="space-y-2">
+                <Label>Brand Name *</Label>
+                <Input
+                  value={creativeForm.brandName}
+                  onChange={(e) => setCreativeForm({ ...creativeForm, brandName: e.target.value })}
+                  placeholder="e.g., Nike, Apple, Your Brand"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Image URL *</Label>
+                <Input
+                  value={creativeForm.imageUrl}
+                  onChange={(e) => setCreativeForm({ ...creativeForm, imageUrl: e.target.value })}
+                  placeholder="https://example.com/your-ad-image.jpg"
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Recommended: full-screen vertical image (9:16 ratio, min 1080×1920px)
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Call-to-Action Text (optional)</Label>
+                <Input
+                  value={creativeForm.ctaText}
+                  onChange={(e) => setCreativeForm({ ...creativeForm, ctaText: e.target.value })}
+                  placeholder="e.g., Shop Now, Learn More"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button type="submit" disabled={createCreativeMutation.isPending}>
+                  {createCreativeMutation.isPending ? 'Submitting…' : 'Submit for Review'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowCreativeForm(false)}
+                  disabled={createCreativeMutation.isPending}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

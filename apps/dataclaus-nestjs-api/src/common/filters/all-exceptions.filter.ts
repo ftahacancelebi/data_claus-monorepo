@@ -41,6 +41,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
         error = (responseObj['error'] as string) || exception.name;
       }
     } else if (exception instanceof Error) {
+      // http-errors style errors (body-parser, multer, raw-body, etc.) expose
+      // a numeric `status` or `statusCode`. Preserve it instead of collapsing
+      // every middleware-level error to 500.
+      const httpErr = exception as Error & {
+        status?: unknown;
+        statusCode?: unknown;
+      };
+      const rawStatus =
+        typeof httpErr.status === 'number'
+          ? httpErr.status
+          : typeof httpErr.statusCode === 'number'
+            ? httpErr.statusCode
+            : undefined;
+      if (rawStatus && rawStatus >= 400 && rawStatus < 600) {
+        status = rawStatus;
+      }
       message = exception.message;
       error = exception.name;
     }

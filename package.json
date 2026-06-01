@@ -14,7 +14,7 @@
     "dev:web": "cd apps/dataclaus-web && npm run dev",
     "dev:tiktok-be": "cd apps/tiktok-backend && npm run start:dev",
     "dev:tiktok-mb": "cd apps/tiktok-mobile && npx expo start",
-    "dev:all": "concurrently -n api,web,tk-be,tk-mb -c blue,green,yellow,magenta \"pnpm run dev:api\" \"pnpm run dev:web\" \"pnpm run dev:tiktok-be\" \"pnpm run dev:tiktok-mb\""
+    "dev:all": "concurrently -n api,web,tk-be -c blue,green,yellow \"pnpm run dev:api\" \"pnpm run dev:web\" \"pnpm run dev:tiktok-be\""
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

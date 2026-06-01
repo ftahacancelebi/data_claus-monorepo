@@ -49,7 +49,9 @@ export class DataClausService {
 
       if (!response.ok) return null;
 
-      const data = (await response.json()) as {
+      const body = await response.json();
+      // NestJS TransformInterceptor wraps all responses: { data: {...}, statusCode, ... }
+      const data = (body.data ?? body) as {
         id: string;
         email: string;
         name: string;

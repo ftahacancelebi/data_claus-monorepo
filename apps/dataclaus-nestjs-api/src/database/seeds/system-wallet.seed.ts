@@ -16,6 +16,8 @@ const SYSTEM_WALLETS: Array<{ id: string; type: WalletType }> = [
   { id: SYSTEM_WALLET_IDS.AD_NETWORK, type: WalletType.FAUCET },
   // Treasury for in-flight payouts also reuses PLATFORM type.
   { id: SYSTEM_WALLET_IDS.PAYOUT_TREASURY, type: WalletType.PLATFORM },
+  // Holding pool for data contributor revenue from package sales.
+  { id: SYSTEM_WALLET_IDS.DATA_CONTRIBUTORS, type: WalletType.PLATFORM },
 ];
 
 /**

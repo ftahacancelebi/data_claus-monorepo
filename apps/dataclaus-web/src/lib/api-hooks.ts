@@ -100,10 +100,13 @@ import {
   type AdminUser,
   type LedgerTransaction,
   type HealthSummary,
+  type ContributionStats,
+  getMyContributionStats,
 } from './api';
 import { queryKeys } from './query-keys';
 import type { ApiKey, Campaign, Wallet, Transaction } from './types';
-import type { RevenueShareConfig } from './api';
+import type { RevenueShareConfig, AdCreative } from './api';
+import { getActiveAdCreative, createAdCreative, getMyAdCreatives } from './api';
 
 // =============================================================================
 // EARNINGS & PAYOUTS  (end-user portal)
@@ -615,6 +618,16 @@ export function useMyPackages(
   });
 }
 
+export function useMyContributionStats(
+  options?: Omit<UseQueryOptions<ContributionStats>, 'queryKey' | 'queryFn'>,
+) {
+  return useQuery({
+    queryKey: queryKeys.contributions.myStats(),
+    queryFn: getMyContributionStats,
+    ...options,
+  });
+}
+
 /**
  * Polled detail view. While a package is in `evaluating`, React Query refetches
  * every 2 s so the page flips to `certified` / `rejected` without user action.
@@ -725,5 +738,34 @@ export function useExtractPreview() {
   return useMutation({
     mutationFn: ({ appId, from, to }: { appId: string; from?: string; to?: string }) =>
       extractPackagePreview(appId, { from, to }),
+  });
+}
+
+// =============================================================================
+// AD CREATIVE
+// =============================================================================
+
+export function useActiveAdCreative() {
+  return useQuery<AdCreative>({
+    queryKey: queryKeys.adCreative.active(),
+    queryFn: getActiveAdCreative,
+  });
+}
+
+export function useMyAdCreatives() {
+  return useQuery({
+    queryKey: queryKeys.adCreative.mine(),
+    queryFn: getMyAdCreatives,
+  });
+}
+
+export function useCreateAdCreative() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (dto: { brandName: string; imageUrl: string; ctaText?: string }) =>
+      createAdCreative(dto),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.adCreative.all });
+    },
   });
 }

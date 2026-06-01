@@ -168,23 +168,30 @@ function PackageDetailContent() {
         <CardHeader>
           <CardTitle className="text-base">Schema & Sample</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                Schema
-              </p>
-              <pre className="bg-slate-50 rounded p-3 text-xs font-mono overflow-x-auto">
-                {JSON.stringify(pkg.schemaJson, null, 2)}
-              </pre>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                First Sample Row
-              </p>
-              <pre className="bg-slate-50 rounded p-3 text-xs font-mono overflow-x-auto">
-                {JSON.stringify(pkg.sampleRows[0] ?? {}, null, 2)}
-              </pre>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+              Schema
+            </p>
+            <pre className="bg-slate-900 rounded-xl p-4 text-xs font-mono overflow-x-auto text-slate-200 leading-relaxed">
+              {JSON.stringify(pkg.schemaJson, null, 2)}
+            </pre>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+              Sample Rows ({Math.min(2, pkg.sampleRows.length)})
+            </p>
+            <div className="space-y-3">
+              {pkg.sampleRows.slice(0, 2).map((row, i) => (
+                <pre key={i} className="bg-slate-900 rounded-xl p-4 text-xs font-mono overflow-x-auto text-emerald-300 leading-relaxed">
+                  <span className="text-slate-500 select-none mr-2">#{i + 1}</span>{JSON.stringify(row, null, 2)}
+                </pre>
+              ))}
+              {pkg.sampleRows.length === 0 && (
+                <pre className="bg-slate-900 rounded-xl p-4 text-xs font-mono text-slate-500">
+                  No sample rows provided.
+                </pre>
+              )}
             </div>
           </div>
         </CardContent>

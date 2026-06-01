@@ -52,7 +52,7 @@ interface SampleRow {
 const SCHEMA_JSON: Record<string, string> = {
   user_pseudo_id: 'string',
   event_type:     'string',
-  sensor_class:   'string',
+  action_class:   'string',
   quality_score:  'number',
   session_id:     'string',
   recorded_at:    'timestamp',
@@ -273,7 +273,7 @@ export class ApplicationExtractorService {
     return rows.map(r => ({
       user_pseudo_id: this.anonymizeUserId(r.user_id, appId),
       event_type:     r.event_type,
-      sensor_class:   this.sensorClass(r.event_type),
+      action_class:   this.actionClass(r.event_type),
       quality_score:  parseFloat(parseFloat(r.quality_score).toFixed(4)),
       session_id:     r.session_id
         ? `s_${crypto.createHash('sha256').update(r.session_id + appId).digest('hex').slice(0, 6)}`
@@ -282,13 +282,13 @@ export class ApplicationExtractorService {
     }));
   }
 
-  private sensorClass(eventType: string): string {
+  private actionClass(eventType: string): string {
     const MAP: Record<string, string> = {
-      accelerometer: 'motion',
-      gyroscope:     'motion',
-      scroll:        'interaction',
-      screen_view:   'navigation',
-      touch:         'interaction',
+      video_view:     'watch',
+      video_complete: 'watch',
+      video_skip:     'interaction',
+      video_like:     'engagement',
+      video_share:    'engagement',
     };
     return MAP[eventType] ?? 'other';
   }

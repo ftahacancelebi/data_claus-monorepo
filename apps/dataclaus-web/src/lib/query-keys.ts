@@ -93,4 +93,13 @@ export const queryKeys = {
     preview:      (appId: string, from?: string, to?: string) =>
       [...queryKeys.extractor.all, 'preview', appId, from ?? '', to ?? ''] as const,
   },
+  contributions: {
+    all: ['contributions'] as const,
+    myStats: () => [...queryKeys.contributions.all, 'my-stats'] as const,
+  },
+  adCreative: {
+    all: ['adCreative'] as const,
+    active: () => [...queryKeys.adCreative.all, 'active'] as const,
+    mine: () => [...queryKeys.adCreative.all, 'mine'] as const,
+  },
 } as const;

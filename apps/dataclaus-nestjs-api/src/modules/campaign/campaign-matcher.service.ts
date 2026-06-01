@@ -50,8 +50,8 @@ export class CampaignMatcherService {
     const candidates = await qr.manager
       .createQueryBuilder(Campaign, 'c')
       .where('c.status = :status', { status: CampaignStatus.ACTIVE })
-      .orderBy('c.bid_per_impression', 'DESC')
-      .addOrderBy('c.created_at', 'ASC')
+      .orderBy('c.bidPerImpression', 'DESC')
+      .addOrderBy('c.createdAt', 'ASC')
       .getMany();
 
     for (const campaign of candidates) {
